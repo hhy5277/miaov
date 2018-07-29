@@ -1,0 +1,126 @@
+jQuery.extend({
+        
+        expando  :  生成唯一JQ字符串(内部)
+        noConflict()  :  防止冲突
+        isReady  :  DOM是否加载完(内部)
+        readyWait  :  等待多少文件的计数器(内部)
+        holdReady()  :  推迟DOM触发
+        ready()  :  准备DOM触发
+        isFunction()  :  是否为函数
+        isArray()  :  是否为数组
+        isWindow()  :  是否为window
+        isNumeric()  :  是否为数字 
+        type()  :  判断数据类型
+        isPlainObject()  :  是否为对象自变量
+        isEmptyObject()  :  是否为空的对象
+        error()  :  抛出异常
+        parseHTML()  :  解析节点
+        parseJSON()  :  解析JSON
+        parseXML()  :  解析XML
+        noop()  :  空函数
+        globalEval()  :  全局解析JS
+        camelCase()  :  转驼峰
+        nodeName()  :  是否为指定节点名(内部)
+        each()  :  遍历集合
+        trim()  :  去前后空格
+        makeArray()  :  类数组转真数组
+        inArray()  :  数组版indexOf
+        merge()  :  合并数组
+        grep()  :  过滤新数组
+        map()  :  映射新数组
+        guid  :  唯一标识符(内部)
+        proxy()  :  改this指向
+        access()  :  多功能值操作(内部)
+        now()  :  当前时间
+        swap()  :  CSS交换(内部)
+        
+});
+
+jQuery.ready.promise = function(){};  监测DOM的异步操作(内部)
+
+function isArraylike(){}  类似数组的判断(内部)
+
+
+
+第十六集：分析的extend方法的内部结构与实现原理。
+
+                1，document.readyState。
+
+                2, DOMContentloaded 与 load 。
+
+                3，completed 方法原理。
+
+                4，holdReady() 方法的作用与实现原理。
+
+                5，getScript() 作用及实现原理。
+
+
+
+
+
+第十七集：
+        
+        本集包含以下几个方法的实现原理：
+
+                1，isFunction() : 判断是否为function 和 原生 typeOf 判断函数的bug。
+
+                2，isArray() : 判断是否为数组。
+
+                3，isWindow() : 判断是否为 window 对象。
+
+                4，isNumberic() : 判断一个值是否为数字或者是否可以转换为数字。
+
+
+
+
+
+
+第十八集：
+
+                typeOf详解： 原生的 typeOf 在判断数据类型的时候有很多不足之处，本集中指出了这些不足之处，并且详细分析了jq的 type() 方法的实现原理。
+
+
+
+
+
+
+
+第十九集：
+
+                程序员口中经常流传着一句话，“一切皆对象”，这句话说明了对象的难以捉摸。本集视频主要介绍什么是 对象自变量 以及 JQ中 isPlainObject 和 isEmptyObject() 方法是如何实现的。
+        观看本节视频需要大家对 jq 的 core_hasOwn 和 原生的 constructor 及 prototype 、原型链 等有一定的了解。
+
+
+
+
+
+
+第二十集：
+
+                本集主要分析 parseHTML() 方法的实现原理，同时也简单分析了 error() 方法的实用意义。parseHTML 是 jq 中解析节点的常用方法。
+
+
+
+
+
+第二十一集：
+
+                本集包含两个常用数据格式转换方法：
+        
+                parseJSON : 将字符串解析成json格式数据（该方法只支持ie8及以上浏览器，视频中对parseJSON与原生eval方法进行了对比并提供了低版本浏览器的解决思路）。
+
+                parseXML : 将字符串解析成xml格式数据（该方法只支持ie9及以上浏览器，视频中详细讲解了方法的实现原理处ie8以下浏览器的兼容处理方式）
+
+                此外本集还包含了并不常用的 noop 方法介绍及说明实现该方法的意义。
+
+
+
+
+
+第二十二集：
+
+                globalEval : 将一个字符串解析成全局变量。该方法在严格模式js和非严格模式下处理方式有所不同。视频中作了详细讲解并分析了原生js中eval() 与 window.eval() 的区别。
+
+                camelCase : 将有‘-’的字符串转换成驼峰形式字符串。 在转换css3的浏览器内核兼容字符串时ie与其它浏览器处理方式不一样，大家留心视频中处理方式的讲解。
+
+                nodeName : 判断是不是指定的节点元素。

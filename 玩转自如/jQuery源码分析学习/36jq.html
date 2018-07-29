@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>无标题文档</title>
+<script src="jquery-2.0.3.js"></script>
+<script>
+
+/*jQuery.event = {
+	global         事件的全局属性(源码还没用到)
+	add            绑定事件
+	remove         取消事件
+	trigger        主动触发事件
+	dispatch       配发事件的具体操作
+	handlers       函数执行顺序的操作
+	props          JQ中共享原生JS的event属性
+	fixHooks       收集event兼容的集合
+	keyHooks       键盘的event兼容
+	mouseHooks     鼠标的event兼容
+	fix            event对象的兼容处理
+	special        特殊事件的处理
+	simulate       focusin的模拟操作(trigger , dispatch)
+};
+
+jQuery.Event = function(){};
+jQuery.Event.prototype = {
+	isDefaultPrevented
+	isPropagationStopped
+	isImmediatePropagationStopped
+	preventDefault
+	stopPropagation
+	stopImmediatePropagation
+};
+
+jQuery.fn.extend({
+	on
+	one
+	off
+	trigger
+	triggerHandler
+});
+
+//6720
+.click();
+.mouseover();
+jQuery.fn.extend({
+	hover
+	bind
+	unbind
+	delegate
+	undelegate
+});*/
+
+$(function(){
+	
+	/*$('#div1').on('click',function(){
+		alert(123);
+	});*/
+	
+	/*$('#div1').on('click',{name:'hello'},function(ev){
+		alert(ev.data.name);
+	});*/
+	
+	/*$('ul').delegate('li','click',{name:'hello'},function(){
+		$(this).css('background','red');
+	});*/
+	
+	/*$('ul').on('click','li',{name:'hello'},function(){
+		$(this).css('background','red');
+	});*/
+	
+	/*$('#div1').on('click',function(){
+		alert(123);
+	});
+	$('#div1').on('mouseover',function(){
+		alert(456);
+	});*/
+	
+	/*$('#div1').on({
+		'click' : function(){
+			alert(123);
+		},
+		'mouseover' : function(){
+			alert(456);
+		}
+	});*/
+	
+	/*$('#div1').one('click',function(){
+		alert(123);
+	});*/
+	
+	$('#input1').focus(function(){
+		$(this).css('background','red');
+	});
+	
+	//$('#input1').trigger('focus');
+	$('#input1').triggerHandler('focus');   //不会触发当前事件的默认行为
+	
+});
+
+</script>
+</head>
+
+<body>
+<div id="div1">div</div>
+<ul>
+	<li>11111</li>
+    <li>11111</li>
+    <li>11111</li>
+    <li>11111</li>
+</ul>
+<input type="text" id="input1">
+</body>
+</html>
