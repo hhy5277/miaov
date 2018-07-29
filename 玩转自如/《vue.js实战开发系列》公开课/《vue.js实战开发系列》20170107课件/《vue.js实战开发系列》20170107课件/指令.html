@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="./vue.js"></script>
+
+</head>
+<body>
+    <!--模板-->
+    <div id="demo">
+        <span :cutomId="id">{{ message }}</span>
+    </div>
+    <script>
+        //数据
+        let obj = {
+            message:"hello,Vue!",
+            id:"123"
+        }
+        //声明式渲染
+        var vm = new Vue({
+            el:"#demo",
+            data:obj
+        });
+
+        console.log( vm.$data );
+
+    </script>
+</body>
+
+
+</html>

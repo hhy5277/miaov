@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="./vue.js"></script>
+
+</head>
+<body>
+    <!--模板-->
+    <div id="demo">
+        <span v-on:click="clickHandle">{{ message }}</span>
+    </div>
+    <script>
+        
+        var arr = [1,2,3,4,5];
+        //求数组中每一项的倍数，放在另一个数组中
+
+        /*var newArr = [];
+        for( var i = 0; i < arr.length; i++ ){
+            newArr.push(arr[i]*2)
+        }*/
+
+        var newArr = arr.map(function(item){
+            return item * 2;
+        });
+
+        console.log( newArr );
+
+    </script>
+</body>
+
+
+</html>
