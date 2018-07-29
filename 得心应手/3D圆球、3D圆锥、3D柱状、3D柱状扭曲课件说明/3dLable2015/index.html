@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="reset.css" />
+    <style>
+        html { height: 100%; overflow: hidden; }
+        body { height: 100%; overflow: hidden; user-select: none; -moz-user-select: none; -webkit-user-select: none; background: url("images/yuyue_bg.jpg") no-repeat center; background-size: 100% 100%; font-family: '微软雅黑'; }
+        li { list-style: none; }
+        .middle { width: 1000px; height: 620px; position: absolute; left: 50%; top: 50%; margin-left: -500px; margin-top: -310px; }
+        .scene { width: 400px; height: 400px; margin: 0 auto; perspective: 900px; -webkit-perspective: 900px; position: relative; transform-style:preserve-3d; -webkit-transform-style:preserve-3d; color: #00a0e9; }
+        .box { width: 100%; height: 100%; position: relative; transform-style:preserve-3d; -webkit-transform-style:preserve-3d; perspective-origin: center 250px; }
+        .ring { width: 100%; height: 100%; transform-style:preserve-3d; -webkit-transform-style:preserve-3d; position: absolute; }
+        .ring li { line-height: 30px; text-align: center; font-size: 16px; position: absolute; margin-top: -25px; margin-left: -15px; transition: all .6s; }
+        li.all { transition: all .6s cubic-bezier(.75,.25,1,1); }
+        li.one { transition: transform .6s cubic-bezier(0,0,.25,.75); }
+        .text { position: absolute; top: 30px; left: 50%; margin-left: -329px; padding: 15px 18px; width: 602px; height: 318px; border: 1px solid #e5e5e5; border-radius: 8px; box-shadow: 0 5px 5px #d4dbe1; background-color: #fff; transform: scale(.5); opacity: 0; transition: opacity .3s cubic-bezier(.15,.84,.35,1), transform .3s cubic-bezier(.15,.84,.35,1); display: none; }
+        .text p { margin-bottom: 12px; font-size: 12px; }
+        .text textarea { resize: none; width: 580px; height: 220px; padding: 10px; border: 1px solid #cacaca; border-radius: 8px; background-color: #f3f7fa; margin-bottom: 15px; color: #00a0e9; }
+        .text a { position: absolute; top: 10px; right: 10px; width: 19px; height: 19px; background: url("images/icons/close.png") no-repeat center; }
+        .btn { margin: 0 auto; width: 260px; overflow: hidden; }
+        .btn button { width: 120px; height: 30px; border: 1px solid #cacaca; border-radius: 15px; float: left; }
+        .btn button:nth-of-type(1) { margin-right: 18px; }
+        .table { width: 400px; margin: 20px auto 10px; overflow: hidden; }
+        .table a { float: left; width: 100px; height: 12px; padding-top: 94px; font-size: 12px; line-height: 12px; text-align: center; color: #889199; }
+        .table a:nth-of-type(1) { background: url("images/icons/circle.png") no-repeat center 2px; }
+        .table a:nth-of-type(2) { background: url("images/icons/Cone.png") no-repeat center top; }
+        .table a:nth-of-type(3) { background: url("images/icons/Column.png") no-repeat center top; }
+        .table a:nth-of-type(4) { background: url("images/icons/Column2.png") no-repeat center top; }
+        .table a:nth-of-type(1):hover { background: url("images/icons/circle-hover.png") no-repeat center 2px; }
+        .table a:nth-of-type(2):hover { background: url("images/icons/Cone-hover.png") no-repeat center top; }
+        .table a:nth-of-type(3):hover { background: url("images/icons/Column-hover.png") no-repeat center top; }
+        .table a:nth-of-type(4):hover { background: url("images/icons/Column2-hover.png") no-repeat center top; }
+        .table a:nth-of-type(1).active { background: url("images/icons/circle-active.png") no-repeat center 2px; }
+        .table a:nth-of-type(2).active { background: url("images/icons/Cone-active.png") no-repeat center top; }
+        .table a:nth-of-type(3).active { background: url("images/icons/Column-active.png") no-repeat center top; }
+        .table a:nth-of-type(4).active { background: url("images/icons/Column2-active.png") no-repeat center top; }
+        .line { width: 734px; height: 1px; margin: 0 auto 14px; background: -webkit-linear-gradient(left,#7ecef4,#94cc8e,#fff45c); }
+        .btn2 { width: 204px; margin: 0 auto; overflow: hidden; }
+        .btn2 button { width: 100px; height: 30px; border: 1px solid #cacaca; float: left; }
+        .btn2 button:nth-of-type(1) { border-radius: 15px 0 0 15px; }
+        .btn2 button:nth-of-type(2) { margin-left: -1px; border-radius: 0 15px 15px 0; }
+        button { background: linear-gradient(#fff,#e3ecf3); color: #889199; }
+        button:hover { background: linear-gradient(#fff,#bef5ff 10%,#6cb7df); border-color: #bef5ff; color: #00a0e9; }
+        button:active { background: linear-gradient(#fff,#6cb7df 10%,#bef5ff); }
+        button.active { background: linear-gradient(#fff,#6cb7df 10%,#bef5ff); }
+        .item { width: 400px; padding: 30px; top: 100px; margin: -30px; position: fixed; transform: scale(2); -webkit-transform: scale(2); opacity: 0; display: none; transform-origin: center center 200px; -webkit-transform-origin: center center 200px; opacity: 0; transition: all .5s ease; }
+        .item a { position: absolute; top: 10px; right: 10px; width: 19px; height: 19px; background: url("images/icons/close.png") no-repeat center; }
+        .item p { font-size: 14px; line-height: 24px; word-break: break-all; }
+    </style>
+    <script src="css3.js" type="text/javascript"></script>
+    <script>
+        var s = '妙味课堂是北京最资深的前端开发培训机构，妙味课堂拥有系统的JavaScript、HTML5、CSS3、移动开发、远程培训等课程，并录制成最系统的前端开发视频教程，妙味课堂推出的VIP前端学习平台已经成为学习氛围最浓郁的前端学习圈。在未来几年内，妙味课堂会逐渐发展成由上百位优秀讲师所带领的创业培训团队，这些优秀讲师将是每个培训区域的独立负责人，他们是妙味课堂未来发展道路中最强大的力量。我们希望自己亦或是将来加入妙味的朋友一起，永远秉持以下思维方式：追求卓越但不崇拜权威，反叛创新绝不敷衍妥协；专注严谨摒弃死板生硬，细致耐心我们年复一年。';
+        window.onload = function () {
+
+            var oScene = document.getElementsByClassName('scene')[0];
+            var oUl = oScene.getElementsByTagName('ul')[0];
+            var oDiv = oScene.getElementsByTagName('div')[0];
+            var oTable = document.getElementsByClassName('table')[0];
+            var aA = oTable.getElementsByTagName('a');
+            var oBtn = document.getElementsByClassName('btn2')[0];
+            var aBtn = oBtn.getElementsByTagName('button');
+            var oItem = document.getElementsByClassName('item')[0];
+            var oP = oScene.getElementsByTagName('p')[0];
+            var aClose = document.getElementsByClassName('close');
+            var aLi = oUl.getElementsByTagName('li');
+            var oText = document.getElementsByClassName('text')[0];
+            var oTextarea = oText.getElementsByTagName('textarea')[0];
+            var aBtn2 = oText.getElementsByTagName('button');
+            var r = 150;
+            var circleArr = [];
+            var coneArr = [];
+            var coneNum = 0;
+            var wordNum = -1;
+            var liNub = 0;
+            var theta = 0;
+            var phi = 0;
+            var layer = 0;
+            var num = 0;
+            var iTimer2 = 0;
+            var graph = 1;
+            var columnH = 0;
+            var columnNum = 0;
+
+            star();
+            function star(){
+
+                circleArr = [];
+                coneArr = [];
+                coneNum = 0;
+                wordNum = -1;
+                liNub = 0;
+                theta = 0;
+                phi = 0;
+                layer = 0;
+                num = 0;
+                aA[graph-1].className = '';
+                graph = 1;
+                aA[graph-1].className = 'active';
+                for(var i=4; i<13; i++){
+
+                    num = i*i + (i+1)*(i+1);
+                    if(num >= s.length){
+
+                        layer = (i-1)*2+1;
+                        break;
+
+                    }
+                    layer = (i-1)*2+1;
+
+                }
+
+                for(var i=0; i<layer; i++){
+
+                    if(i<(layer+1)/2){
+
+                        wordNum+=2;
+
+                    }else{
+
+                        wordNum-=2;
+
+                    }
+                    circleArr.push(wordNum);
+
+                }
+
+
+                num = 0;
+                for(var i=0; i<circleArr.length; i++){
+
+                    theta = Math.PI/circleArr.length;
+                    phi = 2*Math.PI/circleArr[i];
+                    for(var j=0; j<circleArr[i]; j++){
+
+                        var li = document.createElement('li');
+                        li.innerHTML = s[num];
+                        num++;
+                        drawCircle(li,theta,phi,i,j);
+                        oUl.appendChild(li);
+
+                    }
+
+                }
+
+
+                for(var i=0; i<aLi.length; i++){
+
+                    coneNum += 2*i+1;
+                    if(coneNum>aLi.length){
+
+                        coneNum -= 2*i+1;
+                        break;
+
+                    }
+                    coneArr.push(2*i+1);
+
+                }
+
+                for(var i=0; i<coneArr.length; i++){
+
+                    phi = 2*Math.PI/coneArr[i];
+                    for(var j=0; j<coneArr[i]; j++){
+
+                        drawCone(aLi[liNub],phi,i,j);
+                        liNub++;
+
+                    }
+
+                }
+
+                liNub = 0;
+                columnH = Math.floor(aLi.length/(circleArr.length-2));
+                columnNum = columnH*(circleArr.length-2);
+                for(var i=0; i<circleArr.length-1; i++){
+
+                    phi = 2*Math.PI/columnH;
+                    for(var j=0; j<columnH; j++){
+
+                        drawColumn(aLi[liNub],phi,i,j);
+                        drawColumn2(aLi[liNub],phi,i,j);
+                        liNub++;
+
+                    }
+
+                }
+                for(var i=0; i<aLi.length; i++){
+
+                    setCss3(aLi[i],{transform:'translate3D('+ aLi[i].circleX +'px,'+ aLi[i].circleY +'px,'+ aLi[i].circleZ +'px) rotateY('+ aLi[i].circlePhi +'rad) rotateX('+ (aLi[i].circleTheta-Math.PI/2) +'rad)'});
+
+                }
+
+            }
+
+            aA[0].onclick = function(){
+
+                clearTimeout(iTimer2);
+                aA[graph - 1].className = '';
+                graph = 1;
+                aA[graph - 1].className = 'active';
+                startChange();
+                if(oItem.bOff){
+
+                    fn();
+
+                }else{
+
+                    iTimer2 = setTimeout(function () {
+
+                        changeCircle();
+
+                    }, 1000);
+
+                }
+
+            };
+            aA[1].onclick = function(){
+
+                clearTimeout(iTimer2);
+                aA[graph-1].className = '';
+                graph = 2;
+                aA[graph-1].className = 'active';
+                startChange();
+                if(oItem.bOff){
+
+                    fn();
+
+                }else{
+
+                    iTimer2 = setTimeout(function () {
+
+                        changeCone();
+
+                    }, 1000);
+
+                }
+
+            };
+            aA[2].onclick = function(){
+
+                clearTimeout(iTimer2);
+                aA[graph - 1].className = '';
+                graph = 3;
+                aA[graph - 1].className = 'active';
+                startChange();
+                if(oItem.bOff){
+
+                    fn();
+
+                }else{
+
+                    iTimer2 = setTimeout(function () {
+
+                        changeColumn();
+
+                    }, 1000);
+
+                }
+
+            };
+            aA[3].onclick = function(){
+
+                clearTimeout(iTimer2);
+                aA[graph - 1].className = '';
+                graph = 4;
+                aA[graph - 1].className = 'active';
+                startChange();
+                if(oItem.bOff){
+
+                    fn();
+
+                }else{
+
+                    iTimer2 = setTimeout(function () {
+
+                        changeColumn2();
+
+                    }, 1000);
+
+                }
+
+            };
+
+
+            oScene.onmousedown = function(ev){
+
+                clearInterval(iTimer);
+                var e = ev || event;
+                var clickX = e.clientX;
+                var clickY = e.clientY;
+                var disX = 0;
+                var disY = 0;
+                document.onmousemove = function(ev){
+
+                    var e = ev || event;
+                    disX = e.clientX - clickX;
+                    disY = e.clientY - clickY;
+                    setCss3(oDiv,{ transform: 'rotateX('+ (angleX-disY) +'deg) rotateY('+ (angleY+disX) +'deg)' });
+
+                }
+                document.onmouseup = function(){
+
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                    angleX = angleX-disY;
+                    angleY = angleY+disX;
+                    if(disY==0 && disX==0){
+
+                        disX = -300;
+
+                    }
+                    iTimer = setInterval(function(){
+
+                        angleX -= disY/100;
+                        angleY += disX/100;
+                        setCss3(oDiv,{ transform: 'rotateX('+ angleX +'deg) rotateY('+ angleY +'deg)' });
+
+                    },60);
+
+                }
+                return false;
+
+            };
+            aBtn[0].onclick = function(){
+
+                oItem.bOff = true;
+                if(aBtn[1].disabled == false)
+                    aBtn[0].className = 'active';
+                aBtn[0].disabled = true;
+                aBtn[1].disabled = true;
+                startChange();
+                oItem.style.display = 'block';
+                setTimeout(function(){
+
+                    setCss3(oItem,{transform:'scale(1)'});
+                    oItem.style.opacity = 1;
+                    oDiv.style.display = 'none';
+
+                },1000);
+
+            };
+            aClose[0].onclick = function(){
+
+                aBtn[0].className = '';
+                fn();
+
+            };
+            aBtn[1].onclick = function(){
+
+                if(aBtn[0].disabled == false)
+                    aBtn[1].className = 'active';
+                oText.style.display = 'block';
+                oDiv.style.display = 'none';
+                aBtn[0].disabled = true;
+                aBtn[1].disabled = true;
+                setTimeout(function(){
+                    setCss3(oText,{transform:'scale(1)'});
+                    oText.style.opacity = '1';
+                },12);
+
+            };
+            aBtn2[0].onclick = function(){
+
+                s = oTextarea.value;
+                if(s.length<50||s.length>364){
+
+                    alert('您输入的文字不得小于50或大于364个');
+
+                }else{
+
+                    oUl.innerHTML = '';
+                    oP.innerHTML = s;
+                    star();
+                    setCss3(oText,{transform:'scale(.5)'});
+                    oText.style.opacity = '0';
+                    oDiv.style.display = 'block';
+                    setTimeout(function(){
+                        oText.style.display = 'none';
+                        aBtn[0].disabled = false;
+                        aBtn[1].disabled = false;
+                        aBtn[1].className = '';
+                    },60);
+
+                }
+
+            };
+            aBtn2[1].onclick = function(){
+
+                oTextarea.value = '';
+
+            };
+            aClose[1].onclick = function(){
+
+                oTextarea.value = '';
+                setCss3(oText,{transform:'scale(.5)'});
+                oText.style.opacity = 0;
+                oDiv.style.display = 'block';
+                setTimeout(function(){
+                    oText.style.display = 'none';
+                    aBtn[0].disabled = false;
+                    aBtn[1].disabled = false;
+                    aBtn[1].className = '';
+                },60);
+
+
+            };
+            function drawCircle(obj,theta,phi,i,j){
+
+                obj.circleX = r*Math.sin(theta*i)*Math.sin(phi*j) + 200;
+                obj.circleY = -r*Math.cos(theta*i) + 200;
+                obj.circleZ = r*Math.sin(theta*i)*Math.cos(phi*j);
+                obj.circleTheta = theta*(circleArr.length-i);
+                obj.circlePhi = phi*j;
+                obj.bigCircleX = (r+2000)*Math.sin(theta*i)*Math.sin(phi*j) + 200;
+                obj.bigCircleY = -(r+2000)*Math.cos(theta*i) + 200;
+                obj.bigCircleZ = (r+2000)*Math.sin(theta*i)*Math.cos(phi*j);
+                obj.maxX = obj.bigCircleX;
+                obj.maxY = obj.bigCircleY;
+                obj.maxZ = obj.bigCircleZ;
+                obj.maxTheta = obj.circleTheta;
+                obj.maxPhi = obj.circlePhi;
+
+            }
+            function drawColumn(obj,phi,i,j){
+
+                obj.columnX = r/1.5*Math.sin(phi*j) + 200;
+                obj.columnY = (2*r/(circleArr.length-2))*i + 50;
+                obj.columnZ = (r/1.5*Math.cos(phi*j)).toFixed(2);
+                obj.columnPhi = phi*j;
+                obj.bigColumnX = (r+2000)/1.5*Math.sin(phi*j) + 200;
+                obj.bigColumnY = (2*(r+2000)/(circleArr.length-2))*i + 50-2000;
+                obj.bigColumnZ = ((r+2000)/1.5*Math.cos(phi*j)).toFixed(2);
+
+            }
+            function drawColumn2(obj,phi,i,j){
+
+                obj.column2X = r/1.5*Math.sin(phi*j+i*Math.PI/180*8) + 200;
+                obj.column2Y = (2*r/(circleArr.length-2))*i + 50;
+                obj.column2Z = (r/1.5*Math.cos(phi*j+i*Math.PI/180*8)).toFixed(2);
+                obj.column2Phi = phi*j+i*Math.PI/180*8;
+                obj.bigColumn2X = (r+2000)/1.5*Math.sin(phi*j+i*Math.PI/180*8) + 200;
+                obj.bigColumn2Y = (2*(r+2000)/(circleArr.length-2))*i + 50-2000;
+                obj.bigColumn2Z = ((r+2000)/1.5*Math.cos(phi*j+i*Math.PI/180*8)).toFixed(2);
+
+            }
+            function drawCone(obj,phi,i,j){
+
+                obj.coneX = (2*r/coneArr.length)*i*Math.tan(30*Math.PI/180)*Math.sin(phi*j) + 200;
+                obj.coneY = (2*r/coneArr.length)*i + 50;
+                obj.coneZ = (2*r/coneArr.length)*i*Math.tan(30*Math.PI/180)*Math.cos(phi*j);
+                obj.coneTheta = Math.PI/6;
+                obj.conePhi = phi*j;
+                obj.bigConeX = (2*(r+2000)/coneArr.length)*i*Math.tan(30*Math.PI/180)*Math.sin(phi*j) + 200;
+                obj.bigConeY = (2*(r+2000)/coneArr.length)*i + 50-2000;
+                obj.bigConeZ = (2*(r+2000)/coneArr.length)*i*Math.tan(30*Math.PI/180)*Math.cos(phi*j);
+
+            }
+            function startChange(){
+
+                for(var i=0; i<aLi.length; i++) {
+
+                    aLi[i].className = 'all';
+                    setCss3(aLi[i], {transform: 'translate3D(' + aLi[i].maxX + 'px,' + aLi[i].maxY + 'px,' + aLi[i].maxZ + 'px) rotateY(' + aLi[i].maxPhi + 'rad) rotateX(' + (aLi[i].maxTheta - Math.PI / 2) + 'rad)'});
+                    aLi[i].style.opacity = 0;
+
+                }
+
+            }
+            function changeCircle(){
+
+                for(var i=0; i<columnNum; i++){
+
+                    aLi[i].className = '';
+                    aLi[i].maxX = aLi[i].bigCircleX;
+                    aLi[i].maxY = aLi[i].bigCircleY;
+                    aLi[i].maxZ = aLi[i].bigCircleZ;
+                    aLi[i].maxTheta = aLi[i].circleTheta;
+                    aLi[i].maxPhi = aLi[i].circlePhi;
+                    setCss3(aLi[i], {transform: 'translate3D(' + aLi[i].maxX + 'px,' + aLi[i].maxY + 'px,' + aLi[i].maxZ + 'px) rotateY(' + aLi[i].maxPhi + 'rad) rotateX(' + (aLi[i].maxTheta - Math.PI / 2) + 'rad)'});
+
+                }
+                setTimeout(function() {
+
+                    for (var i = 0; i < aLi.length; i++) {
+                        aLi[i].className = 'one';
+                        aLi[i].style.opacity = 1;
+                        setCss3(aLi[i], {transform: 'translate3D(' + aLi[i].circleX + 'px,' + aLi[i].circleY + 'px,' + aLi[i].circleZ + 'px) rotateY(' + aLi[i].circlePhi + 'rad) rotateX(' + (aLi[i].circleTheta - Math.PI / 2) + 'rad)'});
+
+                    }
+
+                },100);
+
+            }
+            function changeColumn(){
+
+                for(var i=0; i<columnNum; i++){
+
+                    aLi[i].className = '';
+                    aLi[i].maxX = aLi[i].bigColumnX;
+                    aLi[i].maxY = aLi[i].bigColumnY;
+                    aLi[i].maxZ = aLi[i].bigColumnZ;
+                    aLi[i].maxTheta = 0;
+                    aLi[i].maxPhi = aLi[i].columnPhi;
+                    setCss3(aLi[i],{transform:'translate3D('+ aLi[i].maxX +'px,'+ aLi[i].maxY +'px,'+ aLi[i].maxZ +'px) rotateY('+ aLi[i].maxPhi +'rad) rotateX('+ aLi[i].maxTheta +'rad)'});
+
+                }
+                setTimeout(function(){
+
+                    for(var i=0; i<columnNum; i++){
+
+                        aLi[i].className = 'one';
+                        aLi[i].style.opacity = 1;
+                        setCss3(aLi[i], {transform: 'translate3D(' + aLi[i].columnX + 'px,' + aLi[i].columnY + 'px,' + aLi[i].columnZ + 'px) rotateY(' + aLi[i].columnPhi + 'rad)'});
+                        console.log(aLi[i].columnZ,aLi[i].columnPhi);
+
+                    }
+
+                },100);
+                // console.log(aLi[153].columnZ,aLi[153].columnPhi);
+
+            }
+            function changeColumn2(){
+
+                for(var i=0; i<columnNum; i++){
+
+                    aLi[i].className = '';
+                    aLi[i].maxX = aLi[i].bigColumn2X;
+                    aLi[i].maxY = aLi[i].bigColumn2Y;
+                    aLi[i].maxZ = aLi[i].bigColumn2Z;
+                    aLi[i].maxTheta = 0;
+                    aLi[i].maxPhi = aLi[i].column2Phi;
+                    setCss3(aLi[i],{transform:'translate3D('+ aLi[i].maxX +'px,'+ aLi[i].maxY +'px,'+ aLi[i].maxZ +'px) rotateY('+ aLi[i].maxPhi +'rad) rotateX('+ aLi[i].maxTheta +'rad)'});
+
+                }
+                setTimeout(function() {
+
+                    for (var i = 0; i < columnNum; i++) {
+
+                        aLi[i].className = 'one';
+                        aLi[i].style.opacity = 1;
+                        setCss3(aLi[i], {transform: 'translate3D(' + aLi[i].column2X + 'px,' + aLi[i].column2Y + 'px,' + aLi[i].column2Z + 'px) rotateY(' + aLi[i].column2Phi + 'rad)'});
+
+                    }
+
+                },100)
+
+            }
+            function changeCone(){
+
+                for(var i=0; i<coneNum; i++){
+
+                    aLi[i].className = '';
+                    aLi[i].maxX = aLi[i].bigConeX;
+                    aLi[i].maxY = aLi[i].bigConeY;
+                    aLi[i].maxZ = aLi[i].bigConeZ;
+                    aLi[i].maxPhi = aLi[i].conePhi;
+                    aLi[i].maxTheta = aLi[i].coneTheta;
+                    setCss3(aLi[i],{transform:'translate3D('+ aLi[i].maxX +'px,'+ aLi[i].maxY +'px,'+ aLi[i].maxZ +'px) rotateY('+ aLi[i].maxPhi +'rad) rotateX('+ aLi[i].maxTheta +'rad)'});
+
+                }
+                setTimeout(function(){
+
+                    for(var i=0; i<coneNum; i++){
+
+                        aLi[i].className = 'one';
+                        aLi[i].style.opacity = 1;
+                        setCss3(aLi[i],{transform:'translate3D('+ aLi[i].coneX +'px,'+ aLi[i].coneY +'px,'+ aLi[i].coneZ +'px) rotateY('+ aLi[i].conePhi +'rad) rotateX('+ aLi[i].coneTheta +'rad)'});
+
+                    }
+
+                },100)
+
+            }
+            function fn() {
+
+                oItem.bOff = false;
+                setCss3(oItem,{transform:'translateZ(-2000px) rotateX(-180deg)'});
+                oItem.style.opacity = 0;
+                oDiv.style.display = 'block';
+                setTimeout(function(){
+
+                    switch (graph){
+
+                        case 1:
+                            changeCircle();
+                            break;
+                        case 2:
+                            changeCone();
+                            break;
+                        case 3:
+                            changeColumn();
+                            break;
+                        case 4:
+                            changeColumn2();
+                            break;
+
+                    }
+                    aBtn[0].disabled = false;
+                    aBtn[1].disabled = false;
+                    oItem.style.display = 'none';
+                    setCss3(oItem,{transform:'translateZ(0px) scale(2)'});
+
+                },600);
+
+            }
+            var angleX = 0;
+            var angleY = 0;
+            var iTimer = setInterval(function(){
+
+                //angleX -= 3;
+                angleY -= 3;
+                setCss3(oDiv,{ transform: 'rotateX('+ angleX +'deg) rotateY('+ angleY +'deg)' });
+
+            },60);
+
+        }
+    </script>
+</head>
+<body>
+<div class="middle">
+    <div class="scene">
+        <div class="box">
+            <ul class="ring">
+
+            </ul>
+        </div>
+        <div class="item">
+            <p>妙味课堂是一支充满温馨并且极富人情味的IT培训团队；2010～2011年，我们深度关注WEB前端开发领域，为此精心研发出一套灵活而充满趣味的 JavaScript 课程，2011～2013年，我们精准研发出最新HTML5&CSS3课程，并推出远程培训课程方案，尝试将线下优良的培训模式移植到远程网络培训中，希望尽最大努力，将一种快乐愉悦的授课体验传递给我们的每一位学员。在未来几年内，妙味课堂会逐渐发展成由上百位优秀讲师所带领的创业培训团队，这些优秀讲师将是每个培训区域的独立负责人，他们是妙味课堂未来发展道路中最强大的力量。</p>
+            <a href="javascript:;" class="close"></a>
+        </div>
+    </div>
+    <div class="text">
+        <p>在下面输入你自己的文字（建议50-350字）</p>
+        <textarea cols="30" rows="10"></textarea>
+        <div class="btn">
+            <button>提交</button>
+            <button>重置</button>
+        </div>
+        <a href="javascript:;" class="close"></a>
+    </div>
+    <div class="table">
+        <a href="javascript:;" class="active">圆球</a>
+        <a href="javascript:;">圆锥</a>
+        <a href="javascript:;">柱状</a>
+        <a href="javascript:;">柱状扭曲</a>
+    </div>
+    <div class="line"></div>
+    <div class="btn2">
+        <button>展开</button>
+        <button>自定义文字</button>
+    </div>
+</div>
+</body>
+</html>
