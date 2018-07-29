@@ -1,0 +1,32 @@
+git status 查看各个区的状态  三个数字分别代表  增加 修改 删除的文件数
+
+git add filename   工作区单个文件filename添加到暂存区
+
+git add .     工作区的所有文件添加到暂存区
+
+
+git commit -m  暂存区的文件添加到 版本区 并添加注释
+
+git commit -a -m 工作区的文件添加到 版本区 并添加注释
+
+
+git diff 比较工作区和暂存区的文件
+
+git diff --cached(--staged) 比较暂存区和版本区的文件
+
+git diff master 比较工作区和版本区的文件
+
+
+git reset HEAD <file.name>  取消已经暂存的文件 撤销提交到暂存区的文件（清理暂存区）
+
+git checkout --<file.name>  取消对文件的修改 撤销工作区的文件的修改 拉取版本区文件
+
+git commit --amend  修改最后一次提交 提交完了才发现漏掉了几个文件没有加，或者提交信息写错了。想要撤消刚才的提交操作，可以使用 --amend 选项重新提交
+
+
+git rm <file.name>  删除工作区文件后删除暂存区的文件
+
+git rm -f <file.name> 删除暂存区文件同时强制删除工作区文件
+
+git rm --cached <file.name> 删除暂存区文件 保留工作区文件
+
