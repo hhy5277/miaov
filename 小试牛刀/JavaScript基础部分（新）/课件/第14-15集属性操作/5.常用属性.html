@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        a{
+            font-size: 20px;
+        }
+        img{
+            display: block;
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <a id="link" href="1.属性操作一.html">链接</a>
+    <img id="img" src="img\a.jpg" alt="">
+    <script>
+        var link = document.getElementById('link');
+        var img = document.getElementById('img');
+
+        // console.log(link.href)
+        // console.log(img.src);
+
+        console.log(link.tagName);
+        console.log(img.tagName);
+        
+        
+    </script>
+</body>
+</html>

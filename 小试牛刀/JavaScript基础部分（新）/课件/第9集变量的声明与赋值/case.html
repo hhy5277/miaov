@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        button {
+            width: 100px;
+            height: 35px;
+            text-align: center;
+            font: 18px/35px "微软雅黑";
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <button id="btn">按钮</button>
+    <script>
+
+        
+        // document.getElementById('btn').onclick = function(){
+        //     document.getElementById('btn').style.background = 'red';
+        //     document.getElementById('btn').style.width = '300px';
+        //     document.getElementById('btn').style.height = '70px';
+        //     /*
+        //         边框
+        //         文字大小
+        //         文字颜色
+        //         我统统想改
+        //         ????? 多次获取元素
+        //     */
+        // }
+
+
+
+        var btn = document.getElementById('btn');
+        btn.onclick = function(){
+           btn.style.background = 'red';
+           btn.style.width = '300px';
+           btn.style.height = '70px'; 
+        }
+
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <input id="score" type="text">
+    <button id="btn">评级</button>
+    <script>
+        var score = document.getElementById('score');
+        var btn = document.getElementById('btn');
+
+
+        btn.onclick = function(){
+            // if(score.value<90){
+            //     alert('小于90')
+            // }else if(score.value > 60){
+
+            // }
+
+
+            /*
+                逻辑运算符
+                    "与或非"
+                    && - 与
+                    || - 或
+                    ! - 非
+            */
+
+            // if(score.value<90 && score.value > 60){
+            //     alert('同时满足了')
+            // }else{
+            //     alert('没有满足')
+            // }
+
+            // if(score.value > 90 || score.value < 20){
+            //     alert('比较极端的成绩')
+            // }else{
+            //     alert('正常的成绩')
+            // }
+
+            if(!score.value > 90){
+                alert('非常好')
+            }else{
+                alert('一般般')
+            }
+
+        }
+    </script>
+</body>
+</html>

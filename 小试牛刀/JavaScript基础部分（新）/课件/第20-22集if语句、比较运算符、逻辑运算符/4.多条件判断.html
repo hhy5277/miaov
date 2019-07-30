@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <input id="score" type="text">
+    <button id="btn">评级</button>
+    <script>
+        var score = document.getElementById('score');
+        var btn = document.getElementById('btn');
+
+
+        btn.onclick = function(){
+            var scoreTxt = score.value;
+           if(scoreTxt >= 80){
+               alert('优秀')
+           }else if(scoreTxt >= 70){
+               alert('良好')
+           }else if(scoreTxt >= 60){
+               alert('一般')
+           }else{
+               alert('不及格')
+           }
+        }
+         
+        //90
+    </script>
+</body>
+</html>

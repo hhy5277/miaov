@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- <script></script> -->
+    <style>
+        #box {
+            width: 300px;
+            height: 300px;
+            background: red;
+            /**/
+        }
+    </style>
+</head>
+<body>
+    <div id="box"></div>
+    <script>
+        // 单行注释
+        /*
+            这是多行注释
+        */
+        document.querySelector('#box').onclick = function(){
+            alert(1)
+        }
+        /*
+        
+            优点：
+                1. 结构分离更清晰
+                2. 可以复用（当前页面）
+                3. 较利于维护和修改
+            缺点：
+                1. 多页面之间无法复用
+                2. 多页面之间的维护修改较麻烦
+        */
+    </script>
+</body>
+</html>

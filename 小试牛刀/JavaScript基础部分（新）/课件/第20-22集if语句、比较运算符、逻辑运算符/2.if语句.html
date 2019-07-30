@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <button id="btn">验证</button>
+    <div id="box" style="width:200px;height:200px;background:red;"></div>
+    <script>
+        /*
+            小括号里面我们放判断条件
+        */
+
+        var box = document.getElementById('box');
+        var btn = document.getElementById('btn');
+        btn.onclick = function(){
+             if (box.style.width == '200px') {
+                //只有小括号里面的条件满足，那么这里的代码才会执行
+                alert('条件成立')
+            }
+        }
+       
+
+        /*
+            > < >= <=
+
+            == -> 用于比较左右两边的值是否相等
+        */
+    </script>
+</body>
+</html>

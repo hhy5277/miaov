@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        button {
+            width: 100px;
+            height: 35px;
+            text-align: center;
+            font: 18px/35px "微软雅黑";
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script>
+        window.onload = function(){
+            // console.log(document.getElementById('btn'));
+            console.log(document.querySelector('#btn'));
+        }
+        
+
+        
+        /*
+            null - 获取的元素不存在
+
+            window.onload = function(){
+
+            }
+
+            window.onload - 等待窗口加载
+            function(){
+                //放置窗口加载完成之后做的事情
+            }
+
+
+            不推荐这样的方法！！！！！！！
+
+        */
+    </script>
+</head>
+<body>
+    <button id="btn">按钮</button>
+    <script>
+        /*
+            这里的JS代码会等待前面的body页面的元素先行渲染，然后再加载 
+            工作中推荐使用这样的方法！！！
+        */
+        
+    </script>
+</body>
+</html>

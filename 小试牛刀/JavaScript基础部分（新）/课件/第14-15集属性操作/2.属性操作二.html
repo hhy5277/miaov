@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #box{
+            width: 200px;
+            height: 200px;
+            background: red;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="box">这是文字</div>
+    <script>
+        var box = document.getElementById('box');
+        // box.onclick = function(){
+        //     box.style.width = '300px';
+        // }
+
+        // box['onclick'] = function(){
+        //     box['style']['width'] = '300px';
+        // }
+
+        // box['on' + 'click'] = function(){
+        //     box['style']['width'] = '300px';
+        // }
+
+
+        //两种属性操作可以一起使用
+        // box.onclick = function(){
+        //     box['style'].width = '300px';
+        // }
+
+        box.onclick = function(){
+            // box.style.fontSize = '36px';
+            box.style['font-size'] = '36px'
+        }
+    </script>
+</body>
+</html>

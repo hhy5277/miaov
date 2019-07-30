@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <button id="btn">点击</button>
+    <div id="box"></div>
+
+    <script>
+        var btn = document.getElementById('btn');
+            var box = document.getElementById('box');
+            var onOff = true;
+
+            btn.onclick = function () {
+                // console.log(!(box.style.width == '200px'))
+                // if (box.style.width == '200px') {
+                //     alert('条件成立')
+                // } else {
+                //     alert('条件不成立')
+                // }
+
+
+                // if(false){
+                //     alert('条件成立')
+                // }else{
+                //     alert('条件不成立')
+                // }
+
+
+                if(onOff){
+                    alert('成立')
+                    // onOff = false;
+                }else{
+                    alert('不成立')
+                    // onOff = true;
+                }
+                /*
+                    每次都需要修改onoff的值，为自己当前的相反值
+                */
+                onOff = !onOff;
+            }
+            /*
+                布尔值
+                    - false 假
+                    - ture 真
+            */
+    </script>
+</body>
+</html>

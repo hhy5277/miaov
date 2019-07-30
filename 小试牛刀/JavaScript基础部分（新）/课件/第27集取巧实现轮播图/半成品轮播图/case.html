@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        a{
+            text-decoration: none;
+        }
+        .wrap{
+            width: 1000px;
+            height: 800px;
+            background: url(img/bg.jpg) no-repeat;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -500px;
+            margin-top: -400px;
+        }
+        #prev,#next{
+            position: absolute;
+            width: 25px;
+            height: 45px;
+            background: url(img/ar.png) no-repeat;
+            
+            top: 155px;
+        }
+        #prev{
+            left: 13px;
+        }
+        #next{
+            transform: rotate(180deg);
+            right: 13px;
+        }
+        .pic{
+            width: 536px;
+            height: 356px;
+            position: absolute;
+            top: 170px;
+            left: 297px;
+        }
+        img{
+            vertical-align: top;
+            width: 536px;
+            height: 356px;
+        }
+        #txt{
+            width: 536px;
+            height: 71px;
+            position: absolute;
+            left: 297px;
+            bottom: 185px;
+            text-align: center;
+            font: 20px/71px "微软雅黑";
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+   <div class="wrap">
+       <div class="pic">
+            <a id="prev" href="javascript:;"></a>
+            <img id="img" src="img/img1.jpg" alt="">
+            <a id="next" href="javascript:;"></a>
+       </div>
+       <p id="txt">这是第 <span>1</span> 张图片</p>
+   </div>
+   <script>
+       /*
+            1- 获取元素（next img）
+            2- next绑定点击事件
+       */
+       var img = document.getElementById('img');
+       var next = document.getElementById('next');
+
+       var num = 0;
+
+       next.onclick = function(){
+        //  num = num + 1;
+        // num += 1;
+
+        //每次为这个值增加1
+        num++;
+        if( num>=5 ){
+            num = 0;
+        }
+        img.src = 'img/img'+ (num + 1) +'.jpg'
+
+       }
+
+       /*
+       
+        a标签是超链接，会导致页面的刷新 或者跳转页面。所以我们可以在href添加  javascript:; 来禁止这个的发生
+       */
+   </script>
+</body>
+</html>

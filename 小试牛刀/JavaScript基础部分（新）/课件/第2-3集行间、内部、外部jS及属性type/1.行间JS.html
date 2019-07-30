@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #box{
+            width: 300px;
+            height: 300px;
+            background: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="box" onclick="alert(1)"></div>
+    <div id="box2" onclick="alert(1)"></div>
+    <!-- 
+        onclick - 点击
+        alert - 弹出
+
+        优点：
+            非常的直观，直接作用于你写的元素
+        缺点：
+            1. 结构分离不清晰（html 、 css 、JS）
+            2. 无复用性
+            3. 维护不方便，后期修改不方便
+
+     -->
+</body>
+</html>

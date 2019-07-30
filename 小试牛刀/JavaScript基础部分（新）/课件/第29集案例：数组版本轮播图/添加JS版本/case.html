@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        a{
+            text-decoration: none;
+        }
+        .wrap{
+            width: 1000px;
+            height: 800px;
+            background: url(img/bg.jpg) no-repeat;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -500px;
+            margin-top: -400px;
+        }
+        #prev,#next{
+            position: absolute;
+            width: 25px;
+            height: 45px;
+            background: url(img/ar.png) no-repeat;
+            
+            top: 155px;
+        }
+        #prev{
+            left: 13px;
+        }
+        #next{
+            transform: rotate(180deg);
+            right: 13px;
+        }
+        .pic{
+            width: 536px;
+            height: 356px;
+            position: absolute;
+            top: 170px;
+            left: 297px;
+        }
+        img{
+            vertical-align: top;
+            width: 536px;
+            height: 356px;
+        }
+        #txt{
+            width: 536px;
+            height: 71px;
+            position: absolute;
+            left: 297px;
+            bottom: 185px;
+            text-align: center;
+            font: 20px/71px "微软雅黑";
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+   <div class="wrap">
+       <div class="pic">
+            <a id="prev" href="javascript:;"></a>
+            <img id="img" src="img/img1.jpg" alt="">
+            <a id="next" href="javascript:;"></a>
+       </div>
+       <p id="txt">这是第 <span id="number">1</span> 张图片</p>
+   </div>
+   <script>
+       var img = document.getElementById('img');
+       var next = document.getElementById('next');
+       var prev = document.getElementById('prev');
+       var number = document.getElementById('number');
+
+       var arr = ['img/img5.jpg','img/img4.jpg','img/img1.jpg','img/img2.jpg','img/img3.jpg'];
+
+       var num = 0;
+
+       next.onclick = function(){
+           num++;
+           if(num==arr.length){
+               num = 0;
+           }
+           img.src = arr[num];
+           number.innerHTML = num + 1;
+       }
+
+       prev.onclick = function(){
+        //    num = num-1;
+        //    num -= 1;
+           num--;
+
+           if(num<0){
+               num = arr.length - 1;
+           }
+
+           img.src = arr[num];
+           number.innerHTML = num + 1;
+       }
+       
+   </script>
+</body>
+</html>

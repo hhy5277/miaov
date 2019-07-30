@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body{
+            background: rgb(233, 231, 231);
+        }
+        .wrap button{
+            width: 120px;
+            height: 40px;
+            font: bold 16px/40px "宋体";
+            text-align: center;
+            color: #fff;
+            background: red;
+            border: none;
+            padding: 0;
+            margin: 0;
+            margin-left: 20px;
+        }
+        #box{
+            width: 100px;
+            height: 100px;
+            background: #fff;
+            border: 4px solid #000;
+        }
+        .mask{
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: rgba(0,0,0,.5);
+            display: none;
+        }
+        .select{
+            width: 400px;
+            height: 260px;
+            background: #fff;
+            border:20px solid #999; 
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -200px;
+            margin-top: -130px;
+        }
+        ul{
+            list-style: none;
+            margin: 0;
+            padding: 10%;
+        }
+        .setList li{
+            height: 30px;
+            font: 14px / 30px "宋体";
+            margin-top: 10px;
+        }
+        .setList span{
+            float: left;
+        }
+        .setList span:not(.title){
+            width: 40px;
+            height: 30px;
+            border: 1px solid #000;
+            margin: 0 5px;
+            text-align: center;
+            background: #e7e2e286;
+            color: #333;
+        }
+        #red{
+            background: red;
+        }
+        #yellow{
+            background: orange;
+        }
+        #blue{
+            background: skyblue;
+        }
+        .setList li:first-of-type span:not(.title){
+            color: #fff;
+        }
+        .select button{
+            width: 80px;
+            height: 30px;
+            font: 14px / 30px "宋体";
+            color: #fff;
+            text-align: center;
+            background: rgb(63, 47, 153);
+            border: none;
+        }
+        .select button:first-of-type{
+            margin-left: 28%;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h2>请为下面的div设置样式:<button id="btn">点击设置</button></h2>
+        <div id="box">
+
+        </div>
+    </div>
+    <div id="maskBox" class="mask">
+        <div class="select">
+            <ul class="setList">
+                <li>
+                    <span class="title">请选择背景色：</span>
+                    <span id="red">红</span>
+                    <span id="yellow">黄</span>
+                    <span id="blue">蓝</span>
+                </li>
+                <li>
+                    <span class="title">请选择宽(px)：</span>
+                    <span id="w200">200</span>
+                    <span id="w300">300</span>
+                    <span id="w400">400</span>
+                </li>
+                <li>
+                    <span class="title">请选择高(px)：</span>
+                    <span id="h200">200</span>
+                    <span id="h300">300</span>
+                    <span id="h400">400</span>
+                </li>
+            </ul>
+            <button id="reset">恢复</button>
+            <button id="sure">确定</button>
+        </div>
+    </div>
+    <script>
+        /*
+            功能分析：
+                1. 点击按钮，然后显示设置页面
+                    1- 获取按钮
+                    2- 绑定点击事件
+                    3- 显示设置页面
+                        display
+        */
+
+        var btn =document.getElementById('btn');
+        var maskBox = document.getElementById('maskBox');
+        btn.onclick = function(){
+            //点击之后要做的事情
+            maskBox.style.display = 'block';
+        }
+
+        /*
+            揉捏DIV
+                1- 获取所有可以设置div的元素（背景色、宽、高）
+                2- 对以上所有获取的元素绑定点击事件
+                3- 对要揉捏的DIV更改其样式
+        */
+
+        var red = document.getElementById('red');
+        var yellow = document.getElementById('yellow');
+        var blue = document.getElementById('blue');
+
+        var w200 = document.getElementById('w200');
+        var w300 = document.getElementById('w300');
+        var w400 = document.getElementById('w400');
+
+        var h200 = document.getElementById('h200');
+        var h300 = document.getElementById('h300');
+        var h400 = document.getElementById('h400');
+
+        var box = document.getElementById('box');
+
+
+        red.onclick = function(){
+            box.style.background = 'red';
+        }
+        yellow.onclick = function () {
+            box.style.background = 'yellow';
+        }
+        blue.onclick = function () {
+            box.style.background = 'blue';
+        }
+
+        w200.onclick = function(){
+            box.style.width = '200px';
+        }
+
+        h200.onclick = function () {
+            box.style.height = '200px';
+        }
+
+        /*
+            确定
+                1- 获取元素按钮
+                2- 绑定点击事件
+                3- 由于在点击上述样式的时候，其实已经给style设置了样式，所以这时候我们只需要把遮罩版面再次隐藏起来就好
+        */
+
+        var sure = document.getElementById('sure');
+        sure.onclick = function(){
+            maskBox.style.display = 'none';
+        }
+
+
+        /*
+            恢复
+                1- 获取元素按钮
+                2- 绑定点击事件
+                3- 把元素的所有可以设置的样式，都回到初始状态
+        */
+
+        var reset = document.getElementById('reset');
+        reset.onclick = function(){
+            /*
+                宽100
+                高100
+                背景色 白色 #fff
+            */
+            // box.style.width = '100px';
+            // box.style.height = '100px';
+            // box.style.background = '#fff';
+
+            box.style.cssText = 'width:100px;height:100px;background:#fff;'
+
+        }
+    </script>
+</body>
+</html>

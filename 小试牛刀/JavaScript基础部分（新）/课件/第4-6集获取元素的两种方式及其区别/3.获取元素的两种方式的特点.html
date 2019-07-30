@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        /* #box{
+            width: 200px;
+            height: 200px;
+            background: red;
+        } */
+
+        div{
+            width: 200px;
+            height: 200px;
+            background: red;
+        }
+    </style>
+</head>
+<body>
+    <!-- <div id="box">
+        <div id="box2"></div>
+    </div> -->
+
+    <!-- <div id="box"></div> -->
+
+
+
+    
+    <div>这是第二个盒子</div>
+    <section class="wrap">
+        <div>这是第一个盒子</div>
+    </section>
+
+
+
+    
+    <script>
+        // console.log(document.getElementById('box1')); 获取一个错误的id
+        // console.log(document.getElementById('box'));
+        /*
+            document.getElementById()
+                 - 通过id进行获取
+                 - 如果获取一个不存在的元素，得到的结果会是null ！！！
+                 - getElementById 只有document下有,id是当前页面中唯一的
+                 - 遇到第一个符合条件的元素，就返回第一个元素
+        */
+
+
+
+        // console.log(document.querySelector('#box1'));
+
+        // console.log(document.querySelector('div'));
+        /*
+            在父级下找到某个元素
+        */
+        // console.log(document.querySelector('.wrap').querySelector('div'));
+        console.log(document.querySelector('.wrap div'))
+
+        /*
+            document.querySelector()
+                - 通过选择器进行获取
+                - 遇到第一个符合条件的元素，就返回第一个元素
+                - 如果获取一个不存在的元素，得到的结果会是null ！！！
+                - document / 指定父级
+
+
+        */
+
+    </script>
+</body>
+</html>

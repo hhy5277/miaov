@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        .wrap{
+            width: 700px;
+            height: 500px;
+            background: url(img/bg.jpg) no-repeat;
+            background-size: cover;
+            margin: 150px auto;
+            text-align: center;
+        }
+        textarea{
+            border: 2px solid #534590;
+            width: 360px;
+            height: 130px;
+            background: #fff;
+            border-radius: 8px;
+            resize: none;
+            margin-top: 118px;
+            padding: 5%;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        ul{
+            list-style: none;
+        }
+        button{
+            display: block;
+            width: 100px;
+            height: 30px;
+            border: 2px solid #fff;
+            background: #14afd0;
+            font-size: 14px;
+            line-height: 30px;
+            font-family: "微软雅黑";
+            border-radius: 12px;
+            color: #fff;
+            margin-left: 430px;
+
+        }
+        #list{
+            width: 360px;
+            margin: 17px 0 0 170px;
+        }
+        #list li{
+            height: 40px;
+            margin-bottom: 12px;
+            background: #554892;
+            border-radius: 12px;
+            color: #fff;
+            padding-left: 20px;
+            box-sizing: border-box;
+            line-height: 40px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <textarea id="text"></textarea>
+        <button id="btn">提交</button>
+        <ul id="list">
+            
+        </ul>
+    </div>
+    <script>
+        /*
+            1- 获取元素（输入框、提交按钮、list）
+            2- 按钮绑定点击事件
+            3- 获取输入框的内容
+            4- 把输入内容放在list里面
+        */
+
+        var text = document.getElementById('text');
+        var btn = document.getElementById('btn');
+        var list = document.getElementById('list');
+
+        btn.onclick = function(){
+            //点击后要做事情
+            // console.log(text.value)
+            var txt = text.value;
+            //innerHTML 会替换掉当前标签内的 所有内容
+            list.innerHTML = list.innerHTML +  '<li>' + txt + '</li>';
+        }
+    </script>
+</body>
+</html>
