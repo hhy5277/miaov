@@ -1,0 +1,146 @@
+git init 
+
+git clone
+
+git config --list
+
+git config --global user.name
+
+git config --global use.email 
+
+set LANG=zh_CN.UTF-8  //在命令行工具的环境变量中添加，解决代码或文件夹乱码问题
+
+git config --global core.quotepath false //解决中文文件名乱码的问题
+
+git log  查看提交信息
+
+git log commit_id  查看某次提交
+
+git log -p 查看详细提交信息
+
+git log -n 查看n条提交信息
+
+回车查看下一屏log
+
+q退出 git log  
+
+
+工作区 暂存区（过渡层、避免误操作、保护工作区和版本区、分支处理） 版本库
+
+
+git status 查看各个区的状态  三个数字分别代表  增加 修改 删除的文件数
+
+	-s  == git status short 简化打印内容
+
+git add filename   工作区单个文件filename添加到暂存区
+
+git add .     工作区的所有文件添加到暂存区
+
+
+git commit -m  暂存区的文件添加到 版本区 并添加注释
+
+git commit -a -m 工作区的文件添加到暂存区 并从暂存区 添加到 版本区 并添加注释（该简写方式只针对已经暂存过的文件，即已经tracked的文件）
+
+
+移动/重命名
+git mv a.txt aa/a.txt
+
+
+比较
+git diff 比较工作区和暂存区的文件
+
+git diff --cached(--staged) 比较暂存区和版本区的文件
+
+git diff master 比较工作区和版本区的文件
+
+
+撤销
+git reset HEAD <file.name>  取消已经暂存的文件 撤销提交到暂存区的文件（清理暂存区）
+
+git checkout -- <file.name>  取消对文件的修改 撤销工作区的文件的修改 拉取版本区文件
+
+git commit --amend  修改最后一次提交 提交完了才发现漏掉了几个文件没有加，或者提交信息写错了。想要撤消刚才的提交操作，可以先add 然后使用加--amend 选项重新提交
+
+
+删除
+git rm <file.name>  删除工作区文件，之后commit删除暂存区的文件
+
+git rm -f <file.name> 删除暂存区文件同时强制删除工作区文件
+
+git rm --cached <file.name> 删除暂存区文件 保留工作区文件
+
+
+恢复【删除错误提交的commit】
+git reset有三个选项，--hard、--mixed、--soft。
+//仅仅只是撤销已提交的版本库，不会修改暂存区和工作区
+git reset --soft 版本库ID
+ 
+
+//仅仅只是撤销已提交的版本库和暂存区，不会修改工作区
+git reset --mixed 版本库ID
+ 
+
+//彻底将工作区、暂存区和版本库记录恢复到指定的版本库
+git reset --hard 版本库ID
+
+git checkout commit_id <file.name>  将某个文件恢复到某次提交（某个版本）
+
+git reset --hard commit_id   将整个版本还原到某次提交（某个版本）
+
+git reset --hard HEAD^  往回回一个版本
+
+git reset --hard --HEAD~<num>  往回回num个版本
+
+git reflog  打印出操作记录 （如果版本回到了过去某个版本，再使用这个展示操作的记录，可以重新回到当前版本）
+
+
+远程操作
+git remote 查看远程仓库名称  
+
+git remote add 可以修改远程仓库名称
+
+git remote -v 查看远程仓库名称、地址
+
+git push origin master 同步到远程仓库
+
+
+多人协作解决冲突
+git fetch  拉取而不合并
+ >> git diff master orgin/master  比较本地和远端代码
+ >> git merge origin/master  解决冲突后  手动合并
+
+git pull 拉取并自动合并
+
+
+git分支
+git branch  显示分支
+git branch <branchname>  创建分支
+	-d <branchname>删除已合并的分支
+	-D <branchname>强制删除分支
+	--merged  已合并的分支
+	--no-merged  未合并的分支
+	
+git checkout <branchname>  切换分支
+git checkout -b <branchname> 创建并切换分支
+		
+git merge <branchname> 合并 branchname分支到当前分支  如果	branchname 和 当前分支都对同一个地方有修改 ，merge后 需要手动解决冲突，然后再次git commit -a -m ''
+
+
+github分支
+git push
+
+github上直接创建
+
+github上的标签
+git tag  <version> 打标签
+git push orgin <version>  把打的标签推送到远端
+
+github上直接创建
+
+
+github创建个人博客
+https://pages.github.com/
+
+
+创建别名
+git config --global alias.co checkout  创建checkout的别名co
