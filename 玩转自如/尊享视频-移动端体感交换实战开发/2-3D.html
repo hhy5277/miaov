@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style type="text/css">
+    #box {
+        margin: 50px auto;
+        padding: 50px;
+        width: 200px;
+        height: 200px;
+        border: 1px solid #000;
+        perspective: 400px;
+    }
+    #div {
+        width: 200px;
+        height: 200px;
+        background: red;
+        transition: 5s;
+    }
+    #box:hover #div {
+        transform: rotateY(360deg);
+    }
+    </style>
+</head>
+
+<body>
+
+    <div id="box">
+        <div id="div"></div>
+    </div>
+
+</body>
+
+</html>

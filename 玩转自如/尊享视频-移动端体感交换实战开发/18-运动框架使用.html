@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="text/javascript" src="js/mTween.js"></script>
+    <style type="text/css">
+    #box {
+        position: absolute;
+        left: 0;
+        top: 100px;
+        width: 100px;
+        height: 100px;
+        background: red;
+    }
+    </style>
+</head>
+
+<body>
+    <button id="start">开始运动</button>
+    <button id="stop">停止运动</button>
+    <div id="box"></div>
+    <script type="text/javascript">
+    /*
+                        props{
+                            el:需要动画的元素,
+                            attrs:{//需要动画的样式
+                                width:100,
+                                ...
+
+                            },
+                            fx:需要动画的形式(easeOUt)[],
+                            duration:动画持续时间 number || {
+                                min:持续时间最短是多少毫秒,
+                                max:持续时间最长是多少毫秒,
+                                multiple:持续时间是运动距离的多少倍
+                            }
+                            ,
+                        }
+                        */
+    (function() {
+        let start = document.querySelector("#start");
+        let stop = document.querySelector("#stop");
+        let box = document.querySelector("#box");
+        start.onclick = function() {
+            mTween({
+                el: box,
+                attrs: {
+                    width: 1300,
+                    height: 400
+                },
+                fx: 'backOut',
+                duration: {
+                    // min: 400,
+                    // max: 600,
+                    multiple: 10
+                },
+                cb() {
+                    console.log("动画结束了")
+                }
+            });
+        }
+        stop.onclick = function() {
+            mTween.stop(box);
+        }
+    })();
+    </script>
+</body>
+
+</html>

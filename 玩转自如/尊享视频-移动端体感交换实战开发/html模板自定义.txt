@@ -1,0 +1,8 @@
+1.下载Emmet
+https://github.com/sergeche/emmet-sublime
+
+2.打开sublime Package程序包目录。windows一般在C:\Users\userName\AppData\Roaming\Sublime Text 3\Packages\下。在Package目录中创建Emmet目录,并将下载的文件解压复制到此目录
+3.Emmet/emmet/snippets.json中可以配置HTML模板内容.
+a)找到html.abbreviations.doc即可定义HTML中header和body标签中存放内容.
+b)html.abbreviations.doc字符串中可以应用变量,变量定义在variables中,字符串中使用使用${变量名}即可.
+4.定义后重启sublime,创建HTML文件,输入!或html:5,按下tab键即可.

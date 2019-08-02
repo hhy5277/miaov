@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="text/javascript" src="js/mTween.js"></script>
+    <style type="text/css">
+    #view {
+        position: fixed;
+        left: 0;
+        top: 100px;
+        width: 100%;
+        height: 100%;
+    }
+    #disZ,
+    #translateZ {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform-style: preserve-3d;
+    }
+    /*背景图片的宽高分别是268，480*/
+    
+    #box3D {
+        position: absolute;
+        width: 268px;
+        height: 480px;
+        left: 50%;
+        top: 50%;
+        margin: -240px 0 0 -134px;
+        transform-style: preserve-3d;
+        background: url(img.gif);
+    }
+    </style>
+</head>
+
+<body>
+    <div id="view">
+        <div id="disZ">
+            <div id="translateZ">
+                <div id="box3D"></div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    document.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+    }, {
+        passive: false
+    });
+    //固定了视野夹角，并且固定和景物的距离，那看到的画面大小一定是固定的
+
+    //3D 适配
+
+    (function() {
+        let view = document.querySelector("#view");
+        let disZ = document.querySelector("#disZ");
+        let translateZ = document.querySelector("#translateZ");
+        let deg = 52; //固定一个视野角度
+        setZ();
+        css(translateZ, "translateZ", -300);
+        window.addEventListener("resize", setZ);
+
+        function setZ() {
+            let h = window.innerHeight; //根据高度适配 如果根据宽度适配 可以换成宽度
+            let R = Math.tan(Math.PI / 180 * deg) * h / 2;
+            view.style.perspective = R + "px";
+            css(disZ, "translateZ", R);
+            // console.log(R);
+        }
+    })()
+    </script>
+</body>
+
+</html>

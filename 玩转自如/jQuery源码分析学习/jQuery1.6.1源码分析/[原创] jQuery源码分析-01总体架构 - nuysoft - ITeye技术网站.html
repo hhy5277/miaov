@@ -1,0 +1,1000 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1177451 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="  1. 总体架构    1.1         自调用匿名函数 self-invoking anonymous  function    打开jQuery源码，首先你会看到这样的代码结构：    (function( window, undefined ) {      // jquery code  })(window);    1.      这是一个自调用匿名函数。什么东东呢？在第一个括号内 ...">
+    <meta name="keywords" content="web, javascript, jquery, 源码, 总体架构 [原创] jQuery源码分析-01总体架构">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  <style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style><style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style><style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style><style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style><style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style><style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style><style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style><style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style><style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style><style type="text/css">.dp-j .annotation { color: #646464; }.dp-j .number { color: #C00000; }</style></head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-01总体架构</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/web">web</a><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/%E6%BA%90%E7%A0%81">源码</a><a href="http://www.iteye.com/blogs/tag/%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84">总体架构</a>&nbsp;</div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <h1>
+<span><span>1.<span style=""> </span></span></span>总体架构</h1>
+<h2>
+<span><span>1.1<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>自调用匿名函数 <span>self-invoking anonymous
+function</span>
+</h2>
+<p class="MsoNormal">打开<span>jQuery</span>源码，首先你会看到这样的代码结构：</p>
+<table cellpadding="0" style="border-collapse: collapse; border: none;" border="1" cellspacing="0" class="MsoTableLightGridAccent3"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: black;">(</span><span style="font-size: 10.0pt; font-family: Consolas; color: #7f0055;">function</span><span style="font-size: 10.0pt; font-family: Consolas; color: black;">( window, </span><span style="font-size: 10.0pt; font-family: Consolas; color: #7f0055;">undefined</span><span style="font-size: 10.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>// jquery code</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: black;">})(window);</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span><span>1.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>这是一个<em>自调用匿名函数</em>。什么东东呢？在第一个括号内，创建一个匿名函数；第二个括号，立即执行</p>
+<p class="MsoListParagraph"><span><span>2.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>为什么要创建这样一个“自调用匿名函数”呢？</p>
+<p style="margin-left: 18.0pt; text-indent: 0cm;" class="MsoListParagraph">通过定义一个匿名函数，创建了一个“私有”的命名空间，该命名空间的变量和方法，不会破坏全局的命名空间。这点非常有用也是一个<span>JS</span>框架必须支持的功能，<span>jQuery</span>被应用在成千上万的<span>JavaScript</span>程序中，必须确保<span>jQuery</span>创建的变量不能和导入他的程序所使用的变量发生冲突。</p>
+<p class="MsoListParagraph"><span><span>3.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>匿名函数从语法上叫函数直接量，<span>JavaScript</span>语法需要包围匿名函数的括号，事实上自调用匿名函数有两种写法（注意标红了的右括号）：</p>
+<table cellpadding="0" style="border-collapse: collapse; border: none;" border="1" cellspacing="0" class="MsoTableLightGridAccent3"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: red;">(</span><span style="font-size: 10.0pt; font-family: Consolas;">function() {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas;"><span>&nbsp;&nbsp;&nbsp;
+  </span>console.info( this );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas;"><span>&nbsp;&nbsp;&nbsp;
+  </span>console.info( arguments );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas;">}( window ) <span style="color: red;">)</span>;</span></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: red;">(</span><span style="font-size: 10.0pt; font-family: Consolas;">function() {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas;"><span>&nbsp;&nbsp;&nbsp;
+  </span>console.info( this );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas;"><span>&nbsp;&nbsp;&nbsp;
+  </span>console.info( arguments );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas;">}<span style="color: red;">)</span>(
+  window );</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span><span>4.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>为什么要传入<span>window</span>呢？</p>
+<p style="margin-left: 18.0pt; text-indent: 0cm;" class="MsoListParagraph">通过传入<span>window</span>变量，使得<span>window</span>由全局变量变为局部变量，当在<span>jQuery</span>代码块中访问<span>window</span>时，不需要将作用域链回退到顶层作用域，这样可以更快的访问<span>window</span>；这还不是关键所在，更重要的是，将<span>window</span>作为参数传入，可以在压缩代码时进行优化，看看<span>jquery-1.6.1.min.js</span>：</p>
+<table cellpadding="0" style="border-collapse: collapse; border: none;" border="1" cellspacing="0" class="MsoTableLightGridAccent3"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">(</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">(a,b){})(window);</span><span style="font-size: 11.0pt; font-family: Consolas;"> <span style="color: #3f7f5f;">// window </span></span><span style="font-size: 11.0pt; color: #3f7f5f;">被优化为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> <span>a <span>&nbsp;</span><span>&nbsp;</span></span></span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span><span>5.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>为什么要在在参数列表中增加<span style="font-family: Consolas;">undefined</span>呢？</p>
+<p style="margin-left: 18.0pt; text-indent: 0cm;" class="MsoListParagraph">在 <em>自调用匿名函数</em> 的作用域内，确保<span>undefined</span>是真的未定义。因为<span>undefined</span>能够被重写，赋予新的值。</p>
+<table cellpadding="0" style="border-collapse: collapse; border: none;" border="1" cellspacing="0" class="MsoTableLightGridAccent3"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-family: Consolas;">undefined =
+  "now it's defined";<strong></strong></span></p>
+<p class="MsoNormal"><span style="font-family: Consolas;">alert(
+  undefined );</span></p>
+</td>
+</tr></tbody></table>
+<p style="margin-left: 18.0pt; text-indent: 0cm;" class="MsoListParagraph">浏览器测试结果：</p>
+<table cellpadding="0" style="border-collapse: collapse; border: none;" border="1" cellspacing="0" class="MsoTableLightGridAccent3">
+<tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><strong><span>浏览器</span></strong><strong></strong></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><strong><span>测试结果</span></strong><strong></strong></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><strong><span>结论</span></strong><strong></strong></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span>ie</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><strong><span style="font-family: Consolas; color: red;">now it's defined</span></strong></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span style="color: red;">可以改变</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span>firefox</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span style="font-family: Consolas; color: #00b050;">undefined</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span style="color: #00b050;">不能改变</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span>chrome</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span style="font-family: Consolas; color: red;">now it's defined</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span style="color: red;">可以改变</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span>opera</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span style="font-family: Consolas; color: red;">now it's defined</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center; text-indent: 0cm;" class="MsoListParagraph"><span style="color: red;">可以改变</span></p>
+</td>
+</tr>
+</tbody></table>
+<p class="MsoListParagraph"><span><span>6.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>注意到源码最后的分号了吗？</p>
+<p style="margin-left: 18.0pt; text-indent: 0cm;" class="MsoListParagraph">分号是可选的，但省略分号并不是一个好的编程习惯；为了更好的兼容性和健壮性，请在每行代码后加上分号并养成习惯。</p>
+<h2>
+<span><span>1.2<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>总体架构</h2>
+<p class="MsoNormal">接下来看看在 <em>自调用匿名函数 </em>中都实现了什么功能，按照代码顺序排列：</p>
+<table cellpadding="0" style="border-collapse: collapse; border: none;" border="1" cellspacing="0" class="MsoTableLightGridAccent3"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: black;">(</span><span style="font-size: 10.0pt; font-family: Consolas; color: #7f0055;">function</span><span style="font-size: 10.0pt; font-family: Consolas; color: black;">( window, </span><span style="font-size: 10.0pt; font-family: Consolas; color: #7f0055;">undefined</span><span style="font-size: 10.0pt; font-family: Consolas; color: black;"> ) {</span><strong></strong></p>
+<p style="text-indent: 20.0pt;" class="MsoNormalCxSpMiddle"><span style="font-size: 10.0pt; font-family: Consolas; color: #00b050;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">构造</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">对象</span><strong></strong></p>
+<p style="text-align: left; text-indent: 20.0pt;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: #7f0055;">var</span><span style="font-size: 10.0pt; font-family: Consolas; color: black;"> jQuery = </span><span style="font-size: 10.0pt; font-family: Consolas; color: #7f0055;">function</span><span style="font-size: 10.0pt; font-family: Consolas; color: black;">( selector, context )
+  {</span><strong></strong></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt; font-family: Consolas; color: #7f0055;">return</span><span style="font-size: 10.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 10.0pt; font-family: Consolas; color: #7f0055;">new</span><span style="font-size: 10.0pt; font-family: Consolas; color: black;"> jQuery.fn.init( selector, context, rootjQuery );</span><strong></strong></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}<strong></strong></span></p>
+<p style="text-indent: 20.0pt;" class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: #00b050;">/</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">/ </span><span style="font-size: 11.0pt; color: #3f7f5f;">工具函数</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> <span>Utilities<strong></strong></span></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">异步队列</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> Deferred<strong></strong></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">浏览器测试</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> Support<strong></strong></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">数据缓存</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> Data<strong></strong></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">队列</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> queue<strong></strong></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">属性操作</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> Attribute<strong></strong></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">事件处理</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> Event<strong></strong></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">选择器</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> Sizzle<strong></strong></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// DOM</span><span style="font-size: 11.0pt; color: #3f7f5f;">遍历</span><strong></strong></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// DOM</span><span style="font-size: 11.0pt; color: #3f7f5f;">操作</span><strong></strong></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// CSS</span><span style="font-size: 11.0pt; color: #3f7f5f;">操作</span><strong></strong></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">异步请求</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> <span>Ajax<strong></strong></span></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">动画</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> FX<strong></strong></span></p>
+<p style="text-indent: 22.0pt;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><a name="OLE_LINK2"></a><a name="OLE_LINK1"><span><span style="font-size: 11.0pt; color: #3f7f5f;">坐标和大小</span></span></a><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> <strong></strong></span></p>
+<p style="text-indent: 20.0pt;" class="MsoNormal"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>window.jQuery = window.$ =
+  jQuery;</span><strong></strong></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt; font-family: Consolas; color: black;">})(window);</span><strong></strong></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal">从上边的注释看，<span>jQuery</span>的源码结构相当清晰、条理，不像代码那般晦涩和让人纠结。</p>
+<p class="MsoNormal">后边的章节基本将以这个顺序展开。</p>
+<h2>
+<span><span>1.3<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>下节预告</h2>
+<p class="MsoNormal">如果你看过<span>jQuery</span>源码，很快就会发现这里到处充斥着正则表达式，而很多<span>JavaScript</span>开发人员又疏于正则基础知识，为了扫清这个障碍，下一章将先温习<span>JavaScript</span>正则表达式的基础知识，再详细剖析<span>jQuery</span>中的正则表达式。</p>
+<p class="MsoNormal">在正式开始分析源码之前，还有没有要准备的基础知识呢？</p>
+<p class="MsoNormal">当然有。比如<span>JavaScript API</span>中的类和对象，如果你不熟练的话，至少手头要有一本参考手册。</p>
+<p class="MsoNormal">除了正则，其他的知识点会在分析过程中穿插讲解，不计划辟出新的章节。</p>
+  </div>
+
+  
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/794.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1177451#" onclick="digg(&quot;blogs&quot;, 1177451, false);return false;"><div><strong>58</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1177451#" onclick="digg(&quot;blogs&quot;, 1177451, true);return false;"><div><strong>0</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1177459" class="next" title="[原创] jQuery源码分析-00前言开光">[原创] jQuery源码分析-00前言开光</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1177436" class="pre" title="天天向上--充分利用Win7+大屏幕显示器">天天向上--充分利用Win7+大屏幕显示器</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-09-21 23:31</li>
+      <li>浏览 47792</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1177451#comments">评论(44)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-01%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1177451" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-01%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1177451&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner.gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1177451" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    <div id="bc2351119">
+  <div class="comment_title">
+    44 楼
+    <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>
+    2014-06-19&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2351119);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">viewsoft 写道</div><div class="quote_div">“// fail”均调用不到fn test，向楼主请教一下原因或者分析一下jquery在函数作用域链中如何处理window的？<br><div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%09%3Cscript%3E%0A%09%09%24(function()%7B%0A%09%09%20%09window.test%20%3D%20function()%7B%0A%09%09%20%09%09alert(&#39;test&#39;)%3B%0A%09%09%20%09%7D%3B%0A%09%09%7D)%3B%0A%09%09%2F%2F%20ok%0A%09%09%24(function()%7B%0A%09%09%20%09test()%3B%0A%09%09%7D)%3B%0A%09%09%0A%09%09%2F%2F%20fail%20%0A%09%09(function()%7B%0A%09%09%20%09window.test()%3B%0A%09%09%7D)()%3B%0A%09%09%09%09%0A%09%09%2F%2F%20fail%20%0A%09%09%24(function(w)%7B%0A%09%09%20%09w.test()%3B%0A%09%09%7D(window))%3B%0A%09%09%0A%09%09%2F%2F%20fail%20%0A%09%09(function(w)%7B%0A%09%09%20%09w.test()%3B%0A%09%09%7D)(window)%3B%0A%0A%09%3C%2Fscript%3E" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>&lt;script&gt;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;$(function(){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window.test&nbsp;=&nbsp;function(){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert(<span class="string">'test'</span><span>);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;});&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;ok</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;$(function(){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;test();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;});&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;fail&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;(function(){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window.test();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;})();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;fail&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;$(function(w){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w.test();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}(window));&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;fail&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;(function(w){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w.test();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;})(window);&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&lt;/script&gt;&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="0" title="[原创] jQuery源码分析-01总体架构" style="display: none;">	&lt;script&gt;
+		$(function(){
+		 	window.test = function(){
+		 		alert('test');
+		 	};
+		});
+		// ok
+		$(function(){
+		 	test();
+		});
+		
+		// fail 
+		(function(){
+		 	window.test();
+		})();
+				
+		// fail 
+		$(function(w){
+		 	w.test();
+		}(window));
+		
+		// fail 
+		(function(w){
+		 	w.test();
+		})(window);
+
+	&lt;/script&gt;</pre></div><br>三个fail是因为它们执行时，window.test = function(){...}还没有执行，如果这句先执行过了，就都正常执行了</div>
+</div>
+
+<div id="bc2337964">
+  <div class="comment_title">
+    43 楼
+    <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>
+    2014-01-16&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2337964);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">为什么$("")返回的会是一个数组？搞了好久没搞明白<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=init%3A%20function(%20selector%2C%20context%2C%20rootjQuery%20)%20%7B%0A%09%09var%20match%2C%20elem%3B%0A%0A%09%09%2F%2F%20HANDLE%3A%20%24(%22%22)%2C%20%24(null)%2C%20%24(undefined)%2C%20%24(false)%0A%09%09if%20(%20!selector%20)%20%7B%0A%09%09%09return%20this%3B%0A%09%09%7D%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>init:&nbsp;function(&nbsp;selector,&nbsp;context,&nbsp;rootjQuery&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;match,&nbsp;elem;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;HANDLE:&nbsp;$(""),&nbsp;$(null),&nbsp;$(undefined),&nbsp;$(false)</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;!selector&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;</span><span class="keyword">this</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="1" title="[原创] jQuery源码分析-01总体架构" style="display: none;">init: function( selector, context, rootjQuery ) {
+		var match, elem;
+
+		// HANDLE: $(""), $(null), $(undefined), $(false)
+		if ( !selector ) {
+			return this;
+		}
+}</pre> 这不应该是个对象么</div>
+</div>
+
+<div id="bc2337405">
+  <div class="comment_title">
+    42 楼
+    <a href="http://disanxian.iteye.com/" target="_blank" title="disanxian">disanxian</a>
+    2014-01-13&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2337405);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">javatozhang 写道</div><div class="quote_div"><div class="quote_title">willwen 写道</div><div class="quote_div">万能的楼主，自调用匿名函数中的成员变量在函数外是不是都不可访问的？<br>如：var module1 = (function(){<br>　　　　_count = 0;<br>　　　　var m1 = function(){<br>　　　　　　//...<br>　　　　};<br>　　　　var m2 = function(){<br>　　　　　　//...<br>　　　　};<br>　　　　return {<br>　　　　　　m1 : m1,<br>　　　　　　m2 : m2<br>　　　　};<br>　　})();<br>&nbsp;&nbsp;&nbsp; alert(module1._count);---输出undefined<br></div><br>可不可以这样理解。因为你的module1是自执行函数为其赋的值。而这个自执行函数执行后返回值为仅仅包含m1、m2变量的对象。你使用 alert出 module1这个已经赋值过的对象中找_count当然不能找到了。不知道可不可以这样理解……<br></div><br>刚刚引错了。。应该是这个。。_count是全局变量吧。。。</div>
+</div>
+
+<div id="bc2337404">
+  <div class="comment_title">
+    41 楼
+    <a href="http://disanxian.iteye.com/" target="_blank" title="disanxian">disanxian</a>
+    2014-01-13&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2337404);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">yuenkin 写道</div><div class="quote_div"><div class="quote_title">hanazawakana 写道</div><div class="quote_div"><div class="quote_title">nuysoft 写道</div><div class="quote_div"><div class="quote_title">chenyi056 写道</div><div class="quote_div">JS中参数不是按值传递的么？那传进去的window参数应该只是window对象的拷贝吧？在函数内部对window对象做修改，会影响到全局的window对象么？</div><br>基本类型按值传递，对象传入引用，函数内部的 window 即全局 window。</div><br><br>看这样一个例子<br><br><div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%3Cscript%20type%3D%22text%2Fjavascript%22%3E%0Afunction%20setName(obj)%7B%0A%20%20%20%20obj.name%20%3D%20%22xiaobai%22%3B%0A%20%20%20%20obj%20%3D%20new%20Object()%3B%0A%20%20%20%20obj.name%20%3D%20%22xiaohei%22%3B%0A%7D%0Avar%20dog%20%3D%20new%20Object()%3B%0AsetName(dog)%3B%0Aconsole.log(dog.name)%3B%0A%2F*%E8%BE%93%E5%87%BA%0A*xiaobai%0A*%2F%0A%3C%2Fscript%3E" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>&lt;script&nbsp;type=</span><span class="string">"text/javascript"</span><span>&gt;&nbsp;&nbsp;</span></span></li><li><span>function&nbsp;setName(obj){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaobai"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaohei"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>var&nbsp;dog&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>setName(dog);&nbsp;&nbsp;</span></li><li><span>console.log(dog.name);&nbsp;&nbsp;</span></li><li><span><span class="comment">/*输出</span>&nbsp;</span></li><li><span><span class="comment">*xiaobai</span>&nbsp;</span></li><li><span><span class="comment">*/</span><span>&nbsp;&nbsp;</span></span></li><li><span>&lt;/script&gt;&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="2" title="[原创] jQuery源码分析-01总体架构" style="display: none;">&lt;script type="text/javascript"&gt;
+function setName(obj){
+    obj.name = "xiaobai";
+    obj = new Object();
+    obj.name = "xiaohei";
+}
+var dog = new Object();
+setName(dog);
+console.log(dog.name);
+/*输出
+*xiaobai
+*/
+&lt;/script&gt;</pre><br><br>JS的函数传参应该都是传值吧，即使是一个对象作为参数，也只是传递的这个对象的引用的一个复制。难道我理解错了？？<br><br><br></div><br><br>你传递的obj指针是按值传递的，函数调用结束后obj还指向调用前的obj<br></div><br>是不是因为_count成为了全局变量啊。。。console.log(_count)就可以。。</div>
+</div>
+
+<div id="bc2328990">
+  <div class="comment_title">
+    40 楼
+    <a href="http://yongjian.iteye.com/" target="_blank" title="yongjian1092">yongjian1092</a>
+    2013-10-22&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2328990);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">这几个问题，每一个问题都问的恰到好处！！<img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_idea.gif">&nbsp;<img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_idea.gif"> </div>
+</div>
+
+<div id="bc2312744">
+  <div class="comment_title">
+    39 楼
+    <a href="http://javatozhang.iteye.com/" target="_blank" title="javatozhang">javatozhang</a>
+    2013-05-25&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2312744);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">447214075 写道</div><div class="quote_div"><div class="quote_title">hanazawakana 写道</div><div class="quote_div"><div class="quote_title">nuysoft 写道</div><div class="quote_div"><div class="quote_title">chenyi056 写道</div><div class="quote_div">JS中参数不是按值传递的么？那传进去的window参数应该只是window对象的拷贝吧？在函数内部对window对象做修改，会影响到全局的window对象么？</div><br>基本类型按值传递，对象传入引用，函数内部的 window 即全局 window。</div><br>看这样一个例子<br><div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%3Cscript%20type%3D%22text%2Fjavascript%22%3E%0Afunction%20setName(obj)%7B%0A%20%20%20%20obj.name%20%3D%20%22xiaobai%22%3B%0A%20%20%20%20obj%20%3D%20new%20Object()%3B%0A%20%20%20%20obj.name%20%3D%20%22xiaohei%22%3B%0A%7D%0Avar%20dog%20%3D%20new%20Object()%3B%0AsetName(dog)%3B%0Aconsole.log(dog.name)%3B%0A%2F*%E8%BE%93%E5%87%BA%0A*xiaobai%0A*%2F%0A%3C%2Fscript%3E" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>&lt;script&nbsp;type=</span><span class="string">"text/javascript"</span><span>&gt;&nbsp;&nbsp;</span></span></li><li><span>function&nbsp;setName(obj){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaobai"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaohei"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>var&nbsp;dog&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>setName(dog);&nbsp;&nbsp;</span></li><li><span>console.log(dog.name);&nbsp;&nbsp;</span></li><li><span><span class="comment">/*输出</span>&nbsp;</span></li><li><span><span class="comment">*xiaobai</span>&nbsp;</span></li><li><span><span class="comment">*/</span><span>&nbsp;&nbsp;</span></span></li><li><span>&lt;/script&gt;&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="3" title="[原创] jQuery源码分析-01总体架构" style="display: none;">&lt;script type="text/javascript"&gt;
+function setName(obj){
+    obj.name = "xiaobai";
+    obj = new Object();
+    obj.name = "xiaohei";
+}
+var dog = new Object();
+setName(dog);
+console.log(dog.name);
+/*输出
+*xiaobai
+*/
+&lt;/script&gt;</pre><br>JS的函数传参应该都是传值吧，即使是一个对象作为参数，也只是传递的这个对象的引用的一个复制。难道我理解错了？？<br></div><br>var dog = new Object(); dog 是一个引用，指向一块内存，将dog传入setName,在setName中修改name属性，能直接反应到dog中，对传入的引用重新赋值，让它重新指向另外一个区域，然后修改name属性，因为引用重置了，这个修改只会对内部那个新对象有用，对外部的dog已无影响。</div><br>引用《javascript高级程序设计》书中的一句话回答：当在函数内部重写引用对象obj时，这个变量引用的就是一个局部对象了。而这个局部对象会在函数执行完毕后立即销毁。<br><em>可以把ECMAScript函数的参数想想成局部变量。</em><br></div>
+</div>
+
+<div id="bc2312714">
+  <div class="comment_title">
+    38 楼
+    <a href="http://447214075.iteye.com/" target="_blank" title="447214075">447214075</a>
+    2013-05-24&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2312714);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">hanazawakana 写道</div><div class="quote_div"><div class="quote_title">nuysoft 写道</div><div class="quote_div"><div class="quote_title">chenyi056 写道</div><div class="quote_div">JS中参数不是按值传递的么？那传进去的window参数应该只是window对象的拷贝吧？在函数内部对window对象做修改，会影响到全局的window对象么？</div>
+<br>基本类型按值传递，对象传入引用，函数内部的 window 即全局 window。</div>
+<br>
+<br>看这样一个例子
+<br>
+<br><div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%3Cscript%20type%3D%22text%2Fjavascript%22%3E%0Afunction%20setName(obj)%7B%0A%20%20%20%20obj.name%20%3D%20%22xiaobai%22%3B%0A%20%20%20%20obj%20%3D%20new%20Object()%3B%0A%20%20%20%20obj.name%20%3D%20%22xiaohei%22%3B%0A%7D%0Avar%20dog%20%3D%20new%20Object()%3B%0AsetName(dog)%3B%0Aconsole.log(dog.name)%3B%0A%2F*%E8%BE%93%E5%87%BA%0A*xiaobai%0A*%2F%0A%3C%2Fscript%3E" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>&lt;script&nbsp;type=</span><span class="string">"text/javascript"</span><span>&gt;&nbsp;&nbsp;</span></span></li><li><span>function&nbsp;setName(obj){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaobai"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaohei"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>var&nbsp;dog&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>setName(dog);&nbsp;&nbsp;</span></li><li><span>console.log(dog.name);&nbsp;&nbsp;</span></li><li><span><span class="comment">/*输出</span>&nbsp;</span></li><li><span><span class="comment">*xiaobai</span>&nbsp;</span></li><li><span><span class="comment">*/</span><span>&nbsp;&nbsp;</span></span></li><li><span>&lt;/script&gt;&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="4" title="[原创] jQuery源码分析-01总体架构" style="display: none;">&lt;script type="text/javascript"&gt;
+function setName(obj){
+    obj.name = "xiaobai";
+    obj = new Object();
+    obj.name = "xiaohei";
+}
+var dog = new Object();
+setName(dog);
+console.log(dog.name);
+/*输出
+*xiaobai
+*/
+&lt;/script&gt;</pre>
+<br>
+<br>JS的函数传参应该都是传值吧，即使是一个对象作为参数，也只是传递的这个对象的引用的一个复制。难道我理解错了？？
+<br>
+<br>
+<br></div>
+<br>var dog = new Object(); dog 是一个引用，指向一块内存，将dog传入setName,在setName中修改name属性，能直接反应到dog中，对传入的引用重新赋值，让它重新指向另外一个区域，然后修改name属性，因为引用重置了，这个修改只会对内部那个新对象有用，对外部的dog已无影响。</div>
+</div>
+
+<div id="bc2311583">
+  <div class="comment_title">
+    37 楼
+    <a href="http://anole1982.iteye.com/" target="_blank" title="anole1982">anole1982</a>
+    2013-05-16&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2311583);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">javatozhang 写道</div><div class="quote_div"><div class="quote_title">anole1982 写道</div><div class="quote_div">辛苦了博主！<br>请教个问题 jquery $(selector)方法 $.trim()<br>jquery 即使方法也是对象 <br>怎么做到的？ <br><br>这块很不理解 劳烦 博主解答！</div><br>查看jQuery1.6.4源代码如下：<br>(function( window, undefined ) {<br>// Use the correct document accordingly with window argument (sandbox)<br>var document = window.document,<br>	navigator = window.navigator,<br>	location = window.location;<br>.......<br>该trim函数是通过jQuery的extend方法实现继承的。这就需要你理解jQuery.extend的功能了。<br>不知道说的这么多你理解否？</div><br><br>多谢楼主解答，醍醐灌顶呀</div>
+</div>
+
+<div id="bc2309980">
+  <div class="comment_title">
+    36 楼
+    <a href="http://viewsoft.iteye.com/" target="_blank" title="viewsoft">viewsoft</a>
+    2013-05-03&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2309980);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">“// fail”均调用不到fn test，向楼主请教一下原因或者分析一下jquery在函数作用域链中如何处理window的？<br><div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%09%3Cscript%3E%0A%09%09%24(function()%7B%0A%09%09%20%09window.test%20%3D%20function()%7B%0A%09%09%20%09%09alert(&#39;test&#39;)%3B%0A%09%09%20%09%7D%3B%0A%09%09%7D)%3B%0A%09%09%2F%2F%20ok%0A%09%09%24(function()%7B%0A%09%09%20%09test()%3B%0A%09%09%7D)%3B%0A%09%09%0A%09%09%2F%2F%20fail%20%0A%09%09(function()%7B%0A%09%09%20%09window.test()%3B%0A%09%09%7D)()%3B%0A%09%09%09%09%0A%09%09%2F%2F%20fail%20%0A%09%09%24(function(w)%7B%0A%09%09%20%09w.test()%3B%0A%09%09%7D(window))%3B%0A%09%09%0A%09%09%2F%2F%20fail%20%0A%09%09(function(w)%7B%0A%09%09%20%09w.test()%3B%0A%09%09%7D)(window)%3B%0A%0A%09%3C%2Fscript%3E" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>&lt;script&gt;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;$(function(){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window.test&nbsp;=&nbsp;function(){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert(<span class="string">'test'</span><span>);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;});&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;ok</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;$(function(){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;test();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;});&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;fail&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;(function(){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window.test();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;})();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;fail&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;$(function(w){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w.test();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}(window));&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;fail&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;(function(w){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w.test();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;})(window);&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&lt;/script&gt;&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="5" title="[原创] jQuery源码分析-01总体架构" style="display: none;">	&lt;script&gt;
+		$(function(){
+		 	window.test = function(){
+		 		alert('test');
+		 	};
+		});
+		// ok
+		$(function(){
+		 	test();
+		});
+		
+		// fail 
+		(function(){
+		 	window.test();
+		})();
+				
+		// fail 
+		$(function(w){
+		 	w.test();
+		}(window));
+		
+		// fail 
+		(function(w){
+		 	w.test();
+		})(window);
+
+	&lt;/script&gt;</pre></div>
+</div>
+
+<div id="bc2309913">
+  <div class="comment_title">
+    35 楼
+    <a href="http://javatozhang.iteye.com/" target="_blank" title="javatozhang">javatozhang</a>
+    2013-05-03&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2309913);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">anole1982 写道</div><div class="quote_div">辛苦了博主！<br>请教个问题 jquery $(selector)方法 $.trim()<br>jquery 即使方法也是对象 <br>怎么做到的？ <br><br>这块很不理解 劳烦 博主解答！</div><br>查看jQuery1.6.4源代码如下：<br>(function( window, undefined ) {<br>// Use the correct document accordingly with window argument (sandbox)<br>var document = window.document,<br>	navigator = window.navigator,<br>	location = window.location;<br><br>var jQuery = (function() {<br>// Define a local copy of jQuery<br>&nbsp;&nbsp; var jQuery = function( selector, context ) {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // The jQuery object is actually just the init constructor 'enhanced'<br>		return new jQuery.fn.init( selector, context, rootjQuery );<br>	},<br>&nbsp;&nbsp;&nbsp;&nbsp; ......<br><br>&nbsp;&nbsp;&nbsp; return jQuery;//返回的这个就是var jQuery = function( selector, context ) {}<br>})();<br>......<br>window.jQuery = window.$ = jQuery;<br>})(window);<br>//解决你的问题1.&nbsp;&nbsp; $(selector)<br>调用的是如下代码：<br>var jQuery = function( selector, context ) {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // The jQuery object is actually just the init constructor 'enhanced'<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return new jQuery.fn.init( selector, context, rootjQuery );<br>}//说到最后还是 new 了jQuery.fn.init的一个实例，使用selector作为参数。<br>//解决你的问题2.&nbsp;&nbsp; $.trim()<br>// Use native String.trim function wherever possible<br>jQuery.extend({<br> ......<br> trim: trim ?<br>		function( text ) {<br>			return text == null ?<br>				"" :<br>				trim.call( text );<br>		} :<br>		// Otherwise use our own trimming functionality<br>		function( text ) {<br>			return text == null ?<br>				"" :<br>				text.toString().replace( trimLeft, "").replace( trimRight, "" );<br>		},<br>......});<br>该trim函数是通过jQuery的extend方法实现继承的。这就需要你理解jQuery.extend的功能了。<br>不知道说的这么多你理解否？</div>
+</div>
+
+<div id="bc2309903">
+  <div class="comment_title">
+    34 楼
+    <a href="http://javatozhang.iteye.com/" target="_blank" title="javatozhang">javatozhang</a>
+    2013-05-03&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2309903);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">yuenkin 写道</div><div class="quote_div"><div class="quote_title">hanazawakana 写道</div><div class="quote_div"><div class="quote_title">nuysoft 写道</div><div class="quote_div"><div class="quote_title">chenyi056 写道</div><div class="quote_div">JS中参数不是按值传递的么？那传进去的window参数应该只是window对象的拷贝吧？在函数内部对window对象做修改，会影响到全局的window对象么？</div><br>基本类型按值传递，对象传入引用，函数内部的 window 即全局 window。</div><br><br>看这样一个例子<br><br><div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%3Cscript%20type%3D%22text%2Fjavascript%22%3E%0Afunction%20setName(obj)%7B%0A%20%20%20%20obj.name%20%3D%20%22xiaobai%22%3B%0A%20%20%20%20obj%20%3D%20new%20Object()%3B%0A%20%20%20%20obj.name%20%3D%20%22xiaohei%22%3B%0A%7D%0Avar%20dog%20%3D%20new%20Object()%3B%0AsetName(dog)%3B%0Aconsole.log(dog.name)%3B%0A%2F*%E8%BE%93%E5%87%BA%0A*xiaobai%0A*%2F%0A%3C%2Fscript%3E" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>&lt;script&nbsp;type=</span><span class="string">"text/javascript"</span><span>&gt;&nbsp;&nbsp;</span></span></li><li><span>function&nbsp;setName(obj){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaobai"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaohei"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>var&nbsp;dog&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>setName(dog);&nbsp;&nbsp;</span></li><li><span>console.log(dog.name);&nbsp;&nbsp;</span></li><li><span><span class="comment">/*输出</span>&nbsp;</span></li><li><span><span class="comment">*xiaobai</span>&nbsp;</span></li><li><span><span class="comment">*/</span><span>&nbsp;&nbsp;</span></span></li><li><span>&lt;/script&gt;&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="6" title="[原创] jQuery源码分析-01总体架构" style="display: none;">&lt;script type="text/javascript"&gt;
+function setName(obj){
+    obj.name = "xiaobai";
+    obj = new Object();
+    obj.name = "xiaohei";
+}
+var dog = new Object();
+setName(dog);
+console.log(dog.name);
+/*输出
+*xiaobai
+*/
+&lt;/script&gt;</pre><br><br>JS的函数传参应该都是传值吧，即使是一个对象作为参数，也只是传递的这个对象的引用的一个复制。难道我理解错了？？<br><br><br></div><br><br>你传递的obj指针是按值传递的，函数调用结束后obj还指向调用前的obj<br></div><br> 在函数setName内部给obj参数添加了一个属性name、然后将引用变量obj重新赋值为空对象。这个obj的重新定义只是在函数内部起到效果、函数之外obj还是指向原来的地址。所以输出：xiaobai。我可以这样解释吗？<br></div>
+</div>
+
+<div id="bc2308791">
+  <div class="comment_title">
+    33 楼
+    <a href="http://anole1982.iteye.com/" target="_blank" title="anole1982">anole1982</a>
+    2013-04-23&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2308791);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">辛苦了博主！<br>请教个问题 jquery $(selector)方法 $.trim()<br>jquery 即使方法也是对象 <br>怎么做到的？ <br><br>这块很不理解 劳烦 博主解答！</div>
+</div>
+
+<div id="bc2308497">
+  <div class="comment_title">
+    32 楼
+    <a href="http://yuenkin.iteye.com/" target="_blank" title="yuenkin">yuenkin</a>
+    2013-04-19&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2308497);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">hanazawakana 写道</div><div class="quote_div"><div class="quote_title">nuysoft 写道</div><div class="quote_div"><div class="quote_title">chenyi056 写道</div><div class="quote_div">JS中参数不是按值传递的么？那传进去的window参数应该只是window对象的拷贝吧？在函数内部对window对象做修改，会影响到全局的window对象么？</div><br>基本类型按值传递，对象传入引用，函数内部的 window 即全局 window。</div><br><br>看这样一个例子<br><br><div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%3Cscript%20type%3D%22text%2Fjavascript%22%3E%0Afunction%20setName(obj)%7B%0A%20%20%20%20obj.name%20%3D%20%22xiaobai%22%3B%0A%20%20%20%20obj%20%3D%20new%20Object()%3B%0A%20%20%20%20obj.name%20%3D%20%22xiaohei%22%3B%0A%7D%0Avar%20dog%20%3D%20new%20Object()%3B%0AsetName(dog)%3B%0Aconsole.log(dog.name)%3B%0A%2F*%E8%BE%93%E5%87%BA%0A*xiaobai%0A*%2F%0A%3C%2Fscript%3E" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>&lt;script&nbsp;type=</span><span class="string">"text/javascript"</span><span>&gt;&nbsp;&nbsp;</span></span></li><li><span>function&nbsp;setName(obj){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaobai"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaohei"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>var&nbsp;dog&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>setName(dog);&nbsp;&nbsp;</span></li><li><span>console.log(dog.name);&nbsp;&nbsp;</span></li><li><span><span class="comment">/*输出</span>&nbsp;</span></li><li><span><span class="comment">*xiaobai</span>&nbsp;</span></li><li><span><span class="comment">*/</span><span>&nbsp;&nbsp;</span></span></li><li><span>&lt;/script&gt;&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="7" title="[原创] jQuery源码分析-01总体架构" style="display: none;">&lt;script type="text/javascript"&gt;
+function setName(obj){
+    obj.name = "xiaobai";
+    obj = new Object();
+    obj.name = "xiaohei";
+}
+var dog = new Object();
+setName(dog);
+console.log(dog.name);
+/*输出
+*xiaobai
+*/
+&lt;/script&gt;</pre><br><br>JS的函数传参应该都是传值吧，即使是一个对象作为参数，也只是传递的这个对象的引用的一个复制。难道我理解错了？？<br><br><br></div><br><br>你传递的obj指针是按值传递的，函数调用结束后obj还指向调用前的obj<br></div>
+</div>
+
+<div id="bc2305998">
+  <div class="comment_title">
+    31 楼
+    <a href="http://javatozhang.iteye.com/" target="_blank" title="javatozhang">javatozhang</a>
+    2013-03-30&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2305998);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">willwen 写道</div><div class="quote_div">万能的楼主，自调用匿名函数中的成员变量在函数外是不是都不可访问的？<br>如：var module1 = (function(){<br>　　　　_count = 0;<br>　　　　var m1 = function(){<br>　　　　　　//...<br>　　　　};<br>　　　　var m2 = function(){<br>　　　　　　//...<br>　　　　};<br>　　　　return {<br>　　　　　　m1 : m1,<br>　　　　　　m2 : m2<br>　　　　};<br>　　})();<br>&nbsp;&nbsp;&nbsp; alert(module1._count);---输出undefined<br></div><br>可不可以这样理解。因为你的module1是自执行函数为其赋的值。而这个自执行函数执行后返回值为仅仅包含m1、m2变量的对象。你使用 alert出 module1这个已经赋值过的对象中找_count当然不能找到了。不知道可不可以这样理解……<br></div>
+</div>
+
+<div id="bc2305920">
+  <div class="comment_title">
+    30 楼
+    <a href="http://willwen.iteye.com/" target="_blank" title="willwen">willwen</a>
+    2013-03-29&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2305920);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">万能的楼主，自调用匿名函数中的成员变量在函数外是不是都不可访问的？<br>如：var module1 = (function(){<br>　　　　_count = 0;<br>　　　　var m1 = function(){<br>　　　　　　//...<br>　　　　};<br>　　　　var m2 = function(){<br>　　　　　　//...<br>　　　　};<br>　　　　return {<br>　　　　　　m1 : m1,<br>　　　　　　m2 : m2<br>　　　　};<br>　　})();<br>&nbsp;&nbsp;&nbsp; alert(module1._count);---输出undefined<br></div>
+</div>
+
+<div id="bc2305699">
+  <div class="comment_title">
+    29 楼
+    <a href="http://zjf-sdnu.iteye.com/" target="_blank" title="zjf_sdnu">zjf_sdnu</a>
+    2013-03-27&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2305699);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">hanazawakana 写道</div><div class="quote_div"><br><br>看这样一个例子<br><br><div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%3Cscript%20type%3D%22text%2Fjavascript%22%3E%0Afunction%20setName(obj)%7B%0A%20%20%20%20obj.name%20%3D%20%22xiaobai%22%3B%0A%20%20%20%20obj%20%3D%20new%20Object()%3B%0A%20%20%20%20obj.name%20%3D%20%22xiaohei%22%3B%0A%7D%0Avar%20dog%20%3D%20new%20Object()%3B%0AsetName(dog)%3B%0Aconsole.log(dog.name)%3B%0A%2F*%E8%BE%93%E5%87%BA%0A*xiaobai%0A*%2F%0A%3C%2Fscript%3E" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>&lt;script&nbsp;type=</span><span class="string">"text/javascript"</span><span>&gt;&nbsp;&nbsp;</span></span></li><li><span>function&nbsp;setName(obj){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaobai"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaohei"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>var&nbsp;dog&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>setName(dog);&nbsp;&nbsp;</span></li><li><span>console.log(dog.name);&nbsp;&nbsp;</span></li><li><span><span class="comment">/*输出</span>&nbsp;</span></li><li><span><span class="comment">*xiaobai</span>&nbsp;</span></li><li><span><span class="comment">*/</span><span>&nbsp;&nbsp;</span></span></li><li><span>&lt;/script&gt;&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="8" title="[原创] jQuery源码分析-01总体架构" style="display: none;">&lt;script type="text/javascript"&gt;
+function setName(obj){
+    obj.name = "xiaobai";
+    obj = new Object();
+    obj.name = "xiaohei";
+}
+var dog = new Object();
+setName(dog);
+console.log(dog.name);
+/*输出
+*xiaobai
+*/
+&lt;/script&gt;</pre><br><br>JS的函数传参应该都是传值吧，即使是一个对象作为参数，也只是传递的这个对象的引用的一个复制。难道我理解错了？？<br><br><br></div><br>obj是dog的一个复制，所以修改obj指向别的对象对dog没影响。</div>
+</div>
+
+<div id="bc2304488">
+  <div class="comment_title">
+    28 楼
+    <a href="http://hanazawakana.iteye.com/" target="_blank" title="hanazawakana">hanazawakana</a>
+    2013-03-19&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2304488);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">nuysoft 写道</div><div class="quote_div"><div class="quote_title">chenyi056 写道</div><div class="quote_div">JS中参数不是按值传递的么？那传进去的window参数应该只是window对象的拷贝吧？在函数内部对window对象做修改，会影响到全局的window对象么？</div><br>基本类型按值传递，对象传入引用，函数内部的 window 即全局 window。</div><br><br>看这样一个例子<br><br><div class="dp-highlighter" id=""><div class="bar"><div class="tools">Java代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%3Cscript%20type%3D%22text%2Fjavascript%22%3E%0Afunction%20setName(obj)%7B%0A%20%20%20%20obj.name%20%3D%20%22xiaobai%22%3B%0A%20%20%20%20obj%20%3D%20new%20Object()%3B%0A%20%20%20%20obj.name%20%3D%20%22xiaohei%22%3B%0A%7D%0Avar%20dog%20%3D%20new%20Object()%3B%0AsetName(dog)%3B%0Aconsole.log(dog.name)%3B%0A%2F*%E8%BE%93%E5%87%BA%0A*xiaobai%0A*%2F%0A%3C%2Fscript%3E" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="display:none"></a></div></div><ol start="1" class="dp-j"><li><span><span>&lt;script&nbsp;type=</span><span class="string">"text/javascript"</span><span>&gt;&nbsp;&nbsp;</span></span></li><li><span>function&nbsp;setName(obj){&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaobai"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj.name&nbsp;=&nbsp;<span class="string">"xiaohei"</span><span>;&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>var&nbsp;dog&nbsp;=&nbsp;<span class="keyword">new</span><span>&nbsp;Object();&nbsp;&nbsp;</span></span></li><li><span>setName(dog);&nbsp;&nbsp;</span></li><li><span>console.log(dog.name);&nbsp;&nbsp;</span></li><li><span><span class="comment">/*输出</span>&nbsp;</span></li><li><span><span class="comment">*xiaobai</span>&nbsp;</span></li><li><span><span class="comment">*/</span><span>&nbsp;&nbsp;</span></span></li><li><span>&lt;/script&gt;&nbsp;&nbsp;</span></li></ol></div><pre name="code" class="java" codeable_id="" codeable_type="BlogComment" source_url="http://nuysoft.iteye.com/blog/1177451#" pre_index="9" title="[原创] jQuery源码分析-01总体架构" style="display: none;">&lt;script type="text/javascript"&gt;
+function setName(obj){
+    obj.name = "xiaobai";
+    obj = new Object();
+    obj.name = "xiaohei";
+}
+var dog = new Object();
+setName(dog);
+console.log(dog.name);
+/*输出
+*xiaobai
+*/
+&lt;/script&gt;</pre><br><br>JS的函数传参应该都是传值吧，即使是一个对象作为参数，也只是传递的这个对象的引用的一个复制。难道我理解错了？？<br><br><br></div>
+</div>
+
+<div id="bc2303266">
+  <div class="comment_title">
+    27 楼
+    <a href="http://cctvsdlkno1.iteye.com/" target="_blank" title="cctvsdlkno1">cctvsdlkno1</a>
+    2013-03-10&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2303266);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">tdwyx 写道</div><div class="quote_div"><div class="quote_title">引用</div><div class="quote_div">将window作为参数传入，可以在压缩代码时进行优化</div><br><br>这个还真没想到&nbsp;<img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_idea.gif"> </div><br><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_idea.gif"> </div>
+</div>
+
+<div id="bc2302184">
+  <div class="comment_title">
+    26 楼
+    <a href="http://javatozhang.iteye.com/" target="_blank" title="javatozhang">javatozhang</a>
+    2013-03-01&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2302184);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">无论是js语言还是java语言参数的传递无论是基本类型参数还是对象类型参数都是值传递呀！楼主的回答不对吧？</div>
+</div>
+
+<div id="bc2290945">
+  <div class="comment_title">
+    25 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2012-11-24&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1177451#" onclick="quote_comment(2290945);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">chenyi056 写道</div><div class="quote_div">JS中参数不是按值传递的么？那传进去的window参数应该只是window对象的拷贝吧？在函数内部对window对象做修改，会影响到全局的window对象么？</div><br>基本类型按值传递，对象传入引用，函数内部的 window 即全局 window。</div>
+</div>
+
+
+    
+    <div class="pagination"><span class="disabled prev_page">« 上一页</span> <span class="current">1</span> <a href="http://nuysoft.iteye.com/blog/1177451?page=2#comments" rel="next">2</a> <a href="http://nuysoft.iteye.com/blog/1177451?page=3#comments">3</a> <a href="http://nuysoft.iteye.com/blog/1177451?page=2#comments" class="next_page" rel="next">下一页 »</a></div>
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_idea(1).gif"><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1177451', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1177451;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-01总体架构');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-01总体架构');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349109 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed?subscription%5Bsubscribed_user_name%5D=nuysoft" class="subscription" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-01总体架构 - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

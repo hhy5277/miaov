@@ -1,0 +1,625 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1217884 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="作者：nuysoft/JS攻城师/高云　QQ：47214707　EMail：nuysoft@gmail.com      声明：本文为原创文章，如需转载，请注明来源并保留原文链接。  前记：本文收集了jQuery中出现的各种遍历技巧和场景  // 简单的for-in（事件）  for ( type in events ) {    }    // 缓存length属性，避免每次都去查找length属 ...">
+    <meta name="keywords" content="javascript, jquery, 技巧, for, while [原创] jQuery源码分析-jQuery中的循环技巧">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1217884#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-jQuery中的循环技巧</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/%E6%8A%80%E5%B7%A7">技巧</a><a href="http://www.iteye.com/blogs/tag/for">for</a><a href="http://www.iteye.com/blogs/tag/while">while</a>&nbsp;</div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E4%BD%9C%E8%80%85%EF%BC%9Anuysoft%2FJS%E6%94%BB%E5%9F%8E%E5%B8%88%2F%E9%AB%98%E4%BA%91%E3%80%80QQ%EF%BC%9A47214707%E3%80%80EMail%EF%BC%9Anuysoft%40gmail.com%20%20%20%20%0A%E5%A3%B0%E6%98%8E%EF%BC%9A%E6%9C%AC%E6%96%87%E4%B8%BA%E5%8E%9F%E5%88%9B%E6%96%87%E7%AB%A0%EF%BC%8C%E5%A6%82%E9%9C%80%E8%BD%AC%E8%BD%BD%EF%BC%8C%E8%AF%B7%E6%B3%A8%E6%98%8E%E6%9D%A5%E6%BA%90%E5%B9%B6%E4%BF%9D%E7%95%99%E5%8E%9F%E6%96%87%E9%93%BE%E6%8E%A5%E3%80%82%0A%E5%89%8D%E8%AE%B0%EF%BC%9A%E6%9C%AC%E6%96%87%E6%94%B6%E9%9B%86%E4%BA%86jQuery%E4%B8%AD%E5%87%BA%E7%8E%B0%E7%9A%84%E5%90%84%E7%A7%8D%E9%81%8D%E5%8E%86%E6%8A%80%E5%B7%A7%E5%92%8C%E5%9C%BA%E6%99%AF" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>作者：nuysoft/JS攻城师/高云　QQ：47214707　EMail：nuysoft@gmail.com&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span></li><li><span>声明：本文为原创文章，如需转载，请注明来源并保留原文链接。&nbsp;&nbsp;</span></li><li><span>前记：本文收集了jQuery中出现的各种遍历技巧和场景&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="0" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">作者：nuysoft/JS攻城师/高云　QQ：47214707　EMail：nuysoft@gmail.com    
+声明：本文为原创文章，如需转载，请注明来源并保留原文链接。
+前记：本文收集了jQuery中出现的各种遍历技巧和场景</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20%E7%AE%80%E5%8D%95%E7%9A%84for-in%EF%BC%88%E4%BA%8B%E4%BB%B6%EF%BC%89%0Afor%20(%20type%20in%20events%20)%20%7B%0A%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;简单的for-in（事件）</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;type&nbsp;</span><span class="keyword">in</span><span>&nbsp;events&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="1" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// 简单的for-in（事件）
+for ( type in events ) {
+
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20%E7%BC%93%E5%AD%98length%E5%B1%9E%E6%80%A7%EF%BC%8C%E9%81%BF%E5%85%8D%E6%AF%8F%E6%AC%A1%E9%83%BD%E5%8E%BB%E6%9F%A5%E6%89%BElength%E5%B1%9E%E6%80%A7%EF%BC%8C%E7%A8%8D%E5%BE%AE%E6%8F%90%E5%8D%87%E9%81%8D%E5%8E%86%E9%80%9F%E5%BA%A6%0A%2F%2F%20%E4%BD%86%E6%98%AF%E5%A6%82%E6%9E%9C%E9%81%8D%E5%8E%86HTMLCollection%E6%97%B6%EF%BC%8C%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87%E9%9D%9E%E5%B8%B8%E6%98%8E%E6%98%BE%EF%BC%8C%E5%9B%A0%E4%B8%BA%E6%AF%8F%E6%AC%A1%E8%AE%BF%E9%97%AEHTMLCollection%E7%9A%84%E5%B1%9E%E6%80%A7%EF%BC%8CHTMLCollection%E9%83%BD%E4%BC%9A%E5%86%85%E9%83%A8%E5%8C%B9%E9%85%8D%E4%B8%80%E6%AC%A1%E6%89%80%E6%9C%89%E7%9A%84%E8%8A%82%E7%82%B9%0Afor%20(%20var%20j%20%3D%200%2C%20l%20%3D%20handlers.length%3B%20j%20%3C%20l%3B%20j%2B%2B%20)%20%7B%0A%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;缓存length属性，避免每次都去查找length属性，稍微提升遍历速度</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="comment">//&nbsp;但是如果遍历HTMLCollection时，性能提升非常明显，因为每次访问HTMLCollection的属性，HTMLCollection都会内部匹配一次所有的节点</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;</span><span class="keyword">var</span><span>&nbsp;j&nbsp;=&nbsp;0,&nbsp;l&nbsp;=&nbsp;handlers.length;&nbsp;j&nbsp;&lt;&nbsp;l;&nbsp;j++&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="2" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// 缓存length属性，避免每次都去查找length属性，稍微提升遍历速度
+// 但是如果遍历HTMLCollection时，性能提升非常明显，因为每次访问HTMLCollection的属性，HTMLCollection都会内部匹配一次所有的节点
+for ( var j = 0, l = handlers.length; j &lt; l; j++ ) {
+
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20%E4%B8%8D%E6%AF%94%E8%BE%83%E4%B8%8B%E6%A0%87%EF%BC%8C%E7%9B%B4%E6%8E%A5%E5%88%A4%E6%96%AD%E5%85%83%E7%B4%A0%E6%98%AF%E5%90%A6%E4%B8%BAtrue%EF%BC%88%E5%BC%BA%E5%88%B6%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%EF%BC%89%0Avar%20elem%3B%0Afor%20(%20var%20i%20%3D%200%3B%20elems%5Bi%5D%3B%20i%2B%2B%20)%20%7B%0A%09elem%20%3D%20elems%5Bi%5D%3B%0A%09%2F%2F%20...%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;不比较下标，直接判断元素是否为true（强制类型转换）</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">var</span><span>&nbsp;elem;&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;</span><span class="keyword">var</span><span>&nbsp;i&nbsp;=&nbsp;0;&nbsp;elems[i];&nbsp;i++&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;elem&nbsp;=&nbsp;elems[i];&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;...</span><span>&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="3" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// 不比较下标，直接判断元素是否为true（强制类型转换）
+var elem;
+for ( var i = 0; elems[i]; i++ ) {
+	elem = elems[i];
+	// ...
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20%E9%81%8D%E5%8E%86%E5%8A%A8%E6%80%81%E6%95%B0%E7%BB%84%EF%BC%88%E4%BA%8B%E4%BB%B6%EF%BC%89%EF%BC%8C%E4%B8%8D%E8%83%BD%E7%BC%93%E5%AD%98length%E5%B1%9E%E6%80%A7%EF%BC%8Cj%2B%2B%E4%B9%8B%E5%89%8D%E5%85%88%E6%89%A7%E8%A1%8Cj--%EF%BC%8C%E4%BF%9D%E8%AF%81%E4%B8%8D%E4%BC%9A%E5%9B%A0%E4%B8%BA%E6%95%B0%E7%BB%84%E4%B8%8B%E6%A0%87%E7%9A%84%E9%94%99%E8%AF%AF%E5%AF%BC%E8%87%B4%E6%9F%90%E4%BA%9B%E6%95%B0%E7%BB%84%E5%85%83%E7%B4%A0%E9%81%8D%E5%8E%86%E4%B8%8D%E5%88%B0%0Afor%20(%20j%20%3D%200%3B%20j%20%3C%20eventType.length%3B%20j%2B%2B%20)%20%7B%0AeventType.splice(%20j--%2C%201%20)%3B%0A%7D%0Afor%20(%20var%20i%20%3D%201%3B%20i%20%3C%20results.length%3B%20i%2B%2B%20)%20%7B%0A%09if%20(%20results%5Bi%5D%20%3D%3D%3D%20results%5B%20i%20-%201%20%5D%20)%20%7B%0A%09%09results.splice(%20i--%2C%201%20)%3B%0A%09%7D%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;遍历动态数组（事件），不能缓存length属性，j++之前先执行j--，保证不会因为数组下标的错误导致某些数组元素遍历不到</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;j&nbsp;=&nbsp;0;&nbsp;j&nbsp;&lt;&nbsp;eventType.length;&nbsp;j++&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>eventType.splice(&nbsp;j--,&nbsp;1&nbsp;);&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;</span><span class="keyword">var</span><span>&nbsp;i&nbsp;=&nbsp;1;&nbsp;i&nbsp;&lt;&nbsp;results.length;&nbsp;i++&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;results[i]&nbsp;===&nbsp;results[&nbsp;i&nbsp;-&nbsp;1&nbsp;]&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;results.splice(&nbsp;i--,&nbsp;1&nbsp;);&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="4" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// 遍历动态数组（事件），不能缓存length属性，j++之前先执行j--，保证不会因为数组下标的错误导致某些数组元素遍历不到
+for ( j = 0; j &lt; eventType.length; j++ ) {
+eventType.splice( j--, 1 );
+}
+for ( var i = 1; i &lt; results.length; i++ ) {
+	if ( results[i] === results[ i - 1 ] ) {
+		results.splice( i--, 1 );
+	}
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20%E8%BF%AD%E4%BB%A3%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%87%8F%E5%B0%91%E9%81%8D%E5%8E%86%E6%AC%A1%E6%95%B0%EF%BC%88%E4%BA%8B%E4%BB%B6%EF%BC%89%EF%BC%8C%E5%A6%82%E6%9E%9C%E4%BD%A0%E8%83%BD%E7%9F%A5%E9%81%93%E4%BB%8E%E5%93%AA%E9%87%8C%E5%BC%80%E5%A7%8B%E9%81%8D%E5%8E%86%E7%9A%84%E8%AF%9D%EF%BC%8C%E8%BF%99%E9%87%8C%E6%98%AFpos%0Afor%20(%20j%20%3D%20pos%20%7C%7C%200%3B%20j%20%3C%20eventType.length%3B%20j%2B%2B%20)%20%7B%0A%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;迭代过程中尽可能减少遍历次数（事件），如果你能知道从哪里开始遍历的话，这里是pos</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;j&nbsp;=&nbsp;pos&nbsp;||&nbsp;0;&nbsp;j&nbsp;&lt;&nbsp;eventType.length;&nbsp;j++&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="5" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// 迭代过程中尽可能减少遍历次数（事件），如果你能知道从哪里开始遍历的话，这里是pos
+for ( j = pos || 0; j &lt; eventType.length; j++ ) {
+
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%E5%80%92%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%88%E4%BA%8B%E4%BB%B6%EF%BC%89%EF%BC%8C%E5%87%8F%E5%B0%91%E4%BA%86%E5%87%A0%E4%B8%AA%E5%AD%97%E7%AC%A6%EF%BC%9A%E5%BE%AA%E7%8E%AF%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD%EF%BC%8C%E5%90%88%E5%B9%B6i%E8%87%AA%E5%87%8F%E5%92%8Ci%E5%8F%96%E5%80%BC%EF%BC%8C%E5%80%92%E5%BA%8F%E9%81%8D%E5%8E%86%E4%BC%9A%E6%9C%89%E6%B5%8F%E8%A7%88%E5%99%A8%E4%BC%98%E5%8C%96%EF%BC%8C%E7%A8%8D%E5%BE%AE%E6%8F%90%E5%8D%87%E9%81%8D%E5%8E%86%E9%80%9F%E5%BA%A6%0Afor%20(%20var%20i%20%3D%20this.props.length%2C%20prop%3B%20i%3B%20)%20%7B%0A%09prop%20%3D%20this.props%5B%20--i%20%5D%3B%0A%09event%5B%20prop%20%5D%20%3D%20originalEvent%5B%20prop%20%5D%3B%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//倒序遍历（事件），减少了几个字符：循环条件判断，合并i自减和i取值，倒序遍历会有浏览器优化，稍微提升遍历速度</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;</span><span class="keyword">var</span><span>&nbsp;i&nbsp;=&nbsp;</span><span class="keyword">this</span><span>.props.length,&nbsp;prop;&nbsp;i;&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;prop&nbsp;=&nbsp;<span class="keyword">this</span><span>.props[&nbsp;--i&nbsp;];&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;event[&nbsp;prop&nbsp;]&nbsp;=&nbsp;originalEvent[&nbsp;prop&nbsp;];&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="6" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">//倒序遍历（事件），减少了几个字符：循环条件判断，合并i自减和i取值，倒序遍历会有浏览器优化，稍微提升遍历速度
+for ( var i = this.props.length, prop; i; ) {
+	prop = this.props[ --i ];
+	event[ prop ] = originalEvent[ prop ];
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20%E5%80%92%E5%BA%8F%E9%81%8D%E5%8E%86%EF%BC%8C%E4%B8%AD%E8%A7%84%E4%B8%AD%E7%9F%A9%EF%BC%8C%E5%80%92%E5%BA%8F%E4%BC%9A%E6%9C%89%E6%B5%8F%E8%A7%88%E5%99%A8%E4%BC%98%E5%8C%96%EF%BC%8C%E7%A8%8D%E5%BE%AE%E6%8F%90%E5%8D%87%E9%81%8D%E5%8E%86%E9%80%9F%E5%BA%A6%0Afor%20(%20j%20%3D%20tbody.length%20-%201%3B%20j%20%3E%3D%200%20%3B%20--j%20)%20%7B%0A%09if%20(%20jQuery.nodeName(%20tbody%5B%20j%20%5D%2C%20%22tbody%22%20)%20%26%26%20!tbody%5B%20j%20%5D.childNodes.length%20)%20%7B%0A%09%09tbody%5B%20j%20%5D.parentNode.removeChild(%20tbody%5B%20j%20%5D%20)%3B%0A%09%7D%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;倒序遍历，中规中矩，倒序会有浏览器优化，稍微提升遍历速度</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;j&nbsp;=&nbsp;tbody.length&nbsp;-&nbsp;1;&nbsp;j&nbsp;&gt;=&nbsp;0&nbsp;;&nbsp;--j&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;jQuery.nodeName(&nbsp;tbody[&nbsp;j&nbsp;],&nbsp;</span><span class="string">"tbody"</span><span>&nbsp;)&nbsp;&amp;&amp;&nbsp;!tbody[&nbsp;j&nbsp;].childNodes.length&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tbody[&nbsp;j&nbsp;].parentNode.removeChild(&nbsp;tbody[&nbsp;j&nbsp;]&nbsp;);&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="7" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// 倒序遍历，中规中矩，倒序会有浏览器优化，稍微提升遍历速度
+for ( j = tbody.length - 1; j &gt;= 0 ; --j ) {
+	if ( jQuery.nodeName( tbody[ j ], "tbody" ) &amp;&amp; !tbody[ j ].childNodes.length ) {
+		tbody[ j ].parentNode.removeChild( tbody[ j ] );
+	}
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%E4%B8%8D%E5%88%A4%E6%96%AD%E4%B8%8B%E6%A0%87%EF%BC%8C%E7%9B%B4%E6%8E%A5%E5%88%A4%E6%96%AD%E5%85%83%E7%B4%A0%EF%BC%88%E9%80%89%E6%8B%A9%E5%99%A8%EF%BC%89%0Afor%20(%20i%20%3D%200%3B%20checkSet%5Bi%5D%20!%3D%20null%3B%20i%2B%2B%20)%20%7B%0A%09if%20(%20checkSet%5Bi%5D%20%26%26%20(checkSet%5Bi%5D%20%3D%3D%3D%20true%20%7C%7C%20checkSet%5Bi%5D.nodeType%20%3D%3D%3D%201%20%26%26%20Sizzle.contains(context%2C%20checkSet%5Bi%5D))%20)%20%7B%0A%09%09results.push(%20set%5Bi%5D%20)%3B%0A%09%7D%0A%7D%0Afor%20(%20%3B%20array%5Bi%5D%3B%20i%2B%2B%20)%20%7B%0A%09ret.push(%20array%5Bi%5D%20)%3B%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//不判断下标，直接判断元素（选择器）</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;i&nbsp;=&nbsp;0;&nbsp;checkSet[i]&nbsp;!=&nbsp;</span><span class="keyword">null</span><span>;&nbsp;i++&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;checkSet[i]&nbsp;&amp;&amp;&nbsp;(checkSet[i]&nbsp;===&nbsp;</span><span class="keyword">true</span><span>&nbsp;||&nbsp;checkSet[i].nodeType&nbsp;===&nbsp;1&nbsp;&amp;&amp;&nbsp;Sizzle.contains(context,&nbsp;checkSet[i]))&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;results.push(&nbsp;set[i]&nbsp;);&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;;&nbsp;array[i];&nbsp;i++&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;ret.push(&nbsp;array[i]&nbsp;);&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="8" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">//不判断下标，直接判断元素（选择器）
+for ( i = 0; checkSet[i] != null; i++ ) {
+	if ( checkSet[i] &amp;&amp; (checkSet[i] === true || checkSet[i].nodeType === 1 &amp;&amp; Sizzle.contains(context, checkSet[i])) ) {
+		results.push( set[i] );
+	}
+}
+for ( ; array[i]; i++ ) {
+	ret.push( array[i] );
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20%E4%B8%8D%E5%88%A4%E6%96%AD%E4%B8%8B%E6%A0%87%EF%BC%8C%E5%8F%96%E5%87%BA%E5%85%83%E7%B4%A0%E7%84%B6%E5%90%8E%E5%88%A4%E6%96%AD%E5%85%83%E7%B4%A0%EF%BC%88%E9%80%89%E6%8B%A9%E5%99%A8%EF%BC%89%0Afor%20(%20var%20i%20%3D%200%3B%20(item%20%3D%20curLoop%5Bi%5D)%20!%3D%20null%3B%20i%2B%2B%20)%20%7B%0A%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;不判断下标，取出元素然后判断元素（选择器）</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;</span><span class="keyword">var</span><span>&nbsp;i&nbsp;=&nbsp;0;&nbsp;(item&nbsp;=&nbsp;curLoop[i])&nbsp;!=&nbsp;</span><span class="keyword">null</span><span>;&nbsp;i++&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="9" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// 不判断下标，取出元素然后判断元素（选择器）
+for ( var i = 0; (item = curLoop[i]) != null; i++ ) {
+
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20%E9%81%8D%E5%8E%86DOM%E5%AD%90%E5%85%83%E7%B4%A0%0Afor%20(%20node%20%3D%20parent.firstChild%3B%20node%3B%20node%20%3D%20node.nextSibling%20)%20%7B%0A%09if%20(%20node.nodeType%20%3D%3D%3D%201%20)%20%7B%0A%09%09node.nodeIndex%20%3D%20%2B%2Bcount%3B%0A%09%7D%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;遍历DOM子元素</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;node&nbsp;=&nbsp;parent.firstChild;&nbsp;node;&nbsp;node&nbsp;=&nbsp;node.nextSibling&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;node.nodeType&nbsp;===&nbsp;1&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node.nodeIndex&nbsp;=&nbsp;++count;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="10" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// 遍历DOM子元素
+for ( node = parent.firstChild; node; node = node.nextSibling ) {
+	if ( node.nodeType === 1 ) {
+		node.nodeIndex = ++count;
+	}
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20%E5%8A%A8%E6%80%81%E9%81%8D%E5%8E%86DOM%E5%AD%90%E5%85%83%E7%B4%A0%EF%BC%88DOM%E9%81%8D%E5%8E%86%EF%BC%89%EF%BC%8Cdir%E5%8F%82%E6%95%B0%E8%A1%A8%E7%A4%BA%E5%85%83%E7%B4%A0%E7%9A%84%E6%96%B9%E5%90%91%E5%B1%9E%E6%80%A7%EF%BC%8C%E5%A6%82parentNode%E3%80%81nextSibling%E3%80%81previousSibling%E3%80%81lastChild%E5%92%8CfirstChild%0Afor%20(%20%3B%20cur%3B%20cur%20%3D%20cur%5Bdir%5D%20)%20%7B%0A%09if%20(%20cur.nodeType%20%3D%3D%3D%201%20%26%26%20%2B%2Bnum%20%3D%3D%3D%20result%20)%20%7B%0A%09%09break%3B%0A%09%7D%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;动态遍历DOM子元素（DOM遍历），dir参数表示元素的方向属性，如parentNode、nextSibling、previousSibling、lastChild和firstChild</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">for</span><span>&nbsp;(&nbsp;;&nbsp;cur;&nbsp;cur&nbsp;=&nbsp;cur[dir]&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;cur.nodeType&nbsp;===&nbsp;1&nbsp;&amp;&amp;&nbsp;++num&nbsp;===&nbsp;result&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">break</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="11" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// 动态遍历DOM子元素（DOM遍历），dir参数表示元素的方向属性，如parentNode、nextSibling、previousSibling、lastChild和firstChild
+for ( ; cur; cur = cur[dir] ) {
+	if ( cur.nodeType === 1 &amp;&amp; ++num === result ) {
+		break;
+	}
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20while%E6%A3%80%E6%9F%A5%E4%B8%8B%E6%A0%87i%0Avar%20i%20%3D%20promiseMethods.length%3B%0Awhile(%20i--%20)%20%7B%0A%09obj%5B%20promiseMethods%5Bi%5D%20%5D%20%3D%20deferred%5B%20promiseMethods%5Bi%5D%20%5D%3B%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;while检查下标i</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">var</span><span>&nbsp;i&nbsp;=&nbsp;promiseMethods.length;&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">while</span><span>(&nbsp;i--&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;obj[&nbsp;promiseMethods[i]&nbsp;]&nbsp;=&nbsp;deferred[&nbsp;promiseMethods[i]&nbsp;];&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="12" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// while检查下标i
+var i = promiseMethods.length;
+while( i-- ) {
+	obj[ promiseMethods[i] ] = deferred[ promiseMethods[i] ];
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20while%E6%A3%80%E6%9F%A5%E5%85%83%E7%B4%A0%0Awhile(%20(type%20%3D%20types%5B%20i%2B%2B%20%5D)%20)%20%7B%0A%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;while检查元素</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">while</span><span>(&nbsp;(type&nbsp;=&nbsp;types[&nbsp;i++&nbsp;])&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="13" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// while检查元素
+while( (type = types[ i++ ]) ) {
+
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20while%E9%81%8D%E5%8E%86%E5%8A%A8%E6%80%81%E6%95%B0%E7%BB%84%EF%BC%88AJAX%EF%BC%89%EF%BC%8C%E6%80%BB%E6%98%AF%E8%8E%B7%E5%8F%96%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%85%83%E7%B4%A0%EF%BC%8C%E6%A3%80%E6%9F%A5%E6%98%AF%E5%90%A6%E4%B8%8E%E7%89%B9%E6%AE%8A%E5%80%BC%E7%9B%B8%E7%AD%89%EF%BC%8C%E5%A6%82%E6%9E%9C%E7%9B%B8%E7%AD%89%E5%B0%B1%E4%BB%8E%E6%95%B0%E7%BB%84%E5%A4%B4%E9%83%A8%E7%A7%BB%E9%99%A4%EF%BC%8C%E7%9B%B4%E5%88%B0%E9%81%87%E5%88%B0%E4%B8%8D%E7%9B%B8%E7%AD%89%E7%9A%84%E5%85%83%E7%B4%A0%E6%88%96%E6%95%B0%E7%BB%84%E4%B8%BA%E7%A9%BA%0Awhile(%20dataTypes%5B%200%20%5D%20%3D%3D%3D%20%22*%22%20)%20%7B%0A%09dataTypes.shift()%3B%0A%09if%20(%20ct%20%3D%3D%3D%20undefined%20)%20%7B%0A%09%09ct%20%3D%20s.mimeType%20%7C%7C%20jqXHR.getResponseHeader(%20%22content-type%22%20)%3B%0A%09%7D%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;while遍历动态数组（AJAX），总是获取第一个元素，检查是否与特殊值相等，如果相等就从数组头部移除，直到遇到不相等的元素或数组为空</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">while</span><span>(&nbsp;dataTypes[&nbsp;0&nbsp;]&nbsp;===&nbsp;</span><span class="string">"*"</span><span>&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;dataTypes.shift();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;ct&nbsp;===&nbsp;undefined&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ct&nbsp;=&nbsp;s.mimeType&nbsp;||&nbsp;jqXHR.getResponseHeader(&nbsp;<span class="string">"content-type"</span><span>&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="14" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// while遍历动态数组（AJAX），总是获取第一个元素，检查是否与特殊值相等，如果相等就从数组头部移除，直到遇到不相等的元素或数组为空
+while( dataTypes[ 0 ] === "*" ) {
+	dataTypes.shift();
+	if ( ct === undefined ) {
+		ct = s.mimeType || jqXHR.getResponseHeader( "content-type" );
+	}
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20while%E9%81%8D%E5%8E%86%E5%8A%A8%E6%80%81%E6%95%B0%E7%BB%84%EF%BC%88%E5%BC%82%E6%AD%A5%E9%98%9F%E5%88%97%EF%BC%89%EF%BC%8C%E6%80%BB%E6%98%AF%E8%8E%B7%E5%8F%96%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%85%83%E7%B4%A0%EF%BC%8C%E7%9B%B4%E5%88%B0%E6%95%B0%E7%BB%84%E4%B8%BA%E7%A9%BA%EF%BC%8C%E6%88%96%E9%81%87%E5%88%B0%E5%80%BC%E4%B8%BAundefined%E7%9A%84%E5%85%83%E7%B4%A0%0Awhile(%20callbacks%5B%200%20%5D%20)%20%7B%0A%09callbacks.shift().apply(%20context%2C%20args%20)%3B%0A%7D" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;while遍历动态数组（异步队列），总是获取第一个元素，直到数组为空，或遇到值为undefined的元素</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">while</span><span>(&nbsp;callbacks[&nbsp;0&nbsp;]&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;callbacks.shift().apply(&nbsp;context,&nbsp;args&nbsp;);&nbsp;&nbsp;</span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="15" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// while遍历动态数组（异步队列），总是获取第一个元素，直到数组为空，或遇到值为undefined的元素
+while( callbacks[ 0 ] ) {
+	callbacks.shift().apply( context, args );
+}</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%2F%2F%20while%E5%8F%8D%E5%A4%8D%E8%B0%83%E7%94%A8RegExp.exec%EF%BC%88AJAX%EF%BC%89%EF%BC%8C%E8%83%BD%E5%A4%9F%E5%90%A6%E5%8F%8D%E5%A4%8D%E8%B0%83%E6%98%AFexec%E6%AF%94re.test%E3%80%81String.match%E6%9B%B4%E5%8A%A0%E5%BC%BA%E5%A4%A7%E7%9A%84%E5%8E%9F%E5%9B%A0%EF%BC%8C%E6%AF%8F%E6%AC%A1%E8%B0%83%E7%94%A8%E9%83%BD%E5%B0%86lastIndex%E5%B1%9E%E6%80%A7%E8%AE%BE%E7%BD%AE%E5%88%B0%E7%B4%A7%E6%8E%A5%E7%9D%80%E5%8C%B9%E9%85%8D%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E5%AD%97%E7%AC%A6%E4%BD%8D%E7%BD%AE%0Awhile(%20(%20match%20%3D%20rheaders.exec(%20responseHeadersString%20)%20)%20)%20%7B%0A%09responseHeaders%5B%20match%5B1%5D.toLowerCase()%20%5D%20%3D%20match%5B%202%20%5D%3B%20%2F%2F%20%E5%B0%86%E5%93%8D%E5%BA%94%E5%A4%B4%E4%BB%A5key-value%E7%9A%84%E6%96%B9%E5%BC%8F%E5%AD%98%E5%9C%A8responseHeaders%E4%B8%AD%0A%7D%0A" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span class="comment">//&nbsp;while反复调用RegExp.exec（AJAX），能够否反复调是exec比re.test、String.match更加强大的原因，每次调用都将lastIndex属性设置到紧接着匹配字符串的字符位置</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">while</span><span>(&nbsp;(&nbsp;match&nbsp;=&nbsp;rheaders.exec(&nbsp;responseHeadersString&nbsp;)&nbsp;)&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;responseHeaders[&nbsp;match[1].toLowerCase()&nbsp;]&nbsp;=&nbsp;match[&nbsp;2&nbsp;];&nbsp;<span class="comment">//&nbsp;将响应头以key-value的方式存在responseHeaders中</span><span>&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217884" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217884" pre_index="16" title="[原创] jQuery源码分析-jQuery中的循环技巧" style="display: none;">// while反复调用RegExp.exec（AJAX），能够否反复调是exec比re.test、String.match更加强大的原因，每次调用都将lastIndex属性设置到紧接着匹配字符串的字符位置
+while( ( match = rheaders.exec( responseHeadersString ) ) ) {
+	responseHeaders[ match[1].toLowerCase() ] = match[ 2 ]; // 将响应头以key-value的方式存在responseHeaders中
+}
+</pre>
+<div><br></div>
+&nbsp;
+  </div>
+
+  
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/794.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1217884#" onclick="digg(&quot;blogs&quot;, 1217884, false);return false;"><div><strong>12</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1217884#" onclick="digg(&quot;blogs&quot;, 1217884, true);return false;"><div><strong>2</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1217898" class="next" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式">[原创] jQuery源码分析-02正则表达式-Reg ...</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1202422" class="pre" title="[原创] jQuery源码分析-10事件处理-Event-DOM-ready">[原创] jQuery源码分析-10事件处理-Event ...</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-10-27 00:36</li>
+      <li>浏览 10905</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1217884#comments">评论(6)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-jQuery%E4%B8%AD%E7%9A%84%E5%BE%AA%E7%8E%AF%E6%8A%80%E5%B7%A7&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1217884" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-jQuery%E4%B8%AD%E7%9A%84%E5%BE%AA%E7%8E%AF%E6%8A%80%E5%B7%A7&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1217884&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1217884" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    <div id="bc2308225">
+  <div class="comment_title">
+    6 楼
+    <a href="http://it-boy1986.iteye.com/" target="_blank" title="it_boy1986">it_boy1986</a>
+    2013-04-18&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217884#" onclick="quote_comment(2308225);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">奥巴马 写道</div><div class="quote_div">拉登</div> </div>
+</div>
+
+<div id="bc2308223">
+  <div class="comment_title">
+    5 楼
+    <a href="http://it-boy1986.iteye.com/" target="_blank" title="it_boy1986">it_boy1986</a>
+    2013-04-18&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217884#" onclick="quote_comment(2308223);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">刘德华 写道</div><div class="quote_div">我看好你哟！！~~~~~~~~~~~~~~~~</div><br>测试</div>
+</div>
+
+<div id="bc2231446">
+  <div class="comment_title">
+    4 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2011-11-24&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217884#" onclick="quote_comment(2231446);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">晨曦的朝阳 写道</div><div class="quote_div">简单补充一点:<br>for ( type in events ) {&nbsp; <br>}<br>上面这种循环有个不好的地方就是会把原型的属性和方法也给遍历出来，所以如果使用<br>这种方式，经常会结合obj.hasOwnProperty来进行判断。<br></div><br><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_idea.gif"> thx</div>
+</div>
+
+<div id="bc2231300">
+  <div class="comment_title">
+    3 楼
+    <a href="http://xiaofei85390656-163-com.iteye.com/" target="_blank" title="晨曦的朝阳">晨曦的朝阳</a>
+    2011-11-24&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217884#" onclick="quote_comment(2231300);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">简单补充一点:<br>for ( type in events ) {&nbsp; <br>}<br>上面这种循环有个不好的地方就是会把原型的属性和方法也给遍历出来，所以如果使用<br>这种方式，经常会结合obj.hasOwnProperty来进行判断。<br></div>
+</div>
+
+<div id="bc2225278">
+  <div class="comment_title">
+    2 楼
+    <a href="http://ywxowen999.iteye.com/" target="_blank" title="ywxowen999">ywxowen999</a>
+    2011-10-28&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217884#" onclick="quote_comment(2225278);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">楼主总结的很到位，收益了。</div>
+</div>
+
+<div id="bc2225067">
+  <div class="comment_title">
+    1 楼
+    <a href="http://zui4yi1.iteye.com/" target="_blank" title="zui4yi1">zui4yi1</a>
+    2011-10-27&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217884#" onclick="quote_comment(2225067);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">学习了，这么多技巧</div>
+</div>
+
+
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_idea(1).gif"><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1217884', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1217884;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-jQuery中的循环技巧');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-jQuery中的循环技巧');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349131 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed/772224" class="subscription" onclick="if (confirm(&#39;你确定要取消这个关注？&#39;)) { var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;delete&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit(); };return false;">取消关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-jQuery中的循环技巧 - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

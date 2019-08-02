@@ -1,0 +1,894 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1202422 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="作者：nuysoft/JS攻城师/高云　QQ：47214707　EMail：nuysoft@gmail.com    声明：本文为原创文章，如需转载，请注明来源并保留原文链接。     后文预告：封装事�� ...">
+    <meta name="keywords" content="javascript, jquery, 源码分析, event, domready [原创] jQuery源码分析-10事件处理-Event-DOM-ready">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1202422#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-10事件处理-Event-DOM-ready</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90">源码分析</a><a href="http://www.iteye.com/blogs/tag/event">event</a><a href="http://www.iteye.com/blogs/tag/domready">domready</a></div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E4%BD%9C%E8%80%85%EF%BC%9Anuysoft%2FJS%E6%94%BB%E5%9F%8E%E5%B8%88%2F%E9%AB%98%E4%BA%91%E3%80%80QQ%EF%BC%9A47214707%E3%80%80EMail%EF%BC%9Anuysoft%40gmail.com%20%20%0A%E5%A3%B0%E6%98%8E%EF%BC%9A%E6%9C%AC%E6%96%87%E4%B8%BA%E5%8E%9F%E5%88%9B%E6%96%87%E7%AB%A0%EF%BC%8C%E5%A6%82%E9%9C%80%E8%BD%AC%E8%BD%BD%EF%BC%8C%E8%AF%B7%E6%B3%A8%E6%98%8E%E6%9D%A5%E6%BA%90%E5%B9%B6%E4%BF%9D%E7%95%99%E5%8E%9F%E6%96%87%E9%93%BE%E6%8E%A5%E3%80%82%20%20%20%0A%E5%90%8E%E6%96%87%E9%A2%84%E5%91%8A%EF%BC%9A%E5%B0%81%E8%A3%85%E4%BA%8B%E4%BB%B6%E5%AF%B9%E8%B1%A1%20%E4%BE%BF%E6%8D%B7%E6%8E%A5%E5%8F%A3%E8%A7%A3%E6%9E%90%0A%0A%E5%89%8D%E8%AE%B0%EF%BC%9A%0A%E8%BF%99%E4%B8%80%E7%AB%A0%E5%86%99%E7%9A%84%E5%BE%88%E7%94%A8%E5%BF%83%EF%BC%8C%E5%B8%8C%E6%9C%9B%E6%9C%89%E6%89%80%E5%90%AF%E5%8F%91%E3%80%82%E5%9B%A0%E4%B8%BA%E6%8E%92%E7%89%88%E7%9A%84%E5%8E%9F%E5%9B%A0%EF%BC%8C%E9%98%85%E8%AF%BB%E9%99%84%E4%BB%B6PDF%E6%9B%B4%E6%96%B9%E4%BE%BF%E4%B8%80%E4%BA%9B%E3%80%82%0A%0AjQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E7%B3%BB%E5%88%97%E5%A4%A7%E6%A6%82%E5%B7%B2%E7%BB%8F%E5%86%99%E4%BA%8660%25%EF%BC%8C%E6%9E%B6%E6%9E%84%E3%80%81%E6%9E%84%E5%BB%BAjQuery%E5%AF%B9%E8%B1%A1%E3%80%81%E5%BC%82%E6%AD%A5%E9%98%9F%E5%88%97%E3%80%81%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B5%8B%E8%AF%95%E3%80%81%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%E3%80%81%E9%98%9F%E5%88%97%E3%80%81%E4%BA%8B%E4%BB%B6%E6%A8%A1%E5%9E%8B%E3%80%81AJAX%E3%80%81%E5%8A%A8%E7%94%BB%E3%80%81%E5%B0%BA%E5%AF%B8%E5%A4%A7%E5%B0%8F%E5%9F%BA%E6%9C%AC%E5%AE%8C%E7%BB%93%EF%BC%8C%E8%BF%99%E4%BA%9B%E6%AF%94%E8%BE%83%E9%9A%BE%E8%AF%BB%E4%B9%9F%E6%98%AF%E6%88%91%E6%84%9F%E5%85%B4%E8%B6%A3%E7%9A%84%EF%BC%8C%E5%89%A9%E4%BD%99%E7%9A%84%E9%83%A8%E5%88%86%E6%9C%89%E9%80%89%E6%8B%A9%E5%99%A8%E3%80%81DOM%E9%81%8D%E5%8E%86%E5%92%8C%E6%93%8D%E4%BD%9C%E3%80%81CSS%E5%92%8C%E9%83%A8%E5%88%86%E7%AB%A0%E8%8A%82%E7%9A%84%E8%A1%A5%E5%85%85%EF%BC%8CjQuery%E4%B8%AD%E7%9A%84%E6%AD%A3%E5%88%99%E5%88%86%E6%9E%90%E5%B7%B2%E6%9C%89%E5%88%9D%E7%A8%BF%E4%BD%86%E6%98%AF%E5%86%85%E5%AE%B9%E5%A4%AA%E5%BA%9E%E5%A4%A7%E8%BF%98%E5%9C%A8%E6%8B%BF%E6%8D%8F%E6%80%8E%E4%B9%88%E5%86%99%E5%90%88%E9%80%82%EF%BC%8C%E4%B8%80%E4%BA%9B%E7%AB%A0%E8%8A%82%E5%86%99%E7%9A%84%E4%B8%8D%E6%98%AF%E5%BE%88%E6%BB%A1%E6%84%8F%E6%9C%89%E6%97%B6%E9%97%B4%E4%BC%9A%E5%81%9A%E4%BF%AE%E6%94%B9%EF%BC%8C%E8%AF%A6%E7%BB%86%E7%9A%84%E7%9B%AE%E5%BD%95%E5%92%8C%E8%AE%A1%E5%88%92%E5%8F%AF%E4%BB%A5%E5%8E%BB%E7%9B%AE%E5%BD%95%E9%A1%B5%E5%8F%82%E7%9C%8B%20http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1190542%E3%80%82%0A%0AJavaScript%E5%90%8C%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%E4%B8%80%E6%A0%B7%EF%BC%8C%E5%9F%BA%E7%A1%80%E9%9D%9E%E5%B8%B8%E9%87%8D%E8%A6%81%EF%BC%8C%E4%BB%85%E4%BB%85%E4%BC%9A%E7%94%A8%E6%A1%86%E6%9E%B6%E5%92%8C%E5%B7%A5%E5%85%B7%E5%86%99%E4%B8%80%E4%BA%9BWebApp%E6%98%AF%E4%B8%8D%E8%83%BD%E6%88%90%E4%B8%BA%E4%B8%80%E5%90%8D%E5%90%88%E6%A0%BC%E7%9A%84JS%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%9A%84%EF%BC%8C%E5%BB%BA%E8%AE%AE%E5%A4%9A%E8%AF%BB%E5%87%A0%E6%AC%A1JavaScript%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%EF%BC%8C%E4%BB%A5%E6%88%91%E7%9A%84%E7%BB%8F%E9%AA%8C%E4%B8%8EJava%E7%9B%B8%E6%AF%94%EF%BC%8CJavaScript%E9%9C%80%E8%A6%81%E8%8A%B1%E8%B4%B9%E4%B8%8EJava%E7%9B%B8%E5%BD%93%E7%9A%84%E6%97%B6%E9%97%B4%E6%89%8D%E8%83%BD%E8%BE%BE%E5%88%B0%E4%B8%8EJava%E7%9B%B8%E5%BD%93%E7%9A%84%E6%B0%B4%E5%B9%B3%E3%80%82%0A%0AjQuery%E5%AE%8C%E7%BB%93%E4%B9%8B%E5%90%8E%E8%AE%A1%E5%88%92%E5%86%99Java%E5%BC%80%E6%BA%90%E6%A1%86%E6%9E%B6%E7%9A%84%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%EF%BC%8C%E4%BB%8ESpring%E3%80%81Hibernate%E5%BC%80%E5%A7%8B%EF%BC%8C%E6%9C%89%E5%85%B4%E8%B6%A3%E7%9A%84%E5%90%8C%E5%AD%A6%E5%8F%AF%E4%BB%A5%E4%B8%80%E8%B5%B7%E7%A0%94%E7%A9%B6%E3%80%82" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>作者：nuysoft/JS攻城师/高云　QQ：47214707　EMail：nuysoft@gmail.com&nbsp;&nbsp;&nbsp;&nbsp;</span></span></li><li><span>声明：本文为原创文章，如需转载，请注明来源并保留原文链接。&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>后文预告：封装事件对象&nbsp;便捷接口解析&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>前记：&nbsp;&nbsp;</span></li><li><span>这一章写的很用心，希望有所启发。因为排版的原因，阅读附件PDF更方便一些。&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>jQuery源码分析系列大概已经写了60%，架构、构建jQuery对象、异步队列、浏览器测试、数据缓存、队列、事件模型、AJAX、动画、尺寸大小基本完结，这些比较难读也是我感兴趣的，剩余的部分有选择器、DOM遍历和操作、CSS和部分章节的补充，jQuery中的正则分析已有初稿但是内容太庞大还在拿捏怎么写合适，一些章节写的不是很满意有时间会做修改，详细的目录和计划可以去目录页参看&nbsp;http:<span class="comment">//nuysoft.iteye.com/blog/1190542。</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>JavaScript同其他语言一样，基础非常重要，仅仅会用框架和工具写一些WebApp是不能成为一名合格的JS工程师的，建议多读几次JavaScript权威指南，以我的经验与Java相比，JavaScript需要花费与Java相当的时间才能达到与Java相当的水平。&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>jQuery完结之后计划写Java开源框架的源码解析，从Spring、Hibernate开始，有兴趣的同学可以一起研究。&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1202422" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1202422" pre_index="0" title="[原创] jQuery源码分析-10事件处理-Event-DOM-ready" style="display: none;">作者：nuysoft/JS攻城师/高云　QQ：47214707　EMail：nuysoft@gmail.com  
+声明：本文为原创文章，如需转载，请注明来源并保留原文链接。   
+后文预告：封装事件对象 便捷接口解析
+
+前记：
+这一章写的很用心，希望有所启发。因为排版的原因，阅读附件PDF更方便一些。
+
+jQuery源码分析系列大概已经写了60%，架构、构建jQuery对象、异步队列、浏览器测试、数据缓存、队列、事件模型、AJAX、动画、尺寸大小基本完结，这些比较难读也是我感兴趣的，剩余的部分有选择器、DOM遍历和操作、CSS和部分章节的补充，jQuery中的正则分析已有初稿但是内容太庞大还在拿捏怎么写合适，一些章节写的不是很满意有时间会做修改，详细的目录和计划可以去目录页参看 http://nuysoft.iteye.com/blog/1190542。
+
+JavaScript同其他语言一样，基础非常重要，仅仅会用框架和工具写一些WebApp是不能成为一名合格的JS工程师的，建议多读几次JavaScript权威指南，以我的经验与Java相比，JavaScript需要花费与Java相当的时间才能达到与Java相当的水平。
+
+jQuery完结之后计划写Java开源框架的源码解析，从Spring、Hibernate开始，有兴趣的同学可以一起研究。</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=10.8%09DOM%20ready%0A%0A%E5%88%9D%E5%AD%A6jQuery%E6%97%B6%EF%BC%8C%E5%BE%88%E5%8F%AF%E8%83%BD%E5%AD%A6%E5%88%B0%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%9F%A5%E8%AF%86%E7%82%B9%E5%B0%B1%E6%98%AF.ready()%EF%BC%8C%E4%BD%86%E6%98%AF%E7%BD%91%E7%BB%9C%E4%B8%8A%E6%B5%81%E8%BD%AC%E7%9A%84%E6%96%87%E7%AB%A0%E5%92%8CAPI%E5%AF%B9%E6%AD%A4%E7%9A%84%E8%A7%A3%E9%87%8A%E6%88%96%E5%89%96%E6%9E%90%EF%BC%8C%E7%BB%8F%E5%B8%B8%E6%98%AF%E6%A8%A1%E6%A3%B1%E4%B8%A4%E5%8F%AF%E7%94%9A%E8%87%B3%E6%98%AF%E4%B8%8D%E5%87%86%E7%A1%AE%E6%88%96%E9%94%99%E8%AF%AF%E7%9A%84%EF%BC%8C%E6%9C%AC%E8%8A%82%E5%B0%86%E8%AF%A6%E7%BB%86%E7%9A%84%E9%98%90%E8%BF%B0.ready()%E7%9A%84%E7%94%A8%E6%B3%95%E5%92%8C%E5%8E%9F%E7%90%86%EF%BC%8C%E5%B9%B6%E7%BA%A0%E6%AD%A3%E8%BF%99%E4%BA%9B%E8%AF%AF%E5%8C%BA%E3%80%82%0A%0A10.8.1%09%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8.ready()%0A%0A.ready()%20%E6%8C%87%E5%AE%9A%E4%B8%80%E4%B8%AA%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%EF%BC%8C%E5%BD%93DOM%E5%AE%8C%E5%85%A8%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%88%90%E6%97%B6%E6%89%A7%E8%A1%8C%0A%0A%E8%99%BD%E7%84%B6JavaScript%E6%8F%90%E4%BE%9B%E4%BA%86load%E4%BA%8B%E4%BB%B6%EF%BC%8C%E5%BD%93%E9%A1%B5%E9%9D%A2%E6%B8%B2%E6%9F%93%E5%AE%8C%E6%88%90%E4%B9%8B%E5%90%8E%E4%BC%9A%E6%89%A7%E8%A1%8C%E8%BF%99%E4%B8%AA%E5%87%BD%E6%95%B0%EF%BC%8C%E5%9C%A8%E6%89%80%E4%BB%A5%E5%85%83%E7%B4%A0%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%88%90%E4%B9%8B%E5%89%8D%EF%BC%8C%E8%BF%99%E4%B8%AA%E5%87%BD%E6%95%B0%E4%B8%8D%E4%BC%9A%E8%A2%AB%E8%B0%83%E7%94%A8%EF%BC%8C%E4%BE%8B%E5%A6%82%E5%9B%BE%E5%83%8F%E3%80%82%E4%BD%86%E6%98%AF%E5%9C%A8%E5%A4%A7%E5%A4%9A%E6%95%B0%E6%83%85%E5%86%B5%E4%B8%8B%EF%BC%8C%E5%8F%AA%E8%A6%81DOM%E7%BB%93%E6%9E%84%E5%8A%A0%E8%BD%BD%E5%AE%8C%EF%BC%8C%E8%84%9A%E6%9C%AC%E5%B0%B1%E5%8F%AF%E4%BB%A5%E5%B0%BD%E5%BF%AB%E8%BF%90%E8%A1%8C%E3%80%82%E4%BC%A0%E9%80%92%E7%BB%99.ready()%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%E5%9C%A8DOM%E5%87%86%E5%A4%87%E5%A5%BD%E5%90%8E%E7%AB%8B%E5%8D%B3%E6%89%A7%E8%A1%8C%EF%BC%8C%E5%9B%A0%E6%AD%A4%E9%80%9A%E5%B8%B8%E6%83%85%E5%86%B5%E4%B8%8B%EF%BC%8C%E6%9C%80%E5%A5%BD%E6%8A%8A%E7%BB%91%E5%AE%9A%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%E5%92%8C%E5%85%B6%E4%BB%96jQuery%E4%BB%A3%E7%A0%81%E9%83%BD%E5%88%B0%E8%BF%99%E9%87%8C%E6%9D%A5%E3%80%82%E4%BD%86%E6%98%AF%E5%BD%93%E8%84%9A%E6%9C%AC%E4%BE%9D%E8%B5%96%E4%BA%8ECSS%E6%A0%B7%E5%BC%8F%E5%B1%9E%E6%80%A7%E6%97%B6%EF%BC%8C%E4%B8%80%E5%AE%9A%E8%A6%81%E5%9C%A8%E8%84%9A%E6%9C%AC%E4%B9%8B%E5%89%8D%E5%BC%95%E5%85%A5%E5%A4%96%E9%83%A8%E6%A0%B7%E5%BC%8F%E6%88%96%E5%86%85%E5%B5%8C%E6%A0%B7%E5%BC%8F%E7%9A%84%E5%85%83%E7%B4%A0%E3%80%82%0A%0A%E5%A6%82%E6%9E%9C%E4%BB%A3%E7%A0%81%E4%BE%9D%E8%B5%96%E4%BA%8E%E9%9C%80%E5%8A%A0%E8%BD%BD%E5%AE%8C%E7%9A%84%E5%85%83%E7%B4%A0%EF%BC%88%E4%BE%8B%E5%A6%82%EF%BC%8C%E6%83%B3%E8%8E%B7%E5%8F%96%E4%B8%80%E4%B8%AA%E5%9B%BE%E7%89%87%E7%9A%84%E5%B0%BA%E5%AF%B8%E5%A4%A7%E5%B0%8F%EF%BC%89%EF%BC%8C%E5%BA%94%E8%AF%A5%E7%94%A8.load()%E4%BA%8B%E4%BB%B6%E4%BB%A3%E6%9B%BF%EF%BC%8C%E5%B9%B6%E6%8A%8A%E4%BB%A3%E7%A0%81%E6%94%BE%E5%88%B0load%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%E4%B8%AD%E3%80%82%0A%0A.ready()%E6%96%B9%E6%B3%95%E4%B8%8D%E5%90%8C%E4%BA%8E%3Cbody%20onload%3D%22%22%3E%E5%B1%9E%E6%80%A7%E3%80%82%E5%A6%82%E6%9E%9C%E5%BF%85%E9%A1%BB%E7%94%A8load%E4%BA%8B%E4%BB%B6%EF%BC%8C%E9%82%A3%E4%B9%88%E5%B0%B1%E4%B8%8D%E8%A6%81%E4%BD%BF%E7%94%A8.ready()%EF%BC%8C%E6%88%96%E7%94%A8.load()%E4%BB%A3%E6%9B%BF%EF%BC%8C%E6%8A%8Aload%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%E7%BB%91%E5%AE%9A%E5%88%B0window%E6%88%96%E5%85%B6%E4%BB%96%E7%9A%84%E5%85%B7%E4%BD%93%E5%85%83%E7%B4%A0%E4%B8%8A%EF%BC%8C%E4%BE%8B%E5%A6%82%E5%9B%BE%E7%89%87%E3%80%82%0A%0A%E4%BB%A5%E4%B8%8B%E4%B8%89%E4%B8%AA%E8%AF%AD%E6%B3%95%E5%85%A8%E9%83%A8%E6%98%AF%E7%AD%89%E4%BB%B7%E7%9A%84%EF%BC%9A%0A%24(document).ready(handler)%0A%24().ready(handler)%20(this%20is%20not%20recommended)%0A%24(handler)%0A%0A%24(document).bind(%22ready%22%2C%20handler)%E7%9A%84%E8%A1%8C%E4%B8%BA%E7%B1%BB%E4%BC%BC%E4%BA%8Eready%E6%96%B9%E6%B3%95%EF%BC%8C%E4%BD%86%E6%9C%89%E4%B8%80%E4%B8%AA%E4%BE%8B%E5%A4%96%EF%BC%9A%E5%A6%82%E6%9E%9Cready%E4%BA%8B%E4%BB%B6%E5%B7%B2%E8%A7%A6%E5%8F%91%E5%90%8E%EF%BC%8C%E5%86%8D%E5%B0%9D%E8%AF%95%E7%94%A8.bind(%22ready%22)%E7%BB%91%E5%AE%9A%E7%9A%84%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E5%B0%86%E4%B8%8D%E4%BC%9A%E8%A2%AB%E6%89%A7%E8%A1%8C%E3%80%82%E8%80%8C%E7%94%A8%E4%BB%A5%E4%B8%8A%E4%B8%89%E7%A7%8D%E6%96%B9%E6%B3%95%E7%BB%91%E5%AE%9A%E7%9A%84%E5%8F%A5%E6%9F%84%E4%BC%9A%E8%A2%AB%E6%89%A7%E8%A1%8C%EF%BC%8C%E6%97%A0%E8%AE%BA%E6%98%AF%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E7%BB%91%E5%AE%9A%E7%9A%84%E3%80%82%0A.ready()%E6%96%B9%E6%B3%95%E5%8F%AA%E8%83%BD%E5%9C%A8%E5%8C%85%E5%90%AB%E4%BA%86document%E7%9A%84jQuery%E4%B8%8A%E8%B0%83%E7%94%A8%EF%BC%8C%E5%9B%A0%E6%AD%A4%E9%80%89%E6%8B%A9%E5%99%A8%E5%8F%AF%E4%BB%A5%E7%9C%81%E7%95%A5%E3%80%82%0A.ready()%E6%96%B9%E6%B3%95%E5%85%B8%E5%9E%8B%E7%9A%84%E7%94%A8%E6%B3%95%E6%98%AF%E4%BD%BF%E7%94%A8%E4%B8%80%E4%B8%AA%E5%8C%BF%E5%90%8D%E5%87%BD%E6%95%B0%EF%BC%9A%0A%24(document).ready(function()%20%7B%0A%20%20%2F%2F%20Handler%20for%20.ready()%20called.%0A%7D)%3B%0A%E7%AD%89%E4%BB%B7%E4%BA%8E%EF%BC%9A%0A%24(function()%20%7B%0A%20%2F%2F%20Handler%20for%20.ready()%20called.%0A%7D)%3B%0A%0A%E5%A6%82%E6%9E%9C%E5%9C%A8DOM%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%AF%95%E4%B9%8B%E5%90%8E%E8%B0%83%E7%94%A8.ready()%EF%BC%8C%E6%96%B0%E7%9A%84%E5%8F%A5%E6%9F%84%E5%B0%86%E4%BC%9A%E7%AB%8B%E5%8D%B3%E6%89%A7%E8%A1%8C%E3%80%82%0A%0A%E7%89%B9%E5%88%AB%E5%BC%BA%E8%B0%83%E4%B8%A4%E7%82%B9%EF%BC%9A%0A1.%09%E4%B9%8B%E6%89%80%E4%BB%A5%E8%8A%B1%E8%B4%B9%E7%AF%87%E5%B9%85%E6%9D%A5%E9%98%90%E8%BF%B0.ready()%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%EF%BC%88%E7%BF%BB%E8%AF%91%E7%9A%84%E5%AE%98%E7%BD%91%E6%96%87%E6%A1%A3%EF%BC%89%EF%BC%8C%E6%98%AF%E5%9B%A0%E4%B8%BA%E7%BD%91%E7%BB%9C%E4%B8%8A%E7%9A%84%E4%B8%80%E4%BA%9B%E6%96%87%E7%AB%A0%E5%92%8C%E4%B8%AD%E6%96%87API%E4%B8%8D%E5%87%86%E7%A1%AE%E7%94%9A%E8%87%B3%E6%98%AF%E9%94%99%E8%AF%AF%E7%9A%84%EF%BC%88%E5%BA%94%E8%AF%A5%E6%98%AF%E5%B7%A5%E5%85%B7%E7%BF%BB%E8%AF%91%E7%9A%84%EF%BC%89%EF%BC%8C%E6%89%80%E4%BB%A5%E9%9C%80%E8%B0%A8%E6%85%8E%E5%8F%82%E8%80%83%0A2.%09.ready()%E7%9A%84%E8%A7%A6%E5%8F%91%E8%A6%81%E6%97%A9%E4%BA%8E.load()%EF%BC%8C%E4%BD%86%E6%98%AF%E4%B8%8D%E8%A6%81%E5%AE%8C%E5%85%A8%E8%BF%B7%E4%BF%A1%E4%BE%9D%E8%B5%96%EF%BC%8C%E5%A6%82%E6%9E%9C%E8%A6%81%E8%8E%B7%E5%8F%96%E6%88%96%E6%93%8D%E4%BD%9C%E6%A0%B7%E5%BC%8F%EF%BC%8C%E6%88%96%E4%BE%9D%E8%B5%96%E4%BA%8E%E5%83%8F%E5%9B%BE%E7%89%87%E8%BF%99%E6%A0%B7%E7%9A%84%E5%BF%85%E9%A1%BB%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%88%90%E6%89%8D%E8%83%BD%E8%8E%B7%E5%8F%96%E5%92%8C%E6%93%8D%E4%BD%9C%E7%9A%84%E5%85%83%E7%B4%A0%EF%BC%8C%E5%B0%B1%E7%94%A8%3Cbody%20onload%3D%22%22%3E%E6%88%96.load()%0A%0A10.8.2%09%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%0A%0A%E5%88%B0%E5%BA%95.ready()%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9B%B4%E5%BF%AB%E7%9A%84%E8%A7%A6%E5%8F%91ready%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%91%A2%EF%BC%8C%E5%85%B3%E9%94%AE%E5%9C%A8jQuery.bindReady%E6%96%B9%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0%E9%87%8C%EF%BC%9A%0A%0A%E5%AF%B9%E6%A0%87%E5%87%86%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BB%91%E5%AE%9A%EF%BC%9Adocument.addEventListener(%20%22DOMContentLoaded%22%2C%20DOMContentLoaded%2C%20false%20)%3B%0A%E5%AF%B9IE%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BB%91%E5%AE%9A%EF%BC%9Adocument.attachEvent(%20%22onreadystatechange%22%2C%20DOMContentLoaded%20)%3B%0A%0A%E5%BD%93%E7%84%B6%E8%BF%98%E6%9C%89%E4%B8%80%E4%BA%9B%E5%85%B6%E4%BB%96%E7%9A%84%E5%85%B3%E9%94%AE%E6%8A%80%E5%B7%A7%EF%BC%8C%E7%8E%B0%E5%9C%A8%E5%AE%8C%E6%88%90%E7%9A%84%E7%9C%8B%E4%B8%8BjQuery.bindReady%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%9A%0A%0A%2F%2F%20%E7%BB%91%E5%AE%9ADOM%20ready%E7%9B%91%E5%90%AC%E5%99%A8%EF%BC%8C%E8%B7%A8%E6%B5%8F%E8%A7%88%E5%99%A8%EF%BC%8C%E5%85%BC%E5%AE%B9%E6%A0%87%E5%87%86%E6%B5%8F%E8%A7%88%E5%99%A8%E5%92%8CIE%E6%B5%8F%E8%A7%88%E5%99%A8%0AbindReady%3A%20function()%20%7B%20%2F%2F%20jQuery.bindReady%0Aif%20(%20readyList%20)%20%7B%0A%09return%3B%0A%7D%0A%0AreadyList%20%3D%20jQuery._Deferred()%3B%20%2F%2F%20%E5%88%9D%E5%A7%8B%E5%8C%96ready%E5%BC%82%E6%AD%A5%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%E9%98%9F%E5%88%97%0A%0A%2F%2F%20Catch%20cases%20where%20%24(document).ready()%20is%20called%20after%20the%0A%2F%2F%20browser%20event%20has%20already%20occurred.%0A%2F%2F%20%E5%A6%82%E6%9E%9CDOM%E5%B7%B2%E7%BB%8F%E5%AE%8C%E6%AF%95%EF%BC%8C%E7%AB%8B%E5%8D%B3%E8%B0%83%E7%94%A8jQuery.ready%0Aif%20(%20document.readyState%20%3D%3D%3D%20%22complete%22%20)%20%7B%0A%09%2F%2F%20Handle%20it%20asynchronously%20to%20allow%20scripts%20the%20opportunity%20to%20delay%20ready%0A%09%2F%2F%20%E9%87%8D%E8%A6%81%E7%9A%84%E6%98%AF%E5%BC%82%E6%AD%A5%0A%09return%20setTimeout(%20jQuery.ready%2C%201%20)%3B%0A%7D%0A%0A%2F%2F%20Mozilla%2C%20Opera%20and%20webkit%20nightlies%20currently%20support%20this%20event%0A%2F%2F%20DOM%202%E7%BA%A7%E4%BA%8B%E4%BB%B6%E6%A8%A1%E5%9E%8B%EF%BC%8CMozilla%2C%20Opera%2C%20webkit%E7%AD%89%20%0Aif%20(%20document.addEventListener%20)%20%7B%0A%09%2F%2F%20Use%20the%20handy%20event%20callback%0A%09%2F%2F%20%E4%BD%BF%E7%94%A8%E5%BF%AB%E9%80%9F%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%0A%09document.addEventListener(%20%22DOMContentLoaded%22%2C%20DOMContentLoaded%2C%20false%20)%3B%0A%0A%09%2F%2F%20A%20fallback%20to%20window.onload%2C%20that%20will%20always%20work%0A%09%2F%2F%20%E5%86%8D%E5%9C%A8window%E4%B8%8A%E7%BB%91%E5%AE%9Aload%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%EF%BC%8C%E8%BF%99%E4%B8%AA%E5%8F%A5%E6%9F%84%E6%80%BB%E6%98%AF%E4%BC%9A%E6%89%A7%E8%A1%8C%0A%09%2F%2F%20%E4%B8%BA%E4%BB%80%E4%B9%88%E5%90%8C%E6%97%B6%E7%BB%91%E5%AE%9Adocument%20window%E5%91%A2%EF%BC%9F%E6%88%91%E6%83%B3%E6%98%AF%E4%B8%BA%E4%BA%86%E5%AE%89%E5%85%A8%E8%B5%B7%E8%A7%81%EF%BC%8C%E9%98%B2%E5%BE%A1%E6%80%A7%E7%BC%96%E7%A0%81%EF%BC%81%0A%09window.addEventListener(%20%22load%22%2C%20jQuery.ready%2C%20false%20)%3B%20%0A%0A%2F%2F%20If%20IE%20event%20model%20is%20used%0A%7D%20else%20if%20(%20document.attachEvent%20)%20%7B%0A%09%2F%2F%20ensure%20firing%20before%20onload%2C%0A%09%2F%2F%20maybe%20late%20but%20safe%20also%20for%20iframes%0A%09%2F%2F%20%E5%90%8C%E6%A0%B7onreadystatechange%E4%BC%9A%E5%9C%A8onload%E4%B9%8B%E5%89%8D%E8%A7%A6%E5%8F%91%EF%BC%8C%E4%BD%86%E6%98%AF%E5%AF%B9%E4%BA%8Eiframe%E4%BC%9A%E6%9C%89%E5%BB%B6%E8%BF%9F%E4%BD%86%E5%AE%89%E5%85%A8%E4%B8%80%E5%AE%9A%E4%BC%9A%E8%A7%A6%E5%8F%91%0A%09%2F%2F%20%E7%9C%8B%E7%9C%8BDOMContentLoaded%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%8C%E6%98%AF%E6%A3%80%E6%B5%8Bdocument.readyState%E7%9A%84%E7%8A%B6%E6%80%81%E6%98%AF%E5%90%A6%E4%B8%BAcomplete%EF%BC%8C%E8%BF%99%E9%87%8C%E6%9C%89%E4%BA%9B%E5%83%8Fajax%E4%B8%AD%E7%9A%84%E6%A3%80%E6%B5%8B%20%0A%09document.attachEvent(%20%22onreadystatechange%22%2C%20DOMContentLoaded%20)%3B%0A%0A%09%2F%2F%20A%20fallback%20to%20window.onload%2C%20that%20will%20always%20work%0A%09window.attachEvent(%20%22onload%22%2C%20jQuery.ready%20)%3B%20%2F%2F%20%E5%90%8C%E6%A0%B7%E7%9A%84%E5%AE%89%E5%85%A8%E8%B5%B7%E8%A7%81%EF%BC%8C%E9%98%B2%E5%BE%A1%E6%80%A7%E7%BC%96%E7%A0%81%EF%BC%81%E5%8F%8A%E6%97%B6%E5%89%8D%E8%BE%B9%E7%9A%84%E6%89%80%E4%BB%A5hack%E6%8A%80%E5%B7%A7%E5%A4%B1%E8%B4%A5%E4%BA%86%EF%BC%8Conload%E6%98%AF%E6%9C%80%E5%90%8E%E7%9A%84%E4%BF%9D%E9%9A%9C%0A%0A%09%2F%2F%20If%20IE%20and%20not%20a%20frame%0A%09%2F%2F%20continually%20check%20to%20see%20if%20the%20document%20is%20ready%0A%09var%20toplevel%20%3D%20false%3B%0A%0A%09try%20%7B%0A%09%09toplevel%20%3D%20window.frameElement%20%3D%3D%20null%3B%20%2F%2F%20%E6%A3%80%E6%9F%A5window%E7%9A%84frameElement%E5%B1%9E%E6%80%A7%EF%BC%8C%E7%9C%8B%E6%98%AF%E5%90%A6%E6%98%AF%E9%A1%B6%E5%B1%82%E7%AA%97%E5%8F%A3%0A%09%7D%20catch(e)%20%7B%7D%0A%09%0A%09%2F%2F%20%E5%81%9AdoScroll%E6%A3%80%E6%B5%8B%EF%BC%8C%E5%A6%82%E6%9E%9C%E5%9C%A8iframe%E4%B8%AD%E5%B0%B1%E4%B8%8D%E6%A3%80%E6%B5%8B%E4%BA%86%EF%BC%8Conreadystatechange%E5%AF%B9%E4%BA%8Eifame%E5%BE%88%E5%8F%AF%E9%9D%A0%0A%09if%20(%20document.documentElement.doScroll%20%26%26%20toplevel%20)%20%7B%0A%09%09doScrollCheck()%3B%20%0A%09%09%2F%2F%20%E5%9C%A8doScrollCheck%E4%B8%AD%EF%BC%8C%E4%B8%8D%E6%96%AD%E7%9A%84%EF%BC%88%E6%AF%8F%E9%9A%941ms%EF%BC%89%E6%89%A7%E8%A1%8Cdocument.documentElement.doScroll(%22left%22)%EF%BC%8C%E7%9B%B4%E5%88%B0%E4%B8%8D%E6%8A%9B%E5%87%BA%E5%BC%82%E5%B8%B8%E4%B8%BA%E6%AD%A2%0A%09%09%2F%2F%20%E8%BF%99%E6%98%AFIE%E4%B8%8B%E6%A3%80%E6%B5%8BDOM%20ready%E7%9A%84%E6%8A%80%E5%B7%A7%0A%09%09%7D%0A%09%7D%0A%7D%2C%0A%0A%E7%84%B6%E5%90%8E%E6%98%AF%E5%AE%8C%E6%95%B4%E7%9A%84ready%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95%E7%9A%84%E5%88%86%E6%9E%90%EF%BC%8C%E6%88%91%E5%89%94%E9%99%A4%E4%BA%86%E5%85%B6%E4%BB%96%E6%97%A0%E5%85%B3%E7%9A%84%E4%BB%A3%E7%A0%81%EF%BC%8C%E4%BF%9D%E7%95%99%E4%BA%86%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84%E5%92%8C%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95%EF%BC%9A%0A%0A(function(%20window%2C%20undefined%20)%20%7B%0A%0A%09var%20jQuery%20%3D%20(function()%20%7B%0A%09%09%0A%09%09%2F%2F%20Define%20a%20local%20copy%20of%20jQuery%0A%09%09var%20jQuery%20%3D%20function(%20selector%2C%20context%20)%20%7B%0A%09%09%09%09%2F%2F%20The%20jQuery%20object%20is%20actually%20just%20the%20init%20constructor%20&#39;enhanced&#39;%0A%09%09%09%09var%20ret%20%3D%20new%20jQuery.fn.init(%20selector%2C%20context%2C%20rootjQuery%20)%3B%0A%09%09%09%09return%20ret%3B%0A%09%09%09%7D%2C%0A%09%09%0A%09%09%09%2F%2F%20A%20central%20reference%20to%20the%20root%20jQuery(document)%0A%09%09%09rootjQuery%2C%20%2F%2F%20%E5%8C%85%E5%90%AB%E4%BA%86document%E7%9A%84jQuery%E5%AF%B9%E8%B1%A1%0A%09%09%0A%09%09%09%2F%2F%20The%20deferred%20used%20on%20DOM%20ready%0A%09%09%09readyList%2C%20%2F%2F%20ready%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E9%98%9F%E5%88%97%0A%09%09%0A%09%09%09%2F%2F%20The%20ready%20event%20handler%0A%09%09%09DOMContentLoaded%2C%20%2F%2F%20DOM%20ready%20hack%E5%8F%A5%E6%9F%84%EF%BC%8C.ready()%E8%83%BD%E6%97%A9%E4%BA%8E.load()%E7%9A%84%E5%85%B3%E9%94%AE%E6%89%80%E5%9C%A8%0A%09%09%0A%09%09jQuery.fn%20%3D%20jQuery.prototype%20%3D%20%7B%0A%09%09%09constructor%3A%20jQuery%2C%0A%09%09%09init%3A%20function(%20selector%2C%20context%2C%20rootjQuery%20)%20%7B%0A%09%09%09%09%2F%2F%20HANDLE%3A%20%24(function)%0A%09%09%09%09%2F%2F%20Shortcut%20for%20document%20ready%0A%09%09%09%09%2F%2F%20%E5%A6%82%E6%9E%9C%E5%87%BD%E6%95%B0%EF%BC%8C%E5%88%99%E8%AE%A4%E4%B8%BA%E6%98%AFDOM%20ready%E5%8F%A5%E6%9F%84%0A%09%09%09%09if%20(%20jQuery.isFunction(%20selector%20)%20)%20%7B%0A%09%09%09%09%09return%20rootjQuery.ready(%20selector%20)%3B%0A%09%09%09%09%7D%0A%09%09%09%7D%2C%0A%09%09%0A%09%09%09ready%3A%20function(%20fn%20)%20%7B%0A%09%09%09%09%2F%2F%20Attach%20the%20listeners%0A%09%09%09%09jQuery.bindReady()%3B%20%2F%2F%20%E7%BB%91%E5%AE%9ADOM%20ready%E7%9B%91%E5%90%AC%E5%99%A8%EF%BC%8C%E8%B7%A8%E6%B5%8F%E8%A7%88%E5%99%A8%EF%BC%8C%E5%85%BC%E5%AE%B9%E6%A0%87%E5%87%86%E6%B5%8F%E8%A7%88%E5%99%A8%E5%92%8CIE%E6%B5%8F%E8%A7%88%E5%99%A8%0A%09%09%0A%09%09%09%09%2F%2F%20Add%20the%20callback%0A%09%09%09%09readyList.done(%20fn%20)%3B%20%2F%2F%20%E5%B0%86ready%E5%8F%A5%E6%9F%84%E6%B7%BB%E5%8A%A0%E5%88%B0ready%E5%BC%82%E6%AD%A5%E5%8F%A5%E6%9F%84%E9%98%9F%E5%88%97%0A%09%09%0A%09%09%09%09return%20this%3B%0A%09%09%09%7D%0A%09%09%7D%3B%0A%09%09%0A%09%09%2F%2F%20Give%20the%20init%20function%20the%20jQuery%20prototype%20for%20later%20instantiation%0A%09%09jQuery.fn.init.prototype%20%3D%20jQuery.fn%3B%0A%09%09%0A%09%09jQuery.extend%20%3D%20jQuery.fn.extend%20%3D%20function()%20%7B%7D%3B%0A%09%09%0A%09%09jQuery.extend(%7B%0A%09%09%0A%09%09%09%2F%2F%20Is%20the%20DOM%20ready%20to%20be%20used%3F%20Set%20to%20true%20once%20it%20occurs.%0A%09%09%09%2F%2F%20DOM%E6%98%AF%E5%90%A6%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%AF%95%0A%09%09%09isReady%3A%20false%2C%0A%09%09%0A%09%09%09%2F%2F%20A%20counter%20to%20track%20how%20many%20items%20to%20wait%20for%20before%0A%09%09%09%2F%2F%20the%20ready%20event%20fires.%20See%20%236781%0A%09%09%09%2F%2F%20DOM%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%AF%95%E4%B9%8B%E5%89%8D%E7%9A%84%E7%AD%89%E5%BE%85%E6%AC%A1%E6%95%B0%0A%09%09%09readyWait%3A%201%2C%0A%09%09%0A%09%09%09%2F%2F%20Hold%20(or%20release)%20the%20ready%20event%0A%09%09%09%2F%2F%20%E6%98%AF%E5%90%A6%E5%BB%B6%E8%BF%9F%E8%A7%A6%E5%8F%91DOM%20ready%EF%BC%9F%E5%9C%A8jQuery%E4%B8%AD%E6%B2%A1%E6%9C%89%E4%BB%BB%E4%BD%95%E5%9C%B0%E6%96%B9%E6%9C%89%E8%B0%83%E7%94%A8%E5%88%B0holdReady%EF%BC%8C%E8%BF%99%E6%98%AF%E4%B8%AA%E9%81%97%E7%95%99%E6%96%B9%E6%B3%95%E8%BF%98%E6%98%AF%E9%A2%84%E7%95%99%E6%96%B9%E6%B3%95%EF%BC%8C%E6%9C%89%E5%BE%85%E7%BB%A7%E7%BB%AD%E7%A0%94%E7%A9%B6%E3%80%82%0A%09%09%09%2F%2F%20%E5%9B%A0%E6%AD%A4%E5%9C%A8%E5%BD%93%E5%89%8D%E7%89%88%E6%9C%AC%E4%B8%AD%EF%BC%8CreadyWait%E6%80%BB%E6%98%AF1%EF%BC%8C%E7%9B%B4%E5%88%B0%E8%87%AA%E5%87%8F%0A%09%09%09holdReady%3A%20function(%20hold%20)%20%7B%0A%09%09%09%09if%20(%20hold%20)%20%7B%20%2F%2F%20%E7%BB%A7%E7%BB%AD%E7%AD%89%E5%BE%85%0A%09%09%09%09%09jQuery.readyWait%2B%2B%3B%0A%09%09%09%09%7D%20else%20%7B%0A%09%09%09%09%09jQuery.ready(%20true%20)%3B%20%2F%2F%20%0A%09%09%09%09%7D%0A%09%09%09%7D%2C%0A%09%09%0A%09%09%09%2F%2F%20Handle%20when%20the%20DOM%20is%20ready%0A%09%09%09%2F%2F%20%E5%88%A4%E6%96%ADDOM%E6%98%AF%E5%90%A6%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%AF%95%EF%BC%8C%E5%A6%82%E6%9E%9C%E5%B7%B2%E5%AE%8C%E6%AF%95%EF%BC%8C%E8%B0%83%E7%94%A8DOM%20ready%E4%BA%8B%E4%BB%B6%E5%BC%82%E6%AD%A5%E9%98%9F%E5%88%97readyList%EF%BC%8C%E5%A6%82%E6%9E%9C%E6%9C%AA%E5%AE%8C%EF%BC%8C%E6%AF%8F%E4%B8%AA1ms%E6%A3%80%E6%9F%A5%E4%B8%80%E6%AC%A1%0A%09%09%09ready%3A%20function(%20wait%20)%20%7B%20%2F%2F%20jQuery.ready%0A%09%09%09%09%2F%2F%20Either%20a%20released%20hold%20or%20an%20DOMready%2Fload%20event%20and%20not%20yet%20ready%0A%09%09%09%09%2F%2F%20%E6%9D%A1%E4%BB%B61%EF%BC%9Await%20%3D%3D%3D%20true%20%26%26%20!--jQuery.readyWait%20%E8%BF%98%E5%9C%A8%E7%AD%89%E5%BE%85%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%88%90%EF%BC%8C%E4%BD%86%E6%98%AF%E7%AD%89%E5%BE%85%E8%AE%A1%E6%95%B0%E5%99%A8jQuery.readyWait%E5%B7%B2%E7%BB%8F%E6%98%AF0%EF%BC%8C%0A%09%09%09%09%2F%2F%20%E6%8D%A2%E5%8F%A5%E8%AF%9D%E8%AF%B4%E5%8F%82%E6%95%B0wait%E4%B8%BAtrue%E8%A1%A8%E7%A4%BA%E5%B0%9D%E8%AF%95%E4%B8%80%E4%B8%8B%E7%9C%8B%E6%98%AF%E5%90%A6%E8%83%BD%E5%BC%80%E5%A7%8B%E8%B0%83%E7%94%A8readyList%E4%BA%86%EF%BC%8C%E5%A6%82%E6%9E%9C%E5%8F%91%E7%8E%B0%E8%AE%A1%E6%95%B0%E5%99%A8jQuery.readyWait%E5%8F%98%E6%88%900%EF%BC%8C%E5%95%A5%E4%B9%9F%E4%B8%8D%E7%AE%A1%E4%BA%86%EF%BC%8C%E5%BC%80%E5%A7%8B%E8%B0%83%E7%94%A8%E5%90%A7%0A%09%09%09%09%2F%2F%20%E5%86%8D%E6%8D%A2%E5%8F%A5%E8%AF%9D%E8%AF%B4%EF%BC%8C%E8%AE%A1%E6%95%B0%E5%99%A8%E5%B7%B2%E7%BB%8F%E6%98%AF0%E4%BA%86%EF%BC%8C%E5%BC%80%E5%B9%B2%E5%90%A7%0A%09%09%09%09%0A%09%09%09%09%2F%2F%20%E6%9D%A1%E4%BB%B62%EF%BC%9Await%20!%3D%3D%20true%20%26%26%20!jQuery.isReady%20%E6%98%8E%E7%A1%AE%E7%9A%84%E8%AF%B4%E4%B8%8D%E7%94%A8%E4%BA%86%EF%BC%8C%E5%8D%B3%E4%BD%BFDOM%20ready%E6%A0%87%E8%AE%B0%E8%BF%98%E6%98%AFfalse%0A%09%09%09%09%2F%2F%20%E6%8D%A2%E5%8F%A5%E8%AF%9D%E8%AF%B4%EF%BC%8C%E5%8F%8A%E6%97%B6DOM%20ready%E6%A0%87%E8%AE%B0%E8%BF%98%E6%98%AFfalse%EF%BC%8C%E4%BD%86%E6%98%AF%E8%B0%83%E7%94%A8jQuery.ready%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%A4%E4%B8%BA%E4%B8%8D%E6%AF%94%E5%86%8D%E7%AD%89%E4%BA%86%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%BC%80%E5%B9%B2%E4%BA%86%0A%09%09%09%09if%20(%20(wait%20%3D%3D%3D%20true%20%26%26%20!--jQuery.readyWait)%20%7C%7C%20(wait%20!%3D%3D%20true%20%26%26%20!jQuery.isReady)%20)%20%7B%0A%09%09%09%09%09%2F%2F%20Make%20sure%20body%20exists%2C%20at%20least%2C%20in%20case%20IE%20gets%20a%20little%20overzealous%20(ticket%20%235443).%0A%09%09%09%09%09%2F%2F%20%E6%A3%80%E6%9F%A5document.body%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%EF%BC%8C%E8%BF%99%E6%98%AF%E7%89%B9%E5%AE%9A%E4%BA%8EIE%E7%9A%84%E6%A3%80%E6%B5%8B%EF%BC%8C%E4%BF%9D%E8%AF%81%E5%9C%A8IE%E4%B8%ADDOM%20ready%E4%BA%8B%E4%BB%B6%E8%83%BD%E6%AD%A3%E7%A1%AE%E5%88%A4%E6%96%AD%0A%09%09%09%09%09if%20(%20!document.body%20)%20%7B%0A%09%09%09%09%09%09return%20setTimeout(%20jQuery.ready%2C%201%20)%3B%0A%09%09%09%09%09%7D%0A%0A%09%09%09%09%09%2F%2F%20Remember%20that%20the%20DOM%20is%20ready%0A%09%09%09%09%09%2F%2F%20%E5%88%B0%E8%BF%99%E9%87%8C%EF%BC%8CjQuery.isReady%E8%A2%AB%E5%BC%BA%E5%88%B6%E4%B8%BAtrue%0A%09%09%09%09%09%2F%2F%20%E5%9C%A8%E6%9D%A1%E4%BB%B62%E4%B8%AD%EF%BC%8C%E5%A6%82%E6%9E%9CjQuery.isReady%E4%B8%BAtrue%EF%BC%8C%E9%82%A3%E4%B9%88%E8%AF%B4%E6%98%8EreadyList%E7%9A%84%E7%8A%B6%E6%80%81%E5%B7%B2%E7%BB%8F%E7%A1%AE%E5%AE%9A%EF%BC%8C%E6%B7%BB%E5%8A%A0%E5%88%B0readyList%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E4%BC%9A%E8%A2%AB%E7%AB%8B%E5%8D%B3%E6%89%A7%E8%A1%8C%0A%09%09%09%09%09%2F%2F%20%E5%A6%82%E6%9E%9CjQuery.isReady%E4%B8%BA%E6%98%AFfalse%EF%BC%8C%E9%82%A3%E4%B9%88%E6%8E%A5%E4%B8%8B%E6%9D%A5readyList%E4%B8%AD%E5%87%BD%E6%95%B0%E5%B0%86%E8%A2%AB%E6%89%A7%E8%A1%8C%0A%09%09%09%09%09jQuery.isReady%20%3D%20true%3B%0A%0A%09%09%09%09%09%2F%2F%20If%20a%20normal%20DOM%20Ready%20event%20fired%2C%20decrement%2C%20and%20wait%20if%20need%20be%0A%09%09%09%09%09%2F%2F%20%E8%99%BD%E7%84%B6%E4%B8%8A%E8%BE%B9%E7%9A%84%E6%9D%A1%E4%BB%B62%E7%9A%84%E6%84%8F%E6%80%9D%E6%98%AF%EF%BC%8C%E5%88%AB%E7%AE%A1%E5%85%B6%E4%BB%96%E6%83%85%E5%86%B5%EF%BC%8C%E8%B0%83%E7%94%A8%E6%96%B9%E8%AE%A4%E4%B8%BAready%E4%BA%86%EF%BC%8C%E4%BD%86%E6%98%AF%E8%BF%99%E9%87%8C%E4%BB%8D%E7%84%B6%E5%81%9A%E4%BA%86%E9%98%B2%E5%BE%A1%E6%80%A7%E6%A3%80%E6%B5%8B%EF%BC%8C%E5%A6%82%E6%9E%9C%E7%AD%89%E5%BE%85%E8%AE%A1%E6%95%B0%E5%99%A8%E4%BB%8D%E7%84%B6%E5%A4%A7%E4%BA%8E1%EF%BC%8C%E7%BB%93%E6%9D%9Fready%E8%B0%83%E7%94%A8%0A%09%09%09%09%09%2F%2F%20%E5%A6%82%E6%9E%9C%E8%BF%99%E4%B8%AA%E6%9D%A1%E4%BB%B6%E6%88%90%E7%AB%8B%EF%BC%8C%E9%82%A3%E4%B9%88%E4%B8%80%E5%AE%9A%E6%98%AF%E5%93%AA%E9%87%8C%E5%87%BA%E9%97%AE%E9%A2%98%E4%BA%86%EF%BC%81%0A%09%09%09%09%09%2F%2F%20%E5%9C%A8%E5%BD%93%E5%89%8D%E7%89%88%E6%9C%AC1.6.1%E4%B8%AD%EF%BC%8C%E8%BF%99%E4%B8%AA%E5%88%A4%E6%96%AD%E6%B0%B8%E8%BF%9C%E4%B8%8D%E4%BC%9A%E6%88%90%E7%AB%8B%EF%BC%8C%E5%9B%A0%E4%B8%BA%E6%B2%A1%E6%9C%89%E5%9C%B0%E6%96%B9%E8%B0%83%E7%94%A8%E4%BC%9A%E4%BD%BFreadyWait%E5%8A%A0%E4%B8%80%E7%9A%84holdReady%0A%09%09%09%09%09if%20(%20wait%20!%3D%3D%20true%20%26%26%20--jQuery.readyWait%20%3E%200%20)%20%7B%0A%09%09%09%09%09%09return%3B%0A%09%09%09%09%09%7D%0A%0A%09%09%09%09%09%2F%2F%20If%20there%20are%20functions%20bound%2C%20to%20execute%0A%09%09%09%09%09%2F%2F%20%E8%B0%83%E7%94%A8DOM%20ready%E4%BA%8B%E4%BB%B6%E5%BC%82%E6%AD%A5%E9%98%9F%E5%88%97readyList%EF%BC%8C%E6%B3%A8%E6%84%8F%E6%95%B4%E7%90%86%E7%9A%84%E5%8F%82%E6%95%B0%E4%BA%AE%E4%BA%86%EF%BC%81%0A%09%09%09%09%09%2F%2F%20document%E6%8C%87%E5%AE%9A%E4%BA%86ready%E5%8F%A5%E6%9F%84%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%EF%BC%8C%E8%BF%99%E6%A0%B7%E6%88%91%E4%BB%AC%E5%9C%A8%E6%89%A7%E8%A1%8Cready%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%E6%97%B6this%E6%8C%87%E5%90%91document%0A%09%09%09%09%09%2F%2F%20%5B%20jQuery%20%5D%E6%8C%87%E5%AE%9A%E4%BA%86ready%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%8F%82%E6%95%B0%EF%BC%8C%E8%BF%99%E6%A0%B7%E5%8D%B3%E4%BD%BF%E8%B0%83%E7%94%A8%24.noConflict()%E4%BA%A4%E5%87%BA%E4%BA%86%24%E7%9A%84%E6%8E%A7%E5%88%B6%E6%9D%83%EF%BC%8C%E6%88%91%E4%BB%AC%E4%BE%9D%E7%84%B6%E5%8F%AF%E4%BB%A5%E5%B0%86%E5%8F%A5%E6%9F%84%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%8F%82%E6%95%B0%E5%91%BD%E5%90%8D%E4%B8%BA%24%EF%BC%8C%E7%BB%A7%E7%BB%AD%E5%9C%A8%E5%8F%A5%E6%9F%84%E5%86%85%E9%83%A8%E4%BD%BF%E7%94%A8%24%E7%AC%A6%E5%8F%B7%0A%09%09%09%09%09%2F%2F%20%E5%A6%82%E6%AD%A4%E7%9A%84%E7%B2%BE%E8%87%B4%EF%BC%81%E8%B5%9E%E5%8F%B9%E4%B9%8B%E4%BD%99%EF%BC%8C%E4%BD%86%E4%B8%8D%E8%A6%81%E5%9C%A8%E4%BD%A0%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%B8%AD%E4%B9%9F%E8%BF%99%E4%B9%88%E7%94%A8%EF%BC%8C%E7%90%86%E8%A7%A3%E5%92%8C%E7%BB%B4%E6%8A%A4%E5%B0%86%E6%88%90%E4%B8%BA%E6%9C%80%E5%A4%A7%E7%9A%84%E9%9A%BE%E9%A2%98%E3%80%82%0A%09%09%09%09%09readyList.resolveWith(%20document%2C%20%5B%20jQuery%20%5D%20)%3B%0A%0A%09%09%09%09%09%2F%2F%20Trigger%20any%20bound%20ready%20events%0A%09%09%09%09%09if%20(%20jQuery.fn.trigger%20)%20%7B%0A%09%09%09%09%09%09%2F%2F%20%E8%A7%A6%E5%8F%91ready%E4%BA%8B%E4%BB%B6%EF%BC%8C%E7%84%B6%E5%90%8E%E5%88%A0%E9%99%A4ready%E5%8F%A5%E6%9F%84%EF%BC%8CDOM%20ready%E4%BA%8B%E4%BB%B6%E5%8F%AA%E4%BC%9A%E7%94%9F%E6%95%88%E4%B8%80%E6%AC%A1%EF%BC%8Cready%E6%98%AF%E4%B8%AA%E8%87%AA%E5%AE%9A%E4%B9%89%E4%BA%8B%E4%BB%B6%0A%09%09%09%09%09%09jQuery(%20document%20).trigger(%20%22ready%22%20).unbind(%20%22ready%22%20)%3B%0A%09%09%09%09%09%7D%0A%09%09%09%09%7D%0A%09%09%09%7D%2C%0A%09%09%0A%09%09%09%2F%2F%20%E7%BB%91%E5%AE%9ADOM%20ready%E7%9B%91%E5%90%AC%E5%99%A8%EF%BC%8C%E8%B7%A8%E6%B5%8F%E8%A7%88%E5%99%A8%EF%BC%8C%E5%85%BC%E5%AE%B9%E6%A0%87%E5%87%86%E6%B5%8F%E8%A7%88%E5%99%A8%E5%92%8CIE%E6%B5%8F%E8%A7%88%E5%99%A8%0A%09%09%09bindReady%3A%20function()%20%7B%20%2F%2F%20jQuery.bindReady%0A%09%09%09%09if%20(%20readyList%20)%20%7B%0A%09%09%09%09%09return%3B%0A%09%09%09%09%7D%0A%0A%09%09%09%09readyList%20%3D%20jQuery._Deferred()%3B%20%2F%2F%20%E5%88%9D%E5%A7%8B%E5%8C%96ready%E5%BC%82%E6%AD%A5%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%E9%98%9F%E5%88%97%0A%0A%09%09%09%09%2F%2F%20Catch%20cases%20where%20%24(document).ready()%20is%20called%20after%20the%0A%09%09%09%09%2F%2F%20browser%20event%20has%20already%20occurred.%0A%09%09%09%09%2F%2F%20%E5%A6%82%E6%9E%9CDOM%E5%B7%B2%E7%BB%8F%E5%AE%8C%E6%AF%95%EF%BC%8C%E7%AB%8B%E5%8D%B3%E8%B0%83%E7%94%A8jQuery.ready%0A%09%09%09%09if%20(%20document.readyState%20%3D%3D%3D%20%22complete%22%20)%20%7B%0A%09%09%09%09%09%2F%2F%20Handle%20it%20asynchronously%20to%20allow%20scripts%20the%20opportunity%20to%20delay%20ready%0A%09%09%09%09%09%2F%2F%20%E9%87%8D%E8%A6%81%E7%9A%84%E6%98%AF%E5%BC%82%E6%AD%A5%0A%09%09%09%09%09return%20setTimeout(%20jQuery.ready%2C%201%20)%3B%0A%09%09%09%09%7D%0A%0A%09%09%09%09%2F%2F%20Mozilla%2C%20Opera%20and%20webkit%20nightlies%20currently%20support%20this%20event%0A%09%09%09%09%2F%2F%20DOM%202%E7%BA%A7%E4%BA%8B%E4%BB%B6%E6%A8%A1%E5%9E%8B%EF%BC%8CMozilla%2C%20Opera%2C%20webkit%E7%AD%89%20%0A%09%09%09%09if%20(%20document.addEventListener%20)%20%7B%0A%09%09%09%09%09%2F%2F%20Use%20the%20handy%20event%20callback%0A%09%09%09%09%09%2F%2F%20%E4%BD%BF%E7%94%A8%E5%BF%AB%E9%80%9F%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%0A%09%09%09%09%09document.addEventListener(%20%22DOMContentLoaded%22%2C%20DOMContentLoaded%2C%20false%20)%3B%0A%0A%09%09%09%09%09%2F%2F%20A%20fallback%20to%20window.onload%2C%20that%20will%20always%20work%0A%09%09%09%09%09%2F%2F%20%E5%86%8D%E5%9C%A8window%E4%B8%8A%E7%BB%91%E5%AE%9Aload%E4%BA%8B%E4%BB%B6%E5%8F%A5%E6%9F%84%EF%BC%8C%E8%BF%99%E4%B8%AA%E5%8F%A5%E6%9F%84%E6%80%BB%E6%98%AF%E4%BC%9A%E6%89%A7%E8%A1%8C%0A%09%09%09%09%09%2F%2F%20%E4%B8%BA%E4%BB%80%E4%B9%88%E5%90%8C%E6%97%B6%E7%BB%91%E5%AE%9Adocument%20window%E5%91%A2%EF%BC%9F%E6%88%91%E6%83%B3%E6%98%AF%E4%B8%BA%E4%BA%86%E5%AE%89%E5%85%A8%E8%B5%B7%E8%A7%81%EF%BC%8C%E9%98%B2%E5%BE%A1%E6%80%A7%E7%BC%96%E7%A0%81%EF%BC%81%0A%09%09%09%09%09window.addEventListener(%20%22load%22%2C%20jQuery.ready%2C%20false%20)%3B%20%0A%0A%09%09%09%09%2F%2F%20If%20IE%20event%20model%20is%20used%0A%09%09%09%09%7D%20else%20if%20(%20document.attachEvent%20)%20%7B%0A%09%09%09%09%09%2F%2F%20ensure%20firing%20before%20onload%2C%0A%09%09%09%09%09%2F%2F%20maybe%20late%20but%20safe%20also%20for%20iframes%0A%09%09%09%09%09%2F%2F%20%E5%90%8C%E6%A0%B7onreadystatechange%E4%BC%9A%E5%9C%A8onload%E4%B9%8B%E5%89%8D%E8%A7%A6%E5%8F%91%EF%BC%8C%E4%BD%86%E6%98%AF%E5%AF%B9%E4%BA%8Eiframe%E4%BC%9A%E6%9C%89%E5%BB%B6%E8%BF%9F%E4%BD%86%E5%AE%89%E5%85%A8%E4%B8%80%E5%AE%9A%E4%BC%9A%E8%A7%A6%E5%8F%91%0A%09%09%09%09%09%2F%2F%20%E7%9C%8B%E7%9C%8BDOMContentLoaded%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%8C%E6%98%AF%E6%A3%80%E6%B5%8Bdocument.readyState%E7%9A%84%E7%8A%B6%E6%80%81%E6%98%AF%E5%90%A6%E4%B8%BAcomplete%EF%BC%8C%E8%BF%99%E9%87%8C%E6%9C%89%E4%BA%9B%E5%83%8Fajax%E4%B8%AD%E7%9A%84%E6%A3%80%E6%B5%8B%20%0A%09%09%09%09%09document.attachEvent(%20%22onreadystatechange%22%2C%20DOMContentLoaded%20)%3B%0A%0A%09%09%09%09%09%2F%2F%20A%20fallback%20to%20window.onload%2C%20that%20will%20always%20work%0A%09%09%09%09%09window.attachEvent(%20%22onload%22%2C%20jQuery.ready%20)%3B%20%2F%2F%20%E5%90%8C%E6%A0%B7%E7%9A%84%E5%AE%89%E5%85%A8%E8%B5%B7%E8%A7%81%EF%BC%8C%E9%98%B2%E5%BE%A1%E6%80%A7%E7%BC%96%E7%A0%81%EF%BC%81%E5%8F%8A%E6%97%B6%E5%89%8D%E8%BE%B9%E7%9A%84%E6%89%80%E4%BB%A5hack%E6%8A%80%E5%B7%A7%E5%A4%B1%E8%B4%A5%E4%BA%86%EF%BC%8Conload%E6%98%AF%E6%9C%80%E5%90%8E%E7%9A%84%E4%BF%9D%E9%9A%9C%0A%0A%09%09%09%09%09%2F%2F%20If%20IE%20and%20not%20a%20frame%0A%09%09%09%09%09%2F%2F%20continually%20check%20to%20see%20if%20the%20document%20is%20ready%0A%09%09%09%09%09var%20toplevel%20%3D%20false%3B%0A%0A%09%09%09%09%09try%20%7B%0A%09%09%09%09%09%09toplevel%20%3D%20window.frameElement%20%3D%3D%20null%3B%20%2F%2F%20%E6%A3%80%E6%9F%A5window%E7%9A%84frameElement%E5%B1%9E%E6%80%A7%EF%BC%8C%E7%9C%8B%E6%98%AF%E5%90%A6%E6%98%AF%E9%A1%B6%E5%B1%82%E7%AA%97%E5%8F%A3%0A%09%09%09%09%09%7D%20catch(e)%20%7B%7D%0A%09%09%09%09%09%0A%09%09%09%09%09%2F%2F%20%E5%81%9AdoScroll%E6%A3%80%E6%B5%8B%EF%BC%8C%E5%A6%82%E6%9E%9C%E5%9C%A8iframe%E4%B8%AD%E5%B0%B1%E4%B8%8D%E6%A3%80%E6%B5%8B%E4%BA%86%EF%BC%8Conreadystatechange%E5%AF%B9%E4%BA%8Eifame%E5%BE%88%E5%8F%AF%E9%9D%A0%0A%09%09%09%09%09if%20(%20document.documentElement.doScroll%20%26%26%20toplevel%20)%20%7B%0A%09%09%09%09%09%09doScrollCheck()%3B%20%0A%09%09%09%09%09%09%2F%2F%20%E5%9C%A8doScrollCheck%E4%B8%AD%EF%BC%8C%E4%B8%8D%E6%96%AD%E7%9A%84%EF%BC%88%E6%AF%8F%E9%9A%941ms%EF%BC%89%E6%89%A7%E8%A1%8Cdocument.documentElement.doScroll(%22left%22)%EF%BC%8C%E7%9B%B4%E5%88%B0%E4%B8%8D%E6%8A%9B%E5%87%BA%E5%BC%82%E5%B8%B8%E4%B8%BA%E6%AD%A2%0A%09%09%09%09%09%09%2F%2F%20%E8%BF%99%E6%98%AFIE%E4%B8%8B%E6%A3%80%E6%B5%8BDOM%20ready%E7%9A%84%E6%8A%80%E5%B7%A7%0A%09%09%09%09%09%7D%0A%09%09%09%09%7D%0A%09%09%09%7D%2C%0A%09%09%7D)%3B%0A%09%09%0A%09%09%2F%2F%20All%20jQuery%20objects%20should%20point%20back%20to%20these%0A%09%09rootjQuery%20%3D%20jQuery(document)%3B%0A%09%09%0A%09%09%2F%2F%20Cleanup%20functions%20for%20the%20document%20ready%20method%0A%09%09%2F%2F%20%E6%9E%84%E9%80%A0%E6%B5%8F%E8%A7%88%E5%99%A8%E5%8A%A0%E8%BD%BD%E5%AE%8C%E6%AF%95%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0DOMContentLoaded%EF%BC%8C%E9%9C%80%E8%A6%81%E6%A3%80%E6%B5%8B%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B7%BB%E5%8A%A0%E4%BA%8B%E4%BB%B6%E7%9A%84%E6%96%B9%E6%B3%95%0A%09%09if%20(%20document.addEventListener%20)%20%7B%0A%09%09%09DOMContentLoaded%20%3D%20function()%20%7B%0A%09%09%09%09%2F%2F%20document%20ready%E4%B9%8B%E5%90%8E%E7%A7%BB%E9%99%A4%0A%09%09%09%09document.removeEventListener(%20%22DOMContentLoaded%22%2C%20DOMContentLoaded%2C%20false%20)%3B%0A%09%09%09%09jQuery.ready()%3B%0A%09%09%09%7D%3B%0A%09%09%0A%09%09%7D%20else%20if%20(%20document.attachEvent%20)%20%7B%0A%09%09%09DOMContentLoaded%20%3D%20function()%20%7B%0A%09%09%09%09%2F%2F%20Make%20sure%20body%20exists%2C%20at%20least%2C%20in%20case%20IE%20gets%20a%20little%20overzealous%20(ticket%20%235443).%0A%09%09%09%09%2F%2F%20%E7%A1%AE%E4%BF%9Dbody%E6%98%AF%E5%AD%98%E5%9C%A8%E7%9A%84%EF%BC%8CIE%E4%BC%9A%E6%9C%89%E4%B8%80%E4%BA%9B%E5%BB%B6%E8%BF%9F%0A%09%09%09%09if%20(%20document.readyState%20%3D%3D%3D%20%22complete%22%20)%20%7B%0A%09%09%09%09%09%2F%2F%20%E5%85%88%E7%A7%BB%E9%99%A4%EF%BC%8C%E9%9A%BE%E9%81%93%E6%B5%8F%E8%A7%88%E5%99%A8%E9%87%8D%E6%96%B0%E6%B8%B2%E6%9F%93%E4%BC%9A%E5%86%8D%E6%AC%A1%E8%A7%A6%E5%8F%91onreadystatechange%E5%90%97%EF%BC%9F%0A%09%09%09%09%09document.detachEvent(%20%22onreadystatechange%22%2C%20DOMContentLoaded%20)%3B%0A%09%09%09%09%09jQuery.ready()%3B%0A%09%09%09%09%7D%0A%09%09%09%7D%3B%0A%09%09%7D%0A%09%09%0A%09%09%2F%2F%20The%20DOM%20ready%20check%20for%20Internet%20Explorer%0A%09%09%2F%2F%20%E5%9C%A8IE%E9%87%8C%EF%BC%8C%E6%AF%8F%E9%9A%941ms%E6%A3%80%E6%B5%8BIE%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84ready%E7%8A%B6%E6%80%81%0A%09%09function%20doScrollCheck()%20%7B%0A%09%09%09if%20(%20jQuery.isReady%20)%20%7B%0A%09%09%09%09return%3B%0A%09%09%09%7D%0A%09%09%0A%09%09%09try%20%7B%0A%09%09%09%09%2F%2F%20If%20IE%20is%20used%2C%20use%20the%20trick%20by%20Diego%20Perini%0A%09%09%09%09%2F%2F%20http%3A%2F%2Fjavascript.nwbox.com%2FIEContentLoaded%2F%0A%09%09%09%09%2F%2F%20%E5%A6%82%E6%9E%9C%E6%98%AFIE%EF%BC%8C%E5%88%99%E4%BD%BF%E7%94%A8%E8%AF%A5%E6%8A%80%E5%B7%A7%E6%9D%A5%E6%A3%80%E6%B5%8B%E6%B5%8F%E8%A7%88%E5%99%A8%E5%8A%A0%E8%BD%BD%E7%8A%B6%E6%80%81%0A%09%09%09%09document.documentElement.doScroll(%22left%22)%3B%0A%09%09%09%7D%20catch(e)%20%7B%0A%09%09%09%09setTimeout(%20doScrollCheck%2C%201%20)%3B%0A%09%09%09%09return%3B%0A%09%09%09%7D%0A%09%09%0A%09%09%09%2F%2F%20and%20execute%20any%20waiting%20functions%0A%09%09%09%2F%2F%20%E6%89%A7%E8%A1%8C%E5%85%B6%E4%BB%96%E7%9A%84%E7%AD%89%E5%BE%85%E5%87%BD%E6%95%B0%0A%09%09%09jQuery.ready()%3B%0A%09%09%7D%0A%09%09%0A%09%09%2F%2F%20Expose%20jQuery%20to%20the%20global%20object%0A%09%09return%20jQuery%3B%0A%09%0A%09%7D)()%3B%0A%0A%09%2F%2F%20%E8%A7%81%E7%B3%BB%E5%88%97%E6%96%87%E7%AB%A0%E4%B8%AD%E5%85%B3%E4%BA%8E%E5%BC%82%E6%AD%A5%E9%98%9F%E5%88%97%E7%9A%84%E8%A7%A3%E6%9E%90%0A%09jQuery.extend(%7B%0A%09%09%2F%2F%20Create%20a%20simple%20deferred%20(one%20callbacks%20list)%0A%09%09_Deferred%3A%20function()%20%7B%7D%2C%0A%09%0A%09%09%2F%2F%20Full%20fledged%20deferred%20(two%20callbacks%20list)%0A%09%09Deferred%3A%20function(%20func%20)%20%7B%7D%2C%0A%09%0A%09%09%2F%2F%20Deferred%20helper%0A%09%09when%3A%20function(%20firstParam%20)%20%7B%7D%0A%09%7D)%3B%0A%09%0A%09%2F%2F%20%E8%A7%81%E7%B3%BB%E5%88%97%E6%96%87%E7%AB%A0%E4%B8%AD%E5%85%B3%E4%BA%8E%E4%BA%8B%E4%BB%B6%E7%9A%84%E8%A7%A3%E6%9E%90%0A%09jQuery.event%20%3D%20%7B%0A%09%09trigger%3A%20function(%20event%2C%20data%2C%20elem%2C%20onlyHandlers%20)%20%7B%7D%2C%0A%0A%09%09handle%3A%20function(%20event%20)%20%7B%7D%2C%0A%0A%09%09special%3A%20%7B%0A%09%09%09ready%3A%20%7B%0A%09%09%09%09%2F%2F%20Make%20sure%20the%20ready%20event%20is%20setup%0A%09%09%09%09setup%3A%20jQuery.bindReady%2C%0A%09%09%09%09teardown%3A%20jQuery.noop%0A%09%09%09%7D%0A%09%09%7D%0A%09%7D%3B%0A%0A%09window.jQuery%20%3D%20window.%24%20%3D%20jQuery%3B%0A%7D)(window)%3B%0A" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>10.8&nbsp;&nbsp;&nbsp;&nbsp;DOM&nbsp;ready&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>初学jQuery时，很可能学到的第一个知识点就是.ready()，但是网络上流转的文章和API对此的解释或剖析，经常是模棱两可甚至是不准确或错误的，本节将详细的阐述.ready()的用法和原理，并纠正这些误区。&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>10.8.1&nbsp;&nbsp;如何使用.ready()&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>.ready()&nbsp;指定一个事件句柄，当DOM完全加载完成时执行&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>虽然JavaScript提供了load事件，当页面渲染完成之后会执行这个函数，在所以元素加载完成之前，这个函数不会被调用，例如图像。但是在大多数情况下，只要DOM结构加载完，脚本就可以尽快运行。传递给.ready()的事件句柄在DOM准备好后立即执行，因此通常情况下，最好把绑定事件句柄和其他jQuery代码都到这里来。但是当脚本依赖于CSS样式属性时，一定要在脚本之前引入外部样式或内嵌样式的元素。&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>如果代码依赖于需加载完的元素（例如，想获取一个图片的尺寸大小），应该用.load()事件代替，并把代码放到load事件句柄中。&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>.ready()方法不同于&lt;body&nbsp;onload=<span class="string">""</span><span>&gt;属性。如果必须用load事件，那么就不要使用.ready()，或用.load()代替，把load事件句柄绑定到window或其他的具体元素上，例如图片。&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>以下三个语法全部是等价的：&nbsp;&nbsp;</span></li><li><span>$(document).ready(handler)&nbsp;&nbsp;</span></li><li><span>$().ready(handler)&nbsp;(<span class="keyword">this</span><span>&nbsp;is&nbsp;not&nbsp;recommended)&nbsp;&nbsp;</span></span></li><li><span>$(handler)&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>$(document).bind(<span class="string">"ready"</span><span>,&nbsp;handler)的行为类似于ready方法，但有一个例外：如果ready事件已触发后，再尝试用.bind(</span><span class="string">"ready"</span><span>)绑定的处理函数将不会被执行。而用以上三种方法绑定的句柄会被执行，无论是什么时候绑定的。&nbsp;&nbsp;</span></span></li><li><span>.ready()方法只能在包含了document的jQuery上调用，因此选择器可以省略。&nbsp;&nbsp;</span></li><li><span>.ready()方法典型的用法是使用一个匿名函数：&nbsp;&nbsp;</span></li><li><span>$(document).ready(<span class="keyword">function</span><span>()&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;<span class="comment">//&nbsp;Handler&nbsp;for&nbsp;.ready()&nbsp;called.</span><span>&nbsp;&nbsp;</span></span></li><li><span>});&nbsp;&nbsp;</span></li><li><span>等价于：&nbsp;&nbsp;</span></li><li><span>$(<span class="keyword">function</span><span>()&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;<span class="comment">//&nbsp;Handler&nbsp;for&nbsp;.ready()&nbsp;called.</span><span>&nbsp;&nbsp;</span></span></li><li><span>});&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>如果在DOM加载完毕之后调用.ready()，新的句柄将会立即执行。&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>特别强调两点：&nbsp;&nbsp;</span></li><li><span>1.&nbsp;&nbsp;之所以花费篇幅来阐述.ready()如何使用（翻译的官网文档），是因为网络上的一些文章和中文API不准确甚至是错误的（应该是工具翻译的），所以需谨慎参考&nbsp;&nbsp;</span></li><li><span>2.&nbsp;&nbsp;.ready()的触发要早于.load()，但是不要完全迷信依赖，如果要获取或操作样式，或依赖于像图片这样的必须加载完成才能获取和操作的元素，就用&lt;body&nbsp;onload=<span class="string">""</span><span>&gt;或.load()&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>10.8.2&nbsp;&nbsp;源码分析&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>到底.ready()是如何实现更快的触发ready事件的呢，关键在jQuery.bindReady方法的实现里：&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>对标准浏览器绑定：document.addEventListener(&nbsp;<span class="string">"DOMContentLoaded"</span><span>,&nbsp;DOMContentLoaded,&nbsp;</span><span class="keyword">false</span><span>&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>对IE浏览器绑定：document.attachEvent(&nbsp;<span class="string">"onreadystatechange"</span><span>,&nbsp;DOMContentLoaded&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>当然还有一些其他的关键技巧，现在完成的看下jQuery.bindReady的实现：&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span><span class="comment">//&nbsp;绑定DOM&nbsp;ready监听器，跨浏览器，兼容标准浏览器和IE浏览器</span><span>&nbsp;&nbsp;</span></span></li><li><span>bindReady:&nbsp;<span class="keyword">function</span><span>()&nbsp;{&nbsp;</span><span class="comment">//&nbsp;jQuery.bindReady</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">if</span><span>&nbsp;(&nbsp;readyList&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>;&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>readyList&nbsp;=&nbsp;jQuery._Deferred();&nbsp;<span class="comment">//&nbsp;初始化ready异步事件句柄队列</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span><span class="comment">//&nbsp;Catch&nbsp;cases&nbsp;where&nbsp;$(document).ready()&nbsp;is&nbsp;called&nbsp;after&nbsp;the</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="comment">//&nbsp;browser&nbsp;event&nbsp;has&nbsp;already&nbsp;occurred.</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="comment">//&nbsp;如果DOM已经完毕，立即调用jQuery.ready</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">if</span><span>&nbsp;(&nbsp;document.readyState&nbsp;===&nbsp;</span><span class="string">"complete"</span><span>&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Handle&nbsp;it&nbsp;asynchronously&nbsp;to&nbsp;allow&nbsp;scripts&nbsp;the&nbsp;opportunity&nbsp;to&nbsp;delay&nbsp;ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;重要的是异步</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;setTimeout(&nbsp;jQuery.ready,&nbsp;1&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span><span class="comment">//&nbsp;Mozilla,&nbsp;Opera&nbsp;and&nbsp;webkit&nbsp;nightlies&nbsp;currently&nbsp;support&nbsp;this&nbsp;event</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="comment">//&nbsp;DOM&nbsp;2级事件模型，Mozilla,&nbsp;Opera,&nbsp;webkit等&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">if</span><span>&nbsp;(&nbsp;document.addEventListener&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Use&nbsp;the&nbsp;handy&nbsp;event&nbsp;callback</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;使用快速事件句柄</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;document.addEventListener(&nbsp;<span class="string">"DOMContentLoaded"</span><span>,&nbsp;DOMContentLoaded,&nbsp;</span><span class="keyword">false</span><span>&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;A&nbsp;fallback&nbsp;to&nbsp;window.onload,&nbsp;that&nbsp;will&nbsp;always&nbsp;work</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;再在window上绑定load事件句柄，这个句柄总是会执行</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;为什么同时绑定document&nbsp;window呢？我想是为了安全起见，防御性编码！</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;window.addEventListener(&nbsp;<span class="string">"load"</span><span>,&nbsp;jQuery.ready,&nbsp;</span><span class="keyword">false</span><span>&nbsp;);&nbsp;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span><span class="comment">//&nbsp;If&nbsp;IE&nbsp;event&nbsp;model&nbsp;is&nbsp;used</span><span>&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;<span class="keyword">else</span><span>&nbsp;</span><span class="keyword">if</span><span>&nbsp;(&nbsp;document.attachEvent&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;ensure&nbsp;firing&nbsp;before&nbsp;onload,</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;maybe&nbsp;late&nbsp;but&nbsp;safe&nbsp;also&nbsp;for&nbsp;iframes</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;同样onreadystatechange会在onload之前触发，但是对于iframe会有延迟但安全一定会触发</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;看看DOMContentLoaded的实现，是检测document.readyState的状态是否为complete，这里有些像ajax中的检测&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;document.attachEvent(&nbsp;<span class="string">"onreadystatechange"</span><span>,&nbsp;DOMContentLoaded&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;A&nbsp;fallback&nbsp;to&nbsp;window.onload,&nbsp;that&nbsp;will&nbsp;always&nbsp;work</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;window.attachEvent(&nbsp;<span class="string">"onload"</span><span>,&nbsp;jQuery.ready&nbsp;);&nbsp;</span><span class="comment">//&nbsp;同样的安全起见，防御性编码！及时前边的所以hack技巧失败了，onload是最后的保障</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;If&nbsp;IE&nbsp;and&nbsp;not&nbsp;a&nbsp;frame</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;continually&nbsp;check&nbsp;to&nbsp;see&nbsp;if&nbsp;the&nbsp;document&nbsp;is&nbsp;ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span><span>&nbsp;toplevel&nbsp;=&nbsp;</span><span class="keyword">false</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;toplevel&nbsp;=&nbsp;window.frameElement&nbsp;==&nbsp;<span class="keyword">null</span><span>;&nbsp;</span><span class="comment">//&nbsp;检查window的frameElement属性，看是否是顶层窗口</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;<span class="keyword">catch</span><span>(e)&nbsp;{}&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;做doScroll检测，如果在iframe中就不检测了，onreadystatechange对于ifame很可靠</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;document.documentElement.doScroll&nbsp;&amp;&amp;&nbsp;toplevel&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;doScrollCheck();&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;在doScrollCheck中，不断的（每隔1ms）执行document.documentElement.doScroll("left")，直到不抛出异常为止</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;这是IE下检测DOM&nbsp;ready的技巧</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>},&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>然后是完整的ready相关方法的分析，我剔除了其他无关的代码，保留了整体结构和相关方法：&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>(<span class="keyword">function</span><span>(&nbsp;window,&nbsp;undefined&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span><span>&nbsp;jQuery&nbsp;=&nbsp;(</span><span class="keyword">function</span><span>()&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Define&nbsp;a&nbsp;local&nbsp;copy&nbsp;of&nbsp;jQuery</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span><span>&nbsp;jQuery&nbsp;=&nbsp;</span><span class="keyword">function</span><span>(&nbsp;selector,&nbsp;context&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;The&nbsp;jQuery&nbsp;object&nbsp;is&nbsp;actually&nbsp;just&nbsp;the&nbsp;init&nbsp;constructor&nbsp;'enhanced'</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span><span>&nbsp;ret&nbsp;=&nbsp;</span><span class="keyword">new</span><span>&nbsp;jQuery.fn.init(&nbsp;selector,&nbsp;context,&nbsp;rootjQuery&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;ret;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;A&nbsp;central&nbsp;reference&nbsp;to&nbsp;the&nbsp;root&nbsp;jQuery(document)</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rootjQuery,&nbsp;<span class="comment">//&nbsp;包含了document的jQuery对象</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;The&nbsp;deferred&nbsp;used&nbsp;on&nbsp;DOM&nbsp;ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readyList,&nbsp;<span class="comment">//&nbsp;ready事件处理函数队列</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;The&nbsp;ready&nbsp;event&nbsp;handler</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DOMContentLoaded,&nbsp;<span class="comment">//&nbsp;DOM&nbsp;ready&nbsp;hack句柄，.ready()能早于.load()的关键所在</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.fn&nbsp;=&nbsp;jQuery.prototype&nbsp;=&nbsp;{&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constructor:&nbsp;jQuery,&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;init:&nbsp;<span class="keyword">function</span><span>(&nbsp;selector,&nbsp;context,&nbsp;rootjQuery&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;HANDLE:&nbsp;$(function)</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Shortcut&nbsp;for&nbsp;document&nbsp;ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;如果函数，则认为是DOM&nbsp;ready句柄</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;jQuery.isFunction(&nbsp;selector&nbsp;)&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;rootjQuery.ready(&nbsp;selector&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ready:&nbsp;<span class="keyword">function</span><span>(&nbsp;fn&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Attach&nbsp;the&nbsp;listeners</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.bindReady();&nbsp;<span class="comment">//&nbsp;绑定DOM&nbsp;ready监听器，跨浏览器，兼容标准浏览器和IE浏览器</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Add&nbsp;the&nbsp;callback</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readyList.done(&nbsp;fn&nbsp;);&nbsp;<span class="comment">//&nbsp;将ready句柄添加到ready异步句柄队列</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;</span><span class="keyword">this</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Give&nbsp;the&nbsp;init&nbsp;function&nbsp;the&nbsp;jQuery&nbsp;prototype&nbsp;for&nbsp;later&nbsp;instantiation</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.fn.init.prototype&nbsp;=&nbsp;jQuery.fn;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.extend&nbsp;=&nbsp;jQuery.fn.extend&nbsp;=&nbsp;<span class="keyword">function</span><span>()&nbsp;{};&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.extend({&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Is&nbsp;the&nbsp;DOM&nbsp;ready&nbsp;to&nbsp;be&nbsp;used?&nbsp;Set&nbsp;to&nbsp;true&nbsp;once&nbsp;it&nbsp;occurs.</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;DOM是否加载完毕</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;isReady:&nbsp;<span class="keyword">false</span><span>,&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;A&nbsp;counter&nbsp;to&nbsp;track&nbsp;how&nbsp;many&nbsp;items&nbsp;to&nbsp;wait&nbsp;for&nbsp;before</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;the&nbsp;ready&nbsp;event&nbsp;fires.&nbsp;See&nbsp;#6781</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;DOM加载完毕之前的等待次数</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readyWait:&nbsp;1,&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Hold&nbsp;(or&nbsp;release)&nbsp;the&nbsp;ready&nbsp;event</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;是否延迟触发DOM&nbsp;ready？在jQuery中没有任何地方有调用到holdReady，这是个遗留方法还是预留方法，有待继续研究。</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;因此在当前版本中，readyWait总是1，直到自减</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;holdReady:&nbsp;<span class="keyword">function</span><span>(&nbsp;hold&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;hold&nbsp;)&nbsp;{&nbsp;</span><span class="comment">//&nbsp;继续等待</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.readyWait++;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;<span class="keyword">else</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.ready(&nbsp;<span class="keyword">true</span><span>&nbsp;);&nbsp;</span><span class="comment">//&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Handle&nbsp;when&nbsp;the&nbsp;DOM&nbsp;is&nbsp;ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;判断DOM是否加载完毕，如果已完毕，调用DOM&nbsp;ready事件异步队列readyList，如果未完，每个1ms检查一次</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ready:&nbsp;<span class="keyword">function</span><span>(&nbsp;wait&nbsp;)&nbsp;{&nbsp;</span><span class="comment">//&nbsp;jQuery.ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Either&nbsp;a&nbsp;released&nbsp;hold&nbsp;or&nbsp;an&nbsp;DOMready/load&nbsp;event&nbsp;and&nbsp;not&nbsp;yet&nbsp;ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;条件1：wait&nbsp;===&nbsp;true&nbsp;&amp;&amp;&nbsp;!--jQuery.readyWait&nbsp;还在等待加载完成，但是等待计数器jQuery.readyWait已经是0，</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;换句话说参数wait为true表示尝试一下看是否能开始调用readyList了，如果发现计数器jQuery.readyWait变成0，啥也不管了，开始调用吧</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;再换句话说，计数器已经是0了，开干吧</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;条件2：wait&nbsp;!==&nbsp;true&nbsp;&amp;&amp;&nbsp;!jQuery.isReady&nbsp;明确的说不用了，即使DOM&nbsp;ready标记还是false</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;换句话说，及时DOM&nbsp;ready标记还是false，但是调用jQuery.ready的客户端认为不比再等了，可以开干了</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;(wait&nbsp;===&nbsp;</span><span class="keyword">true</span><span>&nbsp;&amp;&amp;&nbsp;!--jQuery.readyWait)&nbsp;||&nbsp;(wait&nbsp;!==&nbsp;</span><span class="keyword">true</span><span>&nbsp;&amp;&amp;&nbsp;!jQuery.isReady)&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Make&nbsp;sure&nbsp;body&nbsp;exists,&nbsp;at&nbsp;least,&nbsp;in&nbsp;case&nbsp;IE&nbsp;gets&nbsp;a&nbsp;little&nbsp;overzealous&nbsp;(ticket&nbsp;#5443).</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;检查document.body是否存在，这是特定于IE的检测，保证在IE中DOM&nbsp;ready事件能正确判断</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;!document.body&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;setTimeout(&nbsp;jQuery.ready,&nbsp;1&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Remember&nbsp;that&nbsp;the&nbsp;DOM&nbsp;is&nbsp;ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;到这里，jQuery.isReady被强制为true</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;在条件2中，如果jQuery.isReady为true，那么说明readyList的状态已经确定，添加到readyList中的函数会被立即执行</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;如果jQuery.isReady为是false，那么接下来readyList中函数将被执行</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.isReady&nbsp;=&nbsp;<span class="keyword">true</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;If&nbsp;a&nbsp;normal&nbsp;DOM&nbsp;Ready&nbsp;event&nbsp;fired,&nbsp;decrement,&nbsp;and&nbsp;wait&nbsp;if&nbsp;need&nbsp;be</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;虽然上边的条件2的意思是，别管其他情况，调用方认为ready了，但是这里仍然做了防御性检测，如果等待计数器仍然大于1，结束ready调用</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;如果这个条件成立，那么一定是哪里出问题了！</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;在当前版本1.6.1中，这个判断永远不会成立，因为没有地方调用会使readyWait加一的holdReady</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;wait&nbsp;!==&nbsp;</span><span class="keyword">true</span><span>&nbsp;&amp;&amp;&nbsp;--jQuery.readyWait&nbsp;&gt;&nbsp;0&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;If&nbsp;there&nbsp;are&nbsp;functions&nbsp;bound,&nbsp;to&nbsp;execute</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;调用DOM&nbsp;ready事件异步队列readyList，注意整理的参数亮了！</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;document指定了ready句柄的上下文，这样我们在执行ready事件句柄时this指向document</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;[&nbsp;jQuery&nbsp;]指定了ready事件句柄的第一个参数，这样即使调用$.noConflict()交出了$的控制权，我们依然可以将句柄的第一个参数命名为$，继续在句柄内部使用$符号</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;如此的精致！赞叹之余，但不要在你的项目中也这么用，理解和维护将成为最大的难题。</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readyList.resolveWith(&nbsp;document,&nbsp;[&nbsp;jQuery&nbsp;]&nbsp;);&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Trigger&nbsp;any&nbsp;bound&nbsp;ready&nbsp;events</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;jQuery.fn.trigger&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;触发ready事件，然后删除ready句柄，DOM&nbsp;ready事件只会生效一次，ready是个自定义事件</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery(&nbsp;document&nbsp;).trigger(&nbsp;<span class="string">"ready"</span><span>&nbsp;).unbind(&nbsp;</span><span class="string">"ready"</span><span>&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;绑定DOM&nbsp;ready监听器，跨浏览器，兼容标准浏览器和IE浏览器</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bindReady:&nbsp;<span class="keyword">function</span><span>()&nbsp;{&nbsp;</span><span class="comment">//&nbsp;jQuery.bindReady</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;readyList&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readyList&nbsp;=&nbsp;jQuery._Deferred();&nbsp;<span class="comment">//&nbsp;初始化ready异步事件句柄队列</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Catch&nbsp;cases&nbsp;where&nbsp;$(document).ready()&nbsp;is&nbsp;called&nbsp;after&nbsp;the</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;browser&nbsp;event&nbsp;has&nbsp;already&nbsp;occurred.</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;如果DOM已经完毕，立即调用jQuery.ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;document.readyState&nbsp;===&nbsp;</span><span class="string">"complete"</span><span>&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Handle&nbsp;it&nbsp;asynchronously&nbsp;to&nbsp;allow&nbsp;scripts&nbsp;the&nbsp;opportunity&nbsp;to&nbsp;delay&nbsp;ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;重要的是异步</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;setTimeout(&nbsp;jQuery.ready,&nbsp;1&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Mozilla,&nbsp;Opera&nbsp;and&nbsp;webkit&nbsp;nightlies&nbsp;currently&nbsp;support&nbsp;this&nbsp;event</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;DOM&nbsp;2级事件模型，Mozilla,&nbsp;Opera,&nbsp;webkit等&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;document.addEventListener&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Use&nbsp;the&nbsp;handy&nbsp;event&nbsp;callback</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;使用快速事件句柄</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document.addEventListener(&nbsp;<span class="string">"DOMContentLoaded"</span><span>,&nbsp;DOMContentLoaded,&nbsp;</span><span class="keyword">false</span><span>&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;A&nbsp;fallback&nbsp;to&nbsp;window.onload,&nbsp;that&nbsp;will&nbsp;always&nbsp;work</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;再在window上绑定load事件句柄，这个句柄总是会执行</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;为什么同时绑定document&nbsp;window呢？我想是为了安全起见，防御性编码！</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window.addEventListener(&nbsp;<span class="string">"load"</span><span>,&nbsp;jQuery.ready,&nbsp;</span><span class="keyword">false</span><span>&nbsp;);&nbsp;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;If&nbsp;IE&nbsp;event&nbsp;model&nbsp;is&nbsp;used</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;<span class="keyword">else</span><span>&nbsp;</span><span class="keyword">if</span><span>&nbsp;(&nbsp;document.attachEvent&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;ensure&nbsp;firing&nbsp;before&nbsp;onload,</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;maybe&nbsp;late&nbsp;but&nbsp;safe&nbsp;also&nbsp;for&nbsp;iframes</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;同样onreadystatechange会在onload之前触发，但是对于iframe会有延迟但安全一定会触发</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;看看DOMContentLoaded的实现，是检测document.readyState的状态是否为complete，这里有些像ajax中的检测&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document.attachEvent(&nbsp;<span class="string">"onreadystatechange"</span><span>,&nbsp;DOMContentLoaded&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;A&nbsp;fallback&nbsp;to&nbsp;window.onload,&nbsp;that&nbsp;will&nbsp;always&nbsp;work</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window.attachEvent(&nbsp;<span class="string">"onload"</span><span>,&nbsp;jQuery.ready&nbsp;);&nbsp;</span><span class="comment">//&nbsp;同样的安全起见，防御性编码！及时前边的所以hack技巧失败了，onload是最后的保障</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;If&nbsp;IE&nbsp;and&nbsp;not&nbsp;a&nbsp;frame</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;continually&nbsp;check&nbsp;to&nbsp;see&nbsp;if&nbsp;the&nbsp;document&nbsp;is&nbsp;ready</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span><span>&nbsp;toplevel&nbsp;=&nbsp;</span><span class="keyword">false</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;toplevel&nbsp;=&nbsp;window.frameElement&nbsp;==&nbsp;<span class="keyword">null</span><span>;&nbsp;</span><span class="comment">//&nbsp;检查window的frameElement属性，看是否是顶层窗口</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;<span class="keyword">catch</span><span>(e)&nbsp;{}&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;做doScroll检测，如果在iframe中就不检测了，onreadystatechange对于ifame很可靠</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;document.documentElement.doScroll&nbsp;&amp;&amp;&nbsp;toplevel&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;doScrollCheck();&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;在doScrollCheck中，不断的（每隔1ms）执行document.documentElement.doScroll("left")，直到不抛出异常为止</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;这是IE下检测DOM&nbsp;ready的技巧</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;All&nbsp;jQuery&nbsp;objects&nbsp;should&nbsp;point&nbsp;back&nbsp;to&nbsp;these</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rootjQuery&nbsp;=&nbsp;jQuery(document);&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Cleanup&nbsp;functions&nbsp;for&nbsp;the&nbsp;document&nbsp;ready&nbsp;method</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;构造浏览器加载完毕事件处理函数DOMContentLoaded，需要检测浏览器添加事件的方法</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;document.addEventListener&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DOMContentLoaded&nbsp;=&nbsp;<span class="keyword">function</span><span>()&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;document&nbsp;ready之后移除</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document.removeEventListener(&nbsp;<span class="string">"DOMContentLoaded"</span><span>,&nbsp;DOMContentLoaded,&nbsp;</span><span class="keyword">false</span><span>&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.ready();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;<span class="keyword">else</span><span>&nbsp;</span><span class="keyword">if</span><span>&nbsp;(&nbsp;document.attachEvent&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DOMContentLoaded&nbsp;=&nbsp;<span class="keyword">function</span><span>()&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Make&nbsp;sure&nbsp;body&nbsp;exists,&nbsp;at&nbsp;least,&nbsp;in&nbsp;case&nbsp;IE&nbsp;gets&nbsp;a&nbsp;little&nbsp;overzealous&nbsp;(ticket&nbsp;#5443).</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;确保body是存在的，IE会有一些延迟</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;document.readyState&nbsp;===&nbsp;</span><span class="string">"complete"</span><span>&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;先移除，难道浏览器重新渲染会再次触发onreadystatechange吗？</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document.detachEvent(&nbsp;<span class="string">"onreadystatechange"</span><span>,&nbsp;DOMContentLoaded&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.ready();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;The&nbsp;DOM&nbsp;ready&nbsp;check&nbsp;for&nbsp;Internet&nbsp;Explorer</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;在IE里，每隔1ms检测IE浏览器的ready状态</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">function</span><span>&nbsp;doScrollCheck()&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;jQuery.isReady&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">try</span><span>&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;If&nbsp;IE&nbsp;is&nbsp;used,&nbsp;use&nbsp;the&nbsp;trick&nbsp;by&nbsp;Diego&nbsp;Perini</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;http://javascript.nwbox.com/IEContentLoaded/</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;如果是IE，则使用该技巧来检测浏览器加载状态</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document.documentElement.doScroll(<span class="string">"left"</span><span>);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;<span class="keyword">catch</span><span>(e)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setTimeout(&nbsp;doScrollCheck,&nbsp;1&nbsp;);&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;and&nbsp;execute&nbsp;any&nbsp;waiting&nbsp;functions</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;执行其他的等待函数</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jQuery.ready();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Expose&nbsp;jQuery&nbsp;to&nbsp;the&nbsp;global&nbsp;object</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;jQuery;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;})();&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;见系列文章中关于异步队列的解析</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;jQuery.extend({&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Create&nbsp;a&nbsp;simple&nbsp;deferred&nbsp;(one&nbsp;callbacks&nbsp;list)</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_Deferred:&nbsp;<span class="keyword">function</span><span>()&nbsp;{},&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Full&nbsp;fledged&nbsp;deferred&nbsp;(two&nbsp;callbacks&nbsp;list)</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Deferred:&nbsp;<span class="keyword">function</span><span>(&nbsp;func&nbsp;)&nbsp;{},&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Deferred&nbsp;helper</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;when:&nbsp;<span class="keyword">function</span><span>(&nbsp;firstParam&nbsp;)&nbsp;{}&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;});&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;见系列文章中关于事件的解析</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;jQuery.event&nbsp;=&nbsp;{&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trigger:&nbsp;<span class="keyword">function</span><span>(&nbsp;event,&nbsp;data,&nbsp;elem,&nbsp;onlyHandlers&nbsp;)&nbsp;{},&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;handle:&nbsp;<span class="keyword">function</span><span>(&nbsp;event&nbsp;)&nbsp;{},&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;special:&nbsp;{&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ready:&nbsp;{&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Make&nbsp;sure&nbsp;the&nbsp;ready&nbsp;event&nbsp;is&nbsp;setup</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setup:&nbsp;jQuery.bindReady,&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;teardown:&nbsp;jQuery.noop&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;};&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;window.jQuery&nbsp;=&nbsp;window.$&nbsp;=&nbsp;jQuery;&nbsp;&nbsp;</span></li><li><span>})(window);&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1202422" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1202422" pre_index="1" title="[原创] jQuery源码分析-10事件处理-Event-DOM-ready" style="display: none;">10.8	DOM ready
+
+初学jQuery时，很可能学到的第一个知识点就是.ready()，但是网络上流转的文章和API对此的解释或剖析，经常是模棱两可甚至是不准确或错误的，本节将详细的阐述.ready()的用法和原理，并纠正这些误区。
+
+10.8.1	如何使用.ready()
+
+.ready() 指定一个事件句柄，当DOM完全加载完成时执行
+
+虽然JavaScript提供了load事件，当页面渲染完成之后会执行这个函数，在所以元素加载完成之前，这个函数不会被调用，例如图像。但是在大多数情况下，只要DOM结构加载完，脚本就可以尽快运行。传递给.ready()的事件句柄在DOM准备好后立即执行，因此通常情况下，最好把绑定事件句柄和其他jQuery代码都到这里来。但是当脚本依赖于CSS样式属性时，一定要在脚本之前引入外部样式或内嵌样式的元素。
+
+如果代码依赖于需加载完的元素（例如，想获取一个图片的尺寸大小），应该用.load()事件代替，并把代码放到load事件句柄中。
+
+.ready()方法不同于&lt;body onload=""&gt;属性。如果必须用load事件，那么就不要使用.ready()，或用.load()代替，把load事件句柄绑定到window或其他的具体元素上，例如图片。
+
+以下三个语法全部是等价的：
+$(document).ready(handler)
+$().ready(handler) (this is not recommended)
+$(handler)
+
+$(document).bind("ready", handler)的行为类似于ready方法，但有一个例外：如果ready事件已触发后，再尝试用.bind("ready")绑定的处理函数将不会被执行。而用以上三种方法绑定的句柄会被执行，无论是什么时候绑定的。
+.ready()方法只能在包含了document的jQuery上调用，因此选择器可以省略。
+.ready()方法典型的用法是使用一个匿名函数：
+$(document).ready(function() {
+  // Handler for .ready() called.
+});
+等价于：
+$(function() {
+ // Handler for .ready() called.
+});
+
+如果在DOM加载完毕之后调用.ready()，新的句柄将会立即执行。
+
+特别强调两点：
+1.	之所以花费篇幅来阐述.ready()如何使用（翻译的官网文档），是因为网络上的一些文章和中文API不准确甚至是错误的（应该是工具翻译的），所以需谨慎参考
+2.	.ready()的触发要早于.load()，但是不要完全迷信依赖，如果要获取或操作样式，或依赖于像图片这样的必须加载完成才能获取和操作的元素，就用&lt;body onload=""&gt;或.load()
+
+10.8.2	源码分析
+
+到底.ready()是如何实现更快的触发ready事件的呢，关键在jQuery.bindReady方法的实现里：
+
+对标准浏览器绑定：document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+对IE浏览器绑定：document.attachEvent( "onreadystatechange", DOMContentLoaded );
+
+当然还有一些其他的关键技巧，现在完成的看下jQuery.bindReady的实现：
+
+// 绑定DOM ready监听器，跨浏览器，兼容标准浏览器和IE浏览器
+bindReady: function() { // jQuery.bindReady
+if ( readyList ) {
+	return;
+}
+
+readyList = jQuery._Deferred(); // 初始化ready异步事件句柄队列
+
+// Catch cases where $(document).ready() is called after the
+// browser event has already occurred.
+// 如果DOM已经完毕，立即调用jQuery.ready
+if ( document.readyState === "complete" ) {
+	// Handle it asynchronously to allow scripts the opportunity to delay ready
+	// 重要的是异步
+	return setTimeout( jQuery.ready, 1 );
+}
+
+// Mozilla, Opera and webkit nightlies currently support this event
+// DOM 2级事件模型，Mozilla, Opera, webkit等 
+if ( document.addEventListener ) {
+	// Use the handy event callback
+	// 使用快速事件句柄
+	document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+
+	// A fallback to window.onload, that will always work
+	// 再在window上绑定load事件句柄，这个句柄总是会执行
+	// 为什么同时绑定document window呢？我想是为了安全起见，防御性编码！
+	window.addEventListener( "load", jQuery.ready, false ); 
+
+// If IE event model is used
+} else if ( document.attachEvent ) {
+	// ensure firing before onload,
+	// maybe late but safe also for iframes
+	// 同样onreadystatechange会在onload之前触发，但是对于iframe会有延迟但安全一定会触发
+	// 看看DOMContentLoaded的实现，是检测document.readyState的状态是否为complete，这里有些像ajax中的检测 
+	document.attachEvent( "onreadystatechange", DOMContentLoaded );
+
+	// A fallback to window.onload, that will always work
+	window.attachEvent( "onload", jQuery.ready ); // 同样的安全起见，防御性编码！及时前边的所以hack技巧失败了，onload是最后的保障
+
+	// If IE and not a frame
+	// continually check to see if the document is ready
+	var toplevel = false;
+
+	try {
+		toplevel = window.frameElement == null; // 检查window的frameElement属性，看是否是顶层窗口
+	} catch(e) {}
+	
+	// 做doScroll检测，如果在iframe中就不检测了，onreadystatechange对于ifame很可靠
+	if ( document.documentElement.doScroll &amp;&amp; toplevel ) {
+		doScrollCheck(); 
+		// 在doScrollCheck中，不断的（每隔1ms）执行document.documentElement.doScroll("left")，直到不抛出异常为止
+		// 这是IE下检测DOM ready的技巧
+		}
+	}
+},
+
+然后是完整的ready相关方法的分析，我剔除了其他无关的代码，保留了整体结构和相关方法：
+
+(function( window, undefined ) {
+
+	var jQuery = (function() {
+		
+		// Define a local copy of jQuery
+		var jQuery = function( selector, context ) {
+				// The jQuery object is actually just the init constructor 'enhanced'
+				var ret = new jQuery.fn.init( selector, context, rootjQuery );
+				return ret;
+			},
+		
+			// A central reference to the root jQuery(document)
+			rootjQuery, // 包含了document的jQuery对象
+		
+			// The deferred used on DOM ready
+			readyList, // ready事件处理函数队列
+		
+			// The ready event handler
+			DOMContentLoaded, // DOM ready hack句柄，.ready()能早于.load()的关键所在
+		
+		jQuery.fn = jQuery.prototype = {
+			constructor: jQuery,
+			init: function( selector, context, rootjQuery ) {
+				// HANDLE: $(function)
+				// Shortcut for document ready
+				// 如果函数，则认为是DOM ready句柄
+				if ( jQuery.isFunction( selector ) ) {
+					return rootjQuery.ready( selector );
+				}
+			},
+		
+			ready: function( fn ) {
+				// Attach the listeners
+				jQuery.bindReady(); // 绑定DOM ready监听器，跨浏览器，兼容标准浏览器和IE浏览器
+		
+				// Add the callback
+				readyList.done( fn ); // 将ready句柄添加到ready异步句柄队列
+		
+				return this;
+			}
+		};
+		
+		// Give the init function the jQuery prototype for later instantiation
+		jQuery.fn.init.prototype = jQuery.fn;
+		
+		jQuery.extend = jQuery.fn.extend = function() {};
+		
+		jQuery.extend({
+		
+			// Is the DOM ready to be used? Set to true once it occurs.
+			// DOM是否加载完毕
+			isReady: false,
+		
+			// A counter to track how many items to wait for before
+			// the ready event fires. See #6781
+			// DOM加载完毕之前的等待次数
+			readyWait: 1,
+		
+			// Hold (or release) the ready event
+			// 是否延迟触发DOM ready？在jQuery中没有任何地方有调用到holdReady，这是个遗留方法还是预留方法，有待继续研究。
+			// 因此在当前版本中，readyWait总是1，直到自减
+			holdReady: function( hold ) {
+				if ( hold ) { // 继续等待
+					jQuery.readyWait++;
+				} else {
+					jQuery.ready( true ); // 
+				}
+			},
+		
+			// Handle when the DOM is ready
+			// 判断DOM是否加载完毕，如果已完毕，调用DOM ready事件异步队列readyList，如果未完，每个1ms检查一次
+			ready: function( wait ) { // jQuery.ready
+				// Either a released hold or an DOMready/load event and not yet ready
+				// 条件1：wait === true &amp;&amp; !--jQuery.readyWait 还在等待加载完成，但是等待计数器jQuery.readyWait已经是0，
+				// 换句话说参数wait为true表示尝试一下看是否能开始调用readyList了，如果发现计数器jQuery.readyWait变成0，啥也不管了，开始调用吧
+				// 再换句话说，计数器已经是0了，开干吧
+				
+				// 条件2：wait !== true &amp;&amp; !jQuery.isReady 明确的说不用了，即使DOM ready标记还是false
+				// 换句话说，及时DOM ready标记还是false，但是调用jQuery.ready的客户端认为不比再等了，可以开干了
+				if ( (wait === true &amp;&amp; !--jQuery.readyWait) || (wait !== true &amp;&amp; !jQuery.isReady) ) {
+					// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+					// 检查document.body是否存在，这是特定于IE的检测，保证在IE中DOM ready事件能正确判断
+					if ( !document.body ) {
+						return setTimeout( jQuery.ready, 1 );
+					}
+
+					// Remember that the DOM is ready
+					// 到这里，jQuery.isReady被强制为true
+					// 在条件2中，如果jQuery.isReady为true，那么说明readyList的状态已经确定，添加到readyList中的函数会被立即执行
+					// 如果jQuery.isReady为是false，那么接下来readyList中函数将被执行
+					jQuery.isReady = true;
+
+					// If a normal DOM Ready event fired, decrement, and wait if need be
+					// 虽然上边的条件2的意思是，别管其他情况，调用方认为ready了，但是这里仍然做了防御性检测，如果等待计数器仍然大于1，结束ready调用
+					// 如果这个条件成立，那么一定是哪里出问题了！
+					// 在当前版本1.6.1中，这个判断永远不会成立，因为没有地方调用会使readyWait加一的holdReady
+					if ( wait !== true &amp;&amp; --jQuery.readyWait &gt; 0 ) {
+						return;
+					}
+
+					// If there are functions bound, to execute
+					// 调用DOM ready事件异步队列readyList，注意整理的参数亮了！
+					// document指定了ready句柄的上下文，这样我们在执行ready事件句柄时this指向document
+					// [ jQuery ]指定了ready事件句柄的第一个参数，这样即使调用$.noConflict()交出了$的控制权，我们依然可以将句柄的第一个参数命名为$，继续在句柄内部使用$符号
+					// 如此的精致！赞叹之余，但不要在你的项目中也这么用，理解和维护将成为最大的难题。
+					readyList.resolveWith( document, [ jQuery ] );
+
+					// Trigger any bound ready events
+					if ( jQuery.fn.trigger ) {
+						// 触发ready事件，然后删除ready句柄，DOM ready事件只会生效一次，ready是个自定义事件
+						jQuery( document ).trigger( "ready" ).unbind( "ready" );
+					}
+				}
+			},
+		
+			// 绑定DOM ready监听器，跨浏览器，兼容标准浏览器和IE浏览器
+			bindReady: function() { // jQuery.bindReady
+				if ( readyList ) {
+					return;
+				}
+
+				readyList = jQuery._Deferred(); // 初始化ready异步事件句柄队列
+
+				// Catch cases where $(document).ready() is called after the
+				// browser event has already occurred.
+				// 如果DOM已经完毕，立即调用jQuery.ready
+				if ( document.readyState === "complete" ) {
+					// Handle it asynchronously to allow scripts the opportunity to delay ready
+					// 重要的是异步
+					return setTimeout( jQuery.ready, 1 );
+				}
+
+				// Mozilla, Opera and webkit nightlies currently support this event
+				// DOM 2级事件模型，Mozilla, Opera, webkit等 
+				if ( document.addEventListener ) {
+					// Use the handy event callback
+					// 使用快速事件句柄
+					document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+
+					// A fallback to window.onload, that will always work
+					// 再在window上绑定load事件句柄，这个句柄总是会执行
+					// 为什么同时绑定document window呢？我想是为了安全起见，防御性编码！
+					window.addEventListener( "load", jQuery.ready, false ); 
+
+				// If IE event model is used
+				} else if ( document.attachEvent ) {
+					// ensure firing before onload,
+					// maybe late but safe also for iframes
+					// 同样onreadystatechange会在onload之前触发，但是对于iframe会有延迟但安全一定会触发
+					// 看看DOMContentLoaded的实现，是检测document.readyState的状态是否为complete，这里有些像ajax中的检测 
+					document.attachEvent( "onreadystatechange", DOMContentLoaded );
+
+					// A fallback to window.onload, that will always work
+					window.attachEvent( "onload", jQuery.ready ); // 同样的安全起见，防御性编码！及时前边的所以hack技巧失败了，onload是最后的保障
+
+					// If IE and not a frame
+					// continually check to see if the document is ready
+					var toplevel = false;
+
+					try {
+						toplevel = window.frameElement == null; // 检查window的frameElement属性，看是否是顶层窗口
+					} catch(e) {}
+					
+					// 做doScroll检测，如果在iframe中就不检测了，onreadystatechange对于ifame很可靠
+					if ( document.documentElement.doScroll &amp;&amp; toplevel ) {
+						doScrollCheck(); 
+						// 在doScrollCheck中，不断的（每隔1ms）执行document.documentElement.doScroll("left")，直到不抛出异常为止
+						// 这是IE下检测DOM ready的技巧
+					}
+				}
+			},
+		});
+		
+		// All jQuery objects should point back to these
+		rootjQuery = jQuery(document);
+		
+		// Cleanup functions for the document ready method
+		// 构造浏览器加载完毕事件处理函数DOMContentLoaded，需要检测浏览器添加事件的方法
+		if ( document.addEventListener ) {
+			DOMContentLoaded = function() {
+				// document ready之后移除
+				document.removeEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+				jQuery.ready();
+			};
+		
+		} else if ( document.attachEvent ) {
+			DOMContentLoaded = function() {
+				// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+				// 确保body是存在的，IE会有一些延迟
+				if ( document.readyState === "complete" ) {
+					// 先移除，难道浏览器重新渲染会再次触发onreadystatechange吗？
+					document.detachEvent( "onreadystatechange", DOMContentLoaded );
+					jQuery.ready();
+				}
+			};
+		}
+		
+		// The DOM ready check for Internet Explorer
+		// 在IE里，每隔1ms检测IE浏览器的ready状态
+		function doScrollCheck() {
+			if ( jQuery.isReady ) {
+				return;
+			}
+		
+			try {
+				// If IE is used, use the trick by Diego Perini
+				// http://javascript.nwbox.com/IEContentLoaded/
+				// 如果是IE，则使用该技巧来检测浏览器加载状态
+				document.documentElement.doScroll("left");
+			} catch(e) {
+				setTimeout( doScrollCheck, 1 );
+				return;
+			}
+		
+			// and execute any waiting functions
+			// 执行其他的等待函数
+			jQuery.ready();
+		}
+		
+		// Expose jQuery to the global object
+		return jQuery;
+	
+	})();
+
+	// 见系列文章中关于异步队列的解析
+	jQuery.extend({
+		// Create a simple deferred (one callbacks list)
+		_Deferred: function() {},
+	
+		// Full fledged deferred (two callbacks list)
+		Deferred: function( func ) {},
+	
+		// Deferred helper
+		when: function( firstParam ) {}
+	});
+	
+	// 见系列文章中关于事件的解析
+	jQuery.event = {
+		trigger: function( event, data, elem, onlyHandlers ) {},
+
+		handle: function( event ) {},
+
+		special: {
+			ready: {
+				// Make sure the ready event is setup
+				setup: jQuery.bindReady,
+				teardown: jQuery.noop
+			}
+		}
+	};
+
+	window.jQuery = window.$ = jQuery;
+})(window);
+</pre>
+&nbsp;
+<p>&nbsp;</p>
+  </div>
+
+  
+  <div class="attachments">
+    
+      
+        <ul>
+          <li><a href="http://dl.iteye.com/topics/download/0ed0b66a-0c97-3306-bbb4-fe56fd2d8496">_原创__jQuery源码分析-10事件处理-Event-DOM-ready.pdf</a> (367.3 KB)</li>
+          
+          <li>下载次数: 153</li>
+        </ul>
+      
+    
+    
+  </div>
+
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/187.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1202422#" onclick="digg(&quot;blogs&quot;, 1202422, false);return false;"><div><strong>2</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1202422#" onclick="digg(&quot;blogs&quot;, 1202422, true);return false;"><div><strong>4</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1217884" class="next" title="[原创] jQuery源码分析-jQuery中的循环技巧">[原创] jQuery源码分析-jQuery中的循环技 ...</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1199719" class="pre" title="[原创] jQuery源码分析-Java工程师应该向jQuery学习的8点建议">[原创] jQuery源码分析-Java工程师应该向 ...</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-10-20 01:20</li>
+      <li>浏览 7601</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1202422#comments">评论(4)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-10%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86-Event-DOM-ready&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1202422" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-10%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86-Event-DOM-ready&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1202422&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/spinner(1).gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1202422" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    <div id="bc2233124">
+  <div class="comment_title">
+    4 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2011-12-03&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1202422#" onclick="quote_comment(2233124);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">filod 写道</div><div class="quote_div">holdReady是早已公开的函数，估计在编写插件的时候较常使用。既非遗留方法也非预留方法。<br>不知道为什么LZ这么喜欢“句柄”一词，个人觉得不太好，容易使人误解。<br>不过依然非常感谢LZ的工作！</div><br>谢谢提示，确实holdReady是公开的函数http://api.jquery.com/jQuery.holdReady/</div>
+</div>
+
+<div id="bc2233114">
+  <div class="comment_title">
+    3 楼
+    <a href="http://filod.iteye.com/" target="_blank" title="filod">filod</a>
+    2011-12-03&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1202422#" onclick="quote_comment(2233114);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">holdReady是早已公开的函数，估计在编写插件的时候较常使用。既非遗留方法也非预留方法。<br>不知道为什么LZ这么喜欢“句柄”一词，个人觉得不太好，容易使人误解。<br>不过依然非常感谢LZ的工作！</div>
+</div>
+
+<div id="bc2231448">
+  <div class="comment_title">
+    2 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2011-11-24&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1202422#" onclick="quote_comment(2231448);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">晨曦的朝阳 写道</div><div class="quote_div">经过LZ这么一分析，原来也是可以大概看懂的，致敬！</div><br>事件模块的代码相对简单些，不懂的地方反复看几遍就了然了</div>
+</div>
+
+<div id="bc2230624">
+  <div class="comment_title">
+    1 楼
+    <a href="http://xiaofei85390656-163-com.iteye.com/" target="_blank" title="晨曦的朝阳">晨曦的朝阳</a>
+    2011-11-21&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1202422#" onclick="quote_comment(2230624);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">经过LZ这么一分析，原来也是可以大概看懂的，致敬！</div>
+</div>
+
+
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_idea.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1202422', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1202422;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-10事件处理-Event-DOM-ready');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-10事件处理-Event-DOM-ready');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349121 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed/772224" class="subscription" onclick="if (confirm(&#39;你确定要取消这个关注？&#39;)) { var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;delete&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit(); };return false;">取消关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-10事件处理-Event-DOM-ready - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

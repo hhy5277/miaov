@@ -1,0 +1,834 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1182844 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="   作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com  声明：本文为原创文章，如需转载，请注明来源并保留原文链接。     边读边写，不对的地方请告诉我，多多交流共同进步，PDF下载在最后     jQuery源码分析系列的目录请查看 http://nuysoft.iteye.com/blog/1177451，想系统的好好写写，目前还是从我感兴趣的 ...">
+    <meta name="keywords" content="javascript, jquery, 源码分析, ajax, 类型转换器 [原创] jQuery源码分析-15AJAX-类型转换器">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1182844#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-15AJAX-类型转换器</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90">源码分析</a><a href="http://www.iteye.com/blogs/tag/ajax">ajax</a><a href="http://www.iteye.com/blogs/tag/%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E5%99%A8">类型转换器</a></div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <p>&nbsp;</p>
+<p>作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com</p>
+<p>声明：本文为原创文章，如需转载，请注明来源并保留原文链接。</p>
+<p>&nbsp;</p>
+<p>边读边写，不对的地方请告诉我，多多交流共同进步，PDF下载在最后</p>
+<p>&nbsp;</p>
+<p>jQuery源码分析系列的目录请查看&nbsp;<a href="http://nuysoft.iteye.com/blog/1177451">http://nuysoft.iteye.com/blog/1177451</a>，<span style="font-family: Helvetica, Tahoma, Arial, sans-serif; line-height: 18px;">想系统的好好写写，目前还是从我感兴趣的部分开始，</span>如果大家有对哪个模块感兴趣的，建议优先分析的，可以告诉我，一起学习。</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h2>
+<span><span>15.5<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span>AJAX</span>中的类型转换器</h2>
+<p class="MsoNormal">前置过滤器、 请求分发器、类型转换器是读懂<span>jQuery AJAX</span>实现的关键，可能最难读的又是类型转换器。除此之外的源码虽然同样的让人纠结，但相较而言并不算复杂。</p>
+<p class="MsoNormal">类型转换器将服务端响应的<span>responseText</span>或<span>responseXML</span>，转换为请求时指定的数据类型<span>dataType</span>，如果没有指定类型就依据响应头<span>Content-Type</span>自动猜测一个。在分析转换过程之前，很有必要先看看类型转换器的初始化过程，看看支持哪些类型之间的转换。</p>
+<h3>
+<span><span>15.5.1<span style="">&nbsp; </span></span></span>类型转换器的初始化</h3>
+<p class="MsoNormal">类型转换器<span>ajaxConvert</span>在服务端响应成功后，对定义在<span>jQuery. ajaxSettings</span>中的<span style="font-size: 11.0pt; font-family: Consolas; color: black;">converters</span><span style="font-size: 11.0pt; color: black;">进行遍历，找到与数据类型相匹配的转换函数，并执行。我们先看看</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">converters</span><span style="font-size: 11.0pt; color: black;">的初始化过程，对类型类型转换器的功能有个初步的认识。</span><span>jQuery.
+ajaxSettings</span>定义了所有<span>AJAX</span>请求的默认参数，我们暂时先忽略其他属性、方法的定义和实现：</p>
+<table cellspacing="0" class="MsoTableLightGridAccent3" border="1" style="border-collapse: collapse; border: none;" cellpadding="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.extend({</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// some code ...</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// <span style="text-decoration: underline;">ajax</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">请求的默认参数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>ajaxSettings: {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// some code ...</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// List of data converters</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// 1) key format is "source_type destination_type" (a single
+  space in-between)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// 2) the <span style="text-decoration: underline;">catchall</span> symbol "*" can be used for
+  source_type</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">类型转换映射</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,key</span><span style="font-size: 11.0pt; color: #3f7f5f;">格式为单个空格分割的字符串：源格式</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> </span><span style="font-size: 11.0pt; color: #3f7f5f;">目标格式</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>converters: {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Convert anything to text</span><span style="font-size: 11.0pt; color: #3f7f5f;">、</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">任意内容转换为字符串</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// window.String </span><span style="font-size: 11.0pt; color: #3f7f5f;">将会在</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">min</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">文件中被压缩为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> a.String</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"* text"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">: window.String,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Text to <span style="text-decoration: underline;">html</span> (true = no transformation)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">文本转换为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">HTML</span><span style="font-size: 11.0pt; color: #3f7f5f;">（</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">true</span><span style="font-size: 11.0pt; color: #3f7f5f;">表示不需要转换，直接返回）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"text html"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Evaluate text as a <span style="text-decoration: underline;">json</span> expression</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">文本转换为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">JSON</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"text json"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">: jQuery.parseJSON,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Parse text as <span style="text-decoration: underline;">xml</span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">文本转换为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">XML</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"text xml"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">: jQuery.parseXML</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// some code ...</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">});</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal">然后在<span>jQuery</span>初始化过程中，对<span>jQuery.
+ajaxSettings.</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">converters</span><span style="font-size: 11.0pt; color: black;">做了扩展，增加了</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">text&gt;script</span><span style="font-size: 11.0pt; color: black;">的转换：</span></p>
+<table cellspacing="0" class="MsoTableLightGridAccent3" border="1" style="border-collapse: collapse; border: none;" cellpadding="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Install script
+  dataType</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">初始化</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">script</span><span style="font-size: 11.0pt; color: #3f7f5f;">对应的数据类型</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// MARK</span><span style="font-size: 11.0pt; color: #3f7f5f;">：</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">AJAX</span><span style="font-size: 11.0pt; color: #3f7f5f;">模块初始化</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.ajaxSetup({</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>accepts: {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>script: </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"text/javascript, application/javascript, application/ecmascript,
+  application/x-ecmascript"</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>contents: {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>script: </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">/javascript|ecmascript/</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">初始化类型转换器</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">这个为什么不写在</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.ajaxSettings</span><span style="font-size: 11.0pt; color: #3f7f5f;">中而要用扩展的方式添加呢</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">?</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">这个转换器是用来出特殊处理</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">JSONP</span><span style="font-size: 11.0pt; color: #3f7f5f;">请求的，显然</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">的作者</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">John <span style="text-decoration: underline;">Resig</span>,</span><span style="font-size: 11.0pt; color: #3f7f5f;">时时刻刻都认为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">JSONP</span><span style="font-size: 11.0pt; color: #3f7f5f;">和跨域要特殊处理</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">!</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>converters: {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"text script"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( text ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.globalEval( text );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> text;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">});</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal">初始化过程到这里就结束了，很简单，就是填充<span>jQuery. ajaxSettings.</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">converters</span><span style="font-size: 11.0pt; color: black;">。</span></p>
+<p class="MsoNormal"><span style="font-size: 11.0pt; color: black;">当一个</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">AJAX</span><span style="font-size: 11.0pt; color: black;">请求完成后，会调用闭包函数</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">done</span><span style="font-size: 11.0pt; color: black;">，在</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">done</span><span style="font-size: 11.0pt; color: black;">中判断本次请求是否成功，如果成功就调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">ajaxConvert</span><span style="font-size: 11.0pt; color: black;">对响应的数据进行类型转换（闭包函数</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">done</span><span style="font-size: 11.0pt; color: black;">在讲到</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.ajax()</span><span style="font-size: 11.0pt; color: black;">时一并分析）：</span></p>
+<table cellspacing="0" class="MsoTableGrid" border="1" style="border-collapse: collapse; border: none;" cellpadding="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">服务器响应完毕之后的回调函数，</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">done</span><span style="font-size: 11.0pt; color: #3f7f5f;">将复杂的善后事宜封装了起来，执行的动作包括：</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">清除本次请求用到的变量、解析状态码</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">&amp;</span><span style="font-size: 11.0pt; color: #3f7f5f;">状态描述、执行异步回调函数队列、执行</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">complete</span><span style="font-size: 11.0pt; color: #3f7f5f;">队列、触发全局</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">Ajax</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">事件</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// status: -1 </span><span style="font-size: 11.0pt; color: #3f7f5f;">没有找到请求分发器</span></p>
+<p class="MsoNormal" style="text-align: left;"><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> done( status, statusText, responses, headers ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">省略代码</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">...</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// If
+  successful, handle type chaining</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果成功的话，处理类型</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( status &gt;= 200 &amp;&amp; status &lt;
+  300 || status === 304 ) {<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果没有修改，修改状态数据，设置成功</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( status === 304 ) { </span><span style="font-size: 11.0pt; color: #3f7f5f;">省略代码</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">... </span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">} </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">try</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">获取相应的数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">在</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">ajaxConvert</span><span style="font-size: 11.0pt; color: #3f7f5f;">这个函数中，将</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">Server</span><span style="font-size: 11.0pt; color: #3f7f5f;">返回的的数据进行相应的转换（</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">js</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">、</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">json</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">等等）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>success = ajaxConvert( s,
+  response ); </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">注意</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">:</span><span style="font-size: 11.0pt; color: #3f7f5f;">这里的</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">succes</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">变为转换后的数据对象</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">!</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>statusText = </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"success"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>isSuccess = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">catch</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">(e) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// We have a <span style="text-decoration: underline;">parsererror</span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">数据类型转换器解析时出现错误</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>statusText = </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"parsererror"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>error = e;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">非</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">200~300</span><span style="font-size: 11.0pt; color: #3f7f5f;">，非</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">304</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// We extract error from statusText</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// then normalize statusText and status for non-aborts</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">其他的异常状态，格式化</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">statusText</span><span style="font-size: 11.0pt; color: #3f7f5f;">、</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">status</span><span style="font-size: 11.0pt; color: #3f7f5f;">，不采用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">HTTP</span><span style="font-size: 11.0pt; color: #3f7f5f;">标准状态码和状态描述</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>error = statusText;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( !statusText || status ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>statusText = </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"error"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( status &lt; 0 ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>status = 0;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">省略代码</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">...</span></p>
+<p class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">}</span></p>
+</td>
+</tr></tbody></table>
+<h3>
+<span><span>15.5.2<span style="">&nbsp; </span></span></span>类型转换器的执行过程</h3>
+<p class="MsoNormal" style="text-align: left;">类型转换器<span>ajaxConvert</span>根据请求时设置的数据类型，从<span>jQuery. ajaxSettings.</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">converters</span><span style="font-size: 11.0pt; color: black;">寻找对应的转换函数，寻找的过程非常绕。假设有类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">A</span><span style="font-size: 11.0pt; color: black;">数据和类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">B</span><span style="font-size: 11.0pt; color: black;">数据，</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">A</span><span style="font-size: 11.0pt; color: black;">要转换为</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">B</span><span style="font-size: 11.0pt; color: black;">（</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">A &gt; B</span><span style="font-size: 11.0pt; color: black;">），首先在</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">converters</span><span style="font-size: 11.0pt; color: black;">中查找能</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">
+<span>A &gt; B </span></span><span style="font-size: 11.0pt; color: black;">对应的转换函数，如果没有找到，则采用曲线救国的路线，寻找类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">C</span><span style="font-size: 11.0pt; color: black;">，使得类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">A</span><span style="font-size: 11.0pt; color: black;">数据可以转换为类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">C</span><span style="font-size: 11.0pt; color: black;">数据，类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">C</span><span style="font-size: 11.0pt; color: black;">数据再转换为类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">B</span><span style="font-size: 11.0pt; color: black;">数据，最终实现</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> A &gt; B</span><span style="font-size: 11.0pt; color: black;">。类型转换器的原理并不复杂，复杂的是它的实现：</span></p>
+<table cellspacing="0" class="MsoTableLightGridAccent3" border="1" style="border-collapse: collapse; border: none;" cellpadding="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Chain conversions
+  given the request and the original response</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">转换器</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">内部函数</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">之所以不添加到</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">中</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">可能是因为这个函数不需要客户端显示调用吧</span></p>
+<p class="MsoNormal" style="text-align: left;"><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ajaxConvert( s, response ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Apply the
+  dataFilter if provided</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// dataFilter</span><span style="font-size: 11.0pt; color: #3f7f5f;">也是一个过滤器</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">在调用时的参数</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">options</span><span style="font-size: 11.0pt; color: #3f7f5f;">中设置</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">在类型类型转换器执行之前调用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( s.dataFilter ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>response = s.dataFilter( response,
+  s.dataType );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> dataTypes = s.dataTypes, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">取出来</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">减少作用域查找</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">缩短后边的拼写</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>converters = {},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>i,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>key,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>length = dataTypes.length,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>tmp,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Current and previous dataTypes</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>current = dataTypes[ 0 ], </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">取出第一个作为起始转换类型</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>prev, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">每次记录前一个类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">以便数组中相邻两个类型能形成链条</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Conversion expression</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conversion, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">类型转换表达式</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> </span><span style="font-size: 11.0pt; color: #3f7f5f;">被转换类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">&gt;</span><span style="font-size: 11.0pt; color: #3f7f5f;">目标了类型</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Conversion function</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conv, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">从</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.ajaxSetting.converts</span><span style="font-size: 11.0pt; color: #3f7f5f;">中取到特定类型之间转换的函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Conversion functions (transitive conversion)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conv1, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">两个临时表达式</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conv2;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// For each
+  dataType in the chain</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">从第</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">2</span><span style="font-size: 11.0pt; color: #3f7f5f;">个元素开始顺序向后遍历</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">挨着的两个元素组成一个转换表达式</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">形成一个转换链条</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">for</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( i = 1; i &lt; length; i++ ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Create converters map</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// with <span style="text-decoration: underline;">lowercased</span> keys</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">将</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">s.converters</span><span style="font-size: 11.0pt; color: #3f7f5f;">复制到</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">converters,</span><span style="font-size: 11.0pt; color: #3f7f5f;">为什么要遍历转换呢</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">?</span><span style="font-size: 11.0pt; color: #3f7f5f;">直接拿过来用不可以么</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">?</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( i === 1 ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">for</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( key </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">in</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> s.converters ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">typeof</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> key === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"string"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>converters[
+  key.toLowerCase() ] = s.converters[ key ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Get the dataTypes</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>prev = current; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">取出前一个类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">每次遍历都会把上一次循环时的类型记录下来</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>current = dataTypes[ i ]; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">取出当前的类型</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// If current is auto dataType, update it to <span style="text-decoration: underline;">prev</span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( current === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"*"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) { </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果碰到了</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">*</span><span style="font-size: 11.0pt; color: #3f7f5f;">号</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">即一个任意类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">而转换为任意类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">*</span><span style="font-size: 11.0pt; color: #3f7f5f;">没有意义</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>current = prev; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">所以回到前一个</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">跳过任意类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">继续遍历</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">s.dataTypes</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// If no auto and dataTypes are actually different</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">这里开始才是函数</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">ajaxConvert</span><span style="font-size: 11.0pt; color: #3f7f5f;">的重点</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">前一个不是任意类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">*,</span><span style="font-size: 11.0pt; color: #3f7f5f;">并且找到了一个不同的类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">(</span><span style="font-size: 11.0pt; color: #3f7f5f;">注意这里隐藏的逻辑</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">:</span><span style="font-size: 11.0pt; color: #3f7f5f;">如果第</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">1</span><span style="font-size: 11.0pt; color: #3f7f5f;">个元素是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">*,</span><span style="font-size: 11.0pt; color: #3f7f5f;">跳过</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">再加上中间遇到的</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">*</span><span style="font-size: 11.0pt; color: #3f7f5f;">都被跳过了</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">所以结论就是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">s.dataTypes</span><span style="font-size: 11.0pt; color: #3f7f5f;">中的</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">*</span><span style="font-size: 11.0pt; color: #3f7f5f;">都会被忽略</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">!)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( prev !== </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"*"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> &amp;&amp; prev !== current ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Get the converter </span><span style="font-size: 11.0pt; color: #3f7f5f;">找到类型转换表达式对应的转化函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conversion = prev + </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">" "</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> + current; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">合体</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">组成类型转换表达式</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conv = converters[ conversion ] ||
+  converters[ </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"* "</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> + current ]; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果没有对应的</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">就默认被转换类型为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">*</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// If there is no direct converter, search transitively</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果没有找到转变表达式</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">则向后查找</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">因为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">:<span style="text-decoration: underline;">jsonp</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">是有浏览器执行的呢</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">还是要调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">globalEval</span><span style="font-size: 11.0pt; color: #3f7f5f;">呢</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">?</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( !conv ) { </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果没有对应的转换函数</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">则寻找中间路线</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conv2 = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">for</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( conv1 </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">in</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> converters ) { </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">其实是遍历</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">s.converts</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>tmp = conv1.split( </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">" "</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ); </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">将</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">s.convsert</span><span style="font-size: 11.0pt; color: #3f7f5f;">中的类型转换表达式拆分</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,<span style="text-decoration: underline;">tmp</span>[0] </span><span style="font-size: 11.0pt; color: #3f7f5f;">源类型</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> <span style="text-decoration: underline;"><span>tmp</span></span><span>[1] </span></span><span style="font-size: 11.0pt; color: #3f7f5f;">目标类型</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">tmp</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">[0]</span><span style="font-size: 11.0pt; color: #3f7f5f;">与前一个类型相等</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">或者</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">tmp</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">[0]</span><span style="font-size: 11.0pt; color: #3f7f5f;">是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">*(*</span><span style="font-size: 11.0pt; color: #3f7f5f;">完全是死马当作活马医</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">没办法的办法</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( tmp[ 0 ] === prev || tmp[ 0 ] === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"*"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) { </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">这里的</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">*</span><span style="font-size: 11.0pt; color: #3f7f5f;">号与</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">=</span><span style="font-size: 11.0pt; color: #3f7f5f;">这条语句对应</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">形成新的类型转换表达式</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">, </span><span style="font-size: 11.0pt; color: #3f7f5f;">看到这里</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">我有个设想</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">简单点说就是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">:</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// A&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">行不通</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C</span><span style="font-size: 11.0pt; color: #3f7f5f;">行得通</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">也行得通</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">那么</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">也行的通</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">:A &gt; C &gt; B</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">将这个过程与代码结合起来</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">转函数用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fun(?&gt;?)</span><span style="font-size: 11.0pt; color: #3f7f5f;">表示</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">:</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// A == <span style="text-decoration: underline;">tmp</span>[0] == <span style="text-decoration: underline;">prev</span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// C == <span style="text-decoration: underline;">tmp</span>[1]</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// B == current</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// conv1 == A&gt;C</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conv2 = converters[
+  tmp[1] + </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">" "</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> + current ]; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">看看</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">转换函数有木有</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,<span style="text-decoration: underline;">conv</span>==fun(C&gt;B)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( conv2 ) { </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fun(C&gt;B)</span><span style="font-size: 11.0pt; color: #3f7f5f;">有</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,Great!</span><span style="font-size: 11.0pt; color: #3f7f5f;">看来有戏</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">因为发现了新的类型转换表达式</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C&gt;B</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conv1 = converters[
+  conv1 ]; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// conv1</span><span style="font-size: 11.0pt; color: #3f7f5f;">是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C,</span><span style="font-size: 11.0pt; color: #3f7f5f;">将</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C</span><span style="font-size: 11.0pt; color: #3f7f5f;">转换函数取出来</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,conv1</span><span style="font-size: 11.0pt; color: #3f7f5f;">由</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C</span><span style="font-size: 11.0pt; color: #3f7f5f;">变成</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fun(A&gt;C)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( conv1 === </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) { </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// true</span><span style="font-size: 11.0pt; color: #3f7f5f;">是什么东西呢</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">?</span><span style="font-size: 11.0pt; color: #3f7f5f;">参看</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.ajaxSettings</span><span style="font-size: 11.0pt; color: #3f7f5f;">知道</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> "text <span style="text-decoration: underline;">html</span>": true,</span><span style="font-size: 11.0pt; color: #3f7f5f;">意思是不需要转换</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">直接那来用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conv = conv2; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// conv2==fun(C&gt;B),</span><span style="font-size: 11.0pt; color: #3f7f5f;">赋给</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,<span style="text-decoration: underline;">conv</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">由</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">func</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">(A&gt;B)</span><span style="font-size: 11.0pt; color: #3f7f5f;">变成</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fun(C&gt;B)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">详细分析一下</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">:</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">这里</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A==text,C==<span style="text-decoration: underline;">html</span>,B</span><span style="font-size: 11.0pt; color: #3f7f5f;">是未知</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">发现</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">行不通</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,A&gt;C</span><span style="font-size: 11.0pt; color: #3f7f5f;">和</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">都行得通</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">但是因为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C</span><span style="font-size: 11.0pt; color: #3f7f5f;">即</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">text&gt;<span style="text-decoration: underline;">html</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">不需要额外的转换可以直接使用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">可以理解为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A==C,</span><span style="font-size: 11.0pt; color: #3f7f5f;">所以可以忽略</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C,</span><span style="font-size: 11.0pt; color: #3f7f5f;">将</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">链条简化为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">C&gt;B</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">结果就变成这样</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">: A&gt;C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">链条中的</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C</span><span style="font-size: 11.0pt; color: #3f7f5f;">被省略</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">表达式简化为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">C&gt;B</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv1</span><span style="font-size: 11.0pt; color: #3f7f5f;">不是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">text&gt;<span style="text-decoration: underline;">html</span>,</span><span style="font-size: 11.0pt; color: #3f7f5f;">即</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A!=C,</span><span style="font-size: 11.0pt; color: #3f7f5f;">那么就麻烦了</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">但是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">又发现</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv2</span><span style="font-size: 11.0pt; color: #3f7f5f;">即</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fun(C&gt;B)</span><span style="font-size: 11.0pt; color: #3f7f5f;">是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">text&gt;<span style="text-decoration: underline;">html</span>,C==B,</span><span style="font-size: 11.0pt; color: #3f7f5f;">那么</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">链条简化为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( conv2 === </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) { </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// conv2==<span style="text-decoration: underline;">func</span>(C&gt;B)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>conv = conv1; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// A&gt;C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">链条简化为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">/**</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">将上边与代码紧密结合的注释再精炼</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">:</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">目标是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">A&gt;B</span><span style="font-size: 11.0pt; color: #3f5fbf;">但是行不通</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">,</span><span style="font-size: 11.0pt; color: #3f5fbf;">但是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">A&gt;C</span><span style="font-size: 11.0pt; color: #3f5fbf;">可以</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">,C&gt;B</span><span style="font-size: 11.0pt; color: #3f5fbf;">可以</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">,</span><span style="font-size: 11.0pt; color: #3f5fbf;">表达式变成</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">A&gt;C&gt;B</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">A=C,</span><span style="font-size: 11.0pt; color: #3f5fbf;">表达式变成</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">C&gt;B,</span><span style="font-size: 11.0pt; color: #3f5fbf;">上边的</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">conv2</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">C=B,</span><span style="font-size: 11.0pt; color: #3f5fbf;">表达式变成</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">A&gt;C,</span><span style="font-size: 11.0pt; color: #3f5fbf;">上边的</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">conv1</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*/</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">/**</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">但是要注意</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">,</span><span style="font-size: 11.0pt; color: #3f5fbf;">到这里还没完</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">,</span><span style="font-size: 11.0pt; color: #3f5fbf;">如果既不是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">A==C,</span><span style="font-size: 11.0pt; color: #3f5fbf;">也不是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">C==B,</span><span style="font-size: 11.0pt; color: #3f5fbf;">表达式</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">A&gt;C&gt;B</span><span style="font-size: 11.0pt; color: #3f5fbf;">就不能简化了</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">!</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">怎么办</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">?</span><span style="font-size: 11.0pt; color: #3f5fbf;">虽然到这里</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">conv</span></span><span style="font-size: 11.0pt; color: #3f5fbf;">依然是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">undefined,</span><span style="font-size: 11.0pt; color: #3f5fbf;">但是知道了一条</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">A</span><span style="font-size: 11.0pt; color: #3f5fbf;">通往</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">B</span><span style="font-size: 11.0pt; color: #3f5fbf;">的路</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">,</span><span style="font-size: 11.0pt; color: #3f5fbf;">剩下的工作在函数</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">ajaxConvert</span><span style="font-size: 11.0pt; color: #3f5fbf;">的最后完成</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">!</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*/</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">break</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">找到一条路就赶紧跑</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">别再转悠了</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// If we found no converter, dispatch an error</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">行不通</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,A&gt;?&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">也行不通</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,?</span><span style="font-size: 11.0pt; color: #3f7f5f;">表示中间路线</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">看来此路是真心不通啊</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">抛出异常</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( !( conv || conv2 ) ) { </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,conv2</span><span style="font-size: 11.0pt; color: #3f7f5f;">都为空</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.error( </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"No conversion from "</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> + conversion.replace(</span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">" "</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">,</span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">" to "</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">) );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// If found converter is not an equivalence</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果找到的</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">是一个函数或者是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">undefined</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( conv !== </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Convert with 1 or 2 converters accordingly</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">分析下边的代码之前</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">我们先描述一下这行代码的运行环境</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">看看这些变量分别代表什么含义</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">:</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// 1. <span style="text-decoration: underline;">conv</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">可能是函数表示</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">可以</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// 2. <span style="text-decoration: underline;">conv</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">可能是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">undefined</span><span style="font-size: 11.0pt; color: #3f7f5f;">表示</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">不可以</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">但是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">可以</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// 3. conv1</span><span style="font-size: 11.0pt; color: #3f7f5f;">是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fun(A&gt;C),</span><span style="font-size: 11.0pt; color: #3f7f5f;">表示</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C</span><span style="font-size: 11.0pt; color: #3f7f5f;">可以</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// 4. conv2</span><span style="font-size: 11.0pt; color: #3f7f5f;">是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fun(C&gt;B),</span><span style="font-size: 11.0pt; color: #3f7f5f;">表示</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">可以</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">那么这行代码的含义就是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">:</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">是函数</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">,</span><span style="font-size: 11.0pt; color: #3f7f5f;">执行</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">( response )</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">undefined,</span><span style="font-size: 11.0pt; color: #3f7f5f;">那么先执行</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv1(response),</span><span style="font-size: 11.0pt; color: #3f7f5f;">即</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C,</span><span style="font-size: 11.0pt; color: #3f7f5f;">再执行</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">conv2( C ),</span><span style="font-size: 11.0pt; color: #3f7f5f;">即</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">C&gt;B,</span><span style="font-size: 11.0pt; color: #3f7f5f;">最终完成</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">A&gt;C&gt;B</span><span style="font-size: 11.0pt; color: #3f7f5f;">的转换</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>response = conv ? conv( response
+  ) : conv2( conv1(response) );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> response;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">}</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal" style="text-align: left;"><span>ajaxConvert</span>的源码分析让我破费一番脑筋，因为它的很多逻辑没有显示的体现在代码上，是隐式的。我不敢对这样的编程方式妄下定论，也许这样的代码不易维护，也许仅仅是我的水平还不够。</p>
+<h3>
+<span><span>15.5.3<span style="">&nbsp; </span></span></span>总结</h3>
+<p class="MsoNormal">通过前面的源码解析，可以将类型转换器总结如下：</p>
+<table cellspacing="0" class="MsoTableGrid" border="1" style="border-collapse: collapse; border: none;" cellpadding="0">
+<tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">属性</p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">值</p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">功能</p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>* text</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>window.String</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">任意内容转换为字符串</p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>text html</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>true</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">文本转换为<span>HTML</span>（<span>true</span>表示不需要转换，直接返回）</p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>text json</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>jQuery.parseJSON</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">文本转换为<span>JSON</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>text script</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( text ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>jQuery.globalEval( text );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> text;</span></p>
+<p class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">}</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">用<span>eval</span>执行<span>text</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>text xml</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>jQuery.parseXML</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">文本转换为<span>XML</span></p>
+</td>
+</tr>
+</tbody></table>
+<p class="MsoNormal">如果在上表示中没有找到对应的转换函数（类型<span>A &gt; </span>类型<span>B</span>），就再次遍历上表，寻找新的类型<span>C</span>，使得可以<span> A &gt; C &gt; B</span>。</p>
+<p class="MsoNormal"><span>&nbsp;</span></p>
+<p class="MsoNormal"><span style="font-size: small;">后记：</span></p>
+<p>
+<span><span style="font-size: small;">到此，最关键的前置过滤器、请求分发器、类型转换器已经分析完毕，但是<span>AJAX</span>实现的复杂度还是远远超过了我最初的认识，还有很多地方值得深入学习和分析，比如：<span>jQuery.ajax</span>的实现、数据的解析、异步队列在<span>AJAX</span>中的应用、多个内部回调函数调用链、<span>jqXHR</span>的状态码与<span>HTTP</span>状态码的关系、数据类型的修正、跨域、对缓存的修正、对<span>HTTP</span>状态码的修正，等等等等，每一部分都可以单独成文，因此对<span>AJAX</span>的分析还会继续。提高自己的同时，希望对读者有所启发和帮助。</span></span></p>
+  </div>
+
+  
+  <div class="attachments">
+    
+      
+        <ul>
+          <li><a href="http://dl.iteye.com/topics/download/e219a5dd-3620-3895-9b90-c32beb967d00">_原创__jQuery源码分析-15AJAX-类型转换器.pdf</a> (385.6 KB)</li>
+          
+          <li>下载次数: 47</li>
+        </ul>
+      
+    
+    
+  </div>
+
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/794.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1182844#" onclick="digg(&quot;blogs&quot;, 1182844, false);return false;"><div><strong>1</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1182844#" onclick="digg(&quot;blogs&quot;, 1182844, true);return false;"><div><strong>0</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1183554" class="next" title="[原创] jQuery源码分析-03构造jQuery对象-工具函数">[原创] jQuery源码分析-03构造jQuery对象 ...</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1182087" class="pre" title="[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数">[原创] jQuery源码分析-03构造jQuery对象 ...</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-09-29 02:25</li>
+      <li>浏览 4703</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1182844#comments">评论(0)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-15AJAX-%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E5%99%A8&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1182844" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-15AJAX-%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E5%99%A8&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1182844&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/spinner.gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1182844" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_idea.gif"><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1182844', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1182844;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-15AJAX-类型转换器');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-15AJAX-类型转换器');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349124 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed/772224" class="subscription" onclick="if (confirm(&#39;你确定要取消这个关注？&#39;)) { var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;delete&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit(); };return false;">取消关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-15AJAX-类型转换器 - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

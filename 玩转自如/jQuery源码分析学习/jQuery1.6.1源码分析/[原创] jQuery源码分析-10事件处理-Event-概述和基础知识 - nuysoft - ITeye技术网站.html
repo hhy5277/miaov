@@ -1,0 +1,568 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1190189 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="    作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com  声明：本文为原创文章，如需转载，请注明来源并保留原文链接。      读读写写，不对的地方请 ...">
+    <meta name="keywords" content="javascript, jquery, 源码分析, 事件event, 事件模型 [原创] jQuery源码分析-10事件处理-Event-概述和基础知识">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1190189#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-10事件处理-Event-概述和基础知识</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90">源码分析</a><a href="http://www.iteye.com/blogs/tag/%E4%BA%8B%E4%BB%B6event">事件event</a><a href="http://www.iteye.com/blogs/tag/%E4%BA%8B%E4%BB%B6%E6%A8%A1%E5%9E%8B">事件模型</a></div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <p><span style="font-family: Helvetica, Tahoma, Arial, sans-serif; line-height: 18px;">
+</span></p>
+<p style="padding: 0px; margin: 0px;">作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com</p>
+<p style="padding: 0px; margin: 0px;">声明：本文为原创文章，如需转载，请注明来源并保留原文链接。<span style="font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25px;">&nbsp;</span></p>
+<p style="padding: 0px; margin: 0px;">&nbsp;</p>
+<p style="padding: 0px; margin: 0px;">读读写写，不对的地方请告诉我，多多交流共同进步，本章的的PDF下载在最后。</p>
+<p style="padding: 0px; margin: 0px;">&nbsp;</p>
+<p>
+<span style="font-family: Helvetica, Tahoma, Arial, sans-serif; line-height: 18px;">前记：</span></p>
+<p>&nbsp;</p>
+<p><span style="font-family: Helvetica, Tahoma, Arial, sans-serif; line-height: 18px;">关于缺少示例，首先感谢这位朋友的反馈。在读源码的过程中，必然要写很多例子来跟踪代码的调用过程，经常还需要单步调试，遇到难度的地方，比如动画、AJAX要反复尝试，尽量覆盖各个分支，这个过程如果用文字记录下来的话会很长，而且未必能讲清楚，因为不像DEMO看效果就可以了，最好的办法是录成视频，这个有点遥远看时间和学的情况吧。</span></p>
+<p>&nbsp;</p>
+<p>关于入门的示例，有的朋友建议多做一些入门教程，我的建议是，去看官网，官网有很全的DEMO，详细的解释，其他的入门教程也是抄官网的，官网上的很多评论很有价值值得仔细看看</p>
+<p>&nbsp;</p>
+<p>关于造轮子，有的人在分析的过程中，会尝试用原生js去实现一个类似的功能，这是个好习惯；本系列的目的是深入的去分析jQuery的思想和技巧，如果理解透彻了模仿一个类似的自然水到渠成，我会在分析的过程将思路、用到的原生js都分解出来。重复造轮子是好事，而且必须要重复造，不重复造怎能明白原创的精髓，不重复造怎么能创新，关键的关键在于：多造少用，造出来的轮子暂时让它留在实验室里，就像我的篮球老师（同事）告诉我的，在平时练球时，要多用你不熟悉的那只手，但是比赛时要用你擅长的那只手，就是多练少用。直到你的双手都娴熟了，直到你的轮子达到原创的水平了，才能把它应用到项目中。</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p class="MsoNormal">本章后续小节预告：</p>
+<p class="MsoNormal">封装事件对象 接口应用 接口调用链 源码解析 <span>DOMReady</span>专题</p>
+<p>&nbsp;</p>
+<h1>
+<span><span>10.<span style=""> </span></span></span>事件处理</h1>
+<h2>
+<span><span>10.1<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>概述</h2>
+<p class="MsoNormal" style="text-indent: 19.5pt;">做为<span>JavaScript</span>库，首先要解决浏览器事件兼容问题，正确的管理事件，并提供便捷的接口方便开发；<span>jQuery</span>的事件模型以简单优雅的方式实现了这些需求：</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>自定义<span>jQuery.Event</span>对象，模拟实现<span>W3C</span>标准的<span>DOM 3</span>级别事件模型，统一了事件的属性和方法</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>可以在一个事件类型上添加多个事件处理函数，可以一次添加多个事件类型的事件处理函数</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>提供了常用事件的便捷方法，例如<span> $( selector ).click( function … )</span>；同时支持通过代码触发事件，例如<span> $( selector ).click( )</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>支持自定义事件</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>扩展了组合事件：<span>toggle</span>（<span>click</span>时顺序执行绑定的事件）、<span>hover</span>（鼠标移入、移除）</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>扩展了<span>one</span>（只执行一次）、<span>live-die</span>（延迟绑定）、<span>delegate-undelegate</span>（类似<span>live</span>）</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>提供了统一的事件封装、绑定、执行、销毁机制</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>优化<span>DOM ready</span>事件</p>
+<p class="MsoNormal" style="text-indent: 19.5pt;">事件的管理不外乎绑定、触发、销毁（详见下一节<span><a><span><span>基<span>础<span>知识</span></span></span></span></a></span>），<span>jQuery</span>则在浏览器原生的支持上进行了封装和完善。</p>
+<p class="MsoNormal" style="text-indent: 19.5pt;"><span>jQuery</span>并没有将事件处理函数直接绑定到<span>DOM</span>元素上，而是通过<span>$.data</span>存储在缓存<span>$.cahce</span>上；首先为<span>DOM</span>元素分配一个唯一<span>ID</span>，绑定的事件存储在<span>$.cahce[ </span>唯一<span>ID ][ $.expand ][ 'events' ]</span>上，而<span>events</span>是个键<span>-</span>值映射对象，键就是事件类型，对应的值就是由事件处理函数组成的数组；最后在<span>DOM</span>元素上绑定（<span>addEventListener/ attachEvent</span>）一个事件处理函数<span>eventHandle</span>，这个过程由
+<span>jQuery.event.add </span>实现。</p>
+<p class="MsoNormal" style="text-indent: 19.5pt;">当事件触发时<span>eventHandle</span>被执行，<span>eventHandle</span>再去<span>$.cache</span>中寻找曾经绑定的事件处理函数并执行，这个过程由
+<span>jQuery.event. trigger </span>和 <span>jQuery.event.handle</span>实现。</p>
+<p class="MsoNormal" style="text-indent: 19.5pt;">事件的销毁则由<span>jQuery.event.remove
+</span>实现，<span>remove</span>对缓存<span>$.cahce</span>中存储的事件数组进行销毁，当缓存中的事件全部销毁时，调用<span>removeEventListener/ detachEvent</span>销毁绑定在<span>DOM</span>元素上的事件处理函数<span>eventHandle</span>。</p>
+<h2>
+<span><span>10.2<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>基础知识</h2>
+<p class="MsoNormal">在我们对<span>jQuery</span>的事件模型进行介绍和分析之前，如果读者不熟悉浏览器的事件模型，建议先读一读《<span>JavaScript</span>权威指南》第<span>17</span>章 事件和事件处理。以下是关键内容的笔记：</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span><span>0</span>级事件模型（所有浏览器都支持的实际标准<span>API</span>）</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>&nbsp; n<span style="">&nbsp; </span></span></span>方式一：作为<span>JavaScript</span>属性的事件句柄（将函数直接绑定到事件属性上）</p>
+<table class="MsoTableGrid" cellspacing="0" border="1" style="margin-left: 21.0pt; border-collapse: collapse; border: none;" cellpadding="0"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">elment.onclick = </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">(){</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>// ...</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">}</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>&nbsp; n<span style="">&nbsp; </span></span></span>方式二：作为<span>HTML</span>属性的事件句柄（将函数句柄以字符串的方式直接赋值给<span>DOM</span>元素的<span>HTML</span>属性）</p>
+<table class="MsoTableGrid" cellspacing="0" border="1" style="margin-left: 21.0pt; border-collapse: collapse; border: none;" cellpadding="0"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&lt;</span><span style="font-size: 10.0pt;">input</span><span style="font-size: 10.0pt;"> <span style="color: #7f007f;">type</span><span style="color: black;">=</span><em><span style="color: #2a00ff;">"button"</span></em>
+  <span style="color: #7f007f;">value</span><span style="color: black;">=</span><em><span style="color: #2a00ff;">"0</span></em></span><em><span style="font-size: 10.0pt; color: #2a00ff;">级事件模型</span></em><em><span style="font-size: 10.0pt;">"</span></em><span style="font-size: 10.0pt;"> <span style="color: #7f007f;">onclick</span><span style="color: black;">=</span><span style="color: #2a00ff;">"alert(this.nodeName);"</span><span style="color: black;"> </span><span style="color: teal;">/&gt;</span></span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span><span>2</span>级事件模型（除<span>Internet Explorer</span>以外的所有现在浏览器都支持<span>2</span>级<span>DOM</span>事件模型）</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>&nbsp; n<span style="">&nbsp; </span></span></span>事件传播分三个阶段进行：</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>&nbsp; &nbsp; u<span style="">&nbsp; </span></span></span>捕捉阶段，事件从<span>Document</span>对象沿着文档树向下传播给目标节点。如果目标的任何一个祖先（不是目标自身）专门注册了捕捉事件句柄，那么在事件传递过程中，就会运行这些句柄。</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>&nbsp; &nbsp; u<span style="">&nbsp; </span></span></span>目标阶段，直接注册在目标上的适合的事件句柄将运行。这与<span>0</span>级事件模型提供的事件处理方法相似</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;</span><span style="font-family: Wingdings;">u</span><span style="">&nbsp; </span></span>起泡阶段，事件将从目标元素向上传播回或起泡回<span>Document</span>对象的文档层次。</p>
+<p class="MsoNormal" style="margin-left: 42.0pt;">虽然所有事件都受事件传播的捕捉阶段的支配，但并非所有类型的事件都起泡。一般来说，原始输入事件起泡（大部分事件），而高级语义事件不起泡（<span>blue focus load unload</span>）</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span style="font-family: Wingdings;">&nbsp;</span><span style="font-family: Wingdings;">&nbsp;</span><span style="font-family: Wingdings;">n</span><span style="">&nbsp;</span></span><span style="font-family: Wingdings;">&nbsp;</span>注册一个事件句柄<span> Element.addEventListener( String type, Function listener, boolean
+useCapture )</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;&nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>type </span>事件监听器调用所针对的时间类型。例如，<span>load click mousedown</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;&nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>listener </span>当指定类型的事件分派给这个元素的时候，事件监听器函数被调用。调用的时候，这个监听器函数被传递给一个<span>Event</span>对象，然后作为在该元素上注册的一个方法来调用</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;&nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>useCapture </span>如果为<span>true</span>，那么只有在事件传播的捕捉阶段，指定的<span>listener</span>才会被调用。更常用的值是<span>false</span>，意味着在捕捉阶段不会调用<span>listener</span>，而当该节点是实际的事件目标或事件从它的原始目标起泡到该节点时，调用<span>listener</span>。</p>
+<p class="MsoNormal" style="margin-left: 42.0pt;">该方法将指定的事件监听器函数添加到当前节点的监听器函数结合中，以处理指定类型<span>type</span>的事件。如果<span>useCapture</span>为<span>true</span>，则监听器被注册为捕捉阶段监听器。如果<span>useCapture</span>为<span>false</span>，它就注册普通事件监听器</p>
+<p class="MsoNormal" style="margin-left: 42.0pt;"><span>addEventListener()</span>可能被调用多次，在同一个节点上为同一种类型的事件注册多个事件句柄。但要注意，<span>DOM</span>不能确定多个事件句柄被调用的顺序。</p>
+<p class="MsoNormal" style="margin-left: 42.0pt;">如果一个事件监听器函数在同一个节点上用相同的<span>type</span>和<span>useCapture</span>参数注册了两次，那么第二次注册将被忽略。如果正在处理一个节点上的事件时，在这个节点上注册了一个新的事件监听器，则不会为那个事件调用新的事件监听器。</p>
+<p class="MsoNormal" style="margin-left: 42.0pt;">当用<span>Node.cloneNode()</span>方法或<span>Document.importNode()</span>方法复制一个<span>Document</span>节点时，不会复制为原始节点注册的事件监听器。</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>删除一个事件句柄<span> Element.removeEventListener( String type, Function listener,
+boolean useCapture )</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;&nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>type </span>要删除事件监听器的事件类型</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;&nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>listener </span>要删除的事件监听器函数</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;&nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>useCapture </span>如果要删除是捕捉事件监听器，则为<span>true</span>；如果要删除的是普通事件监听器，则为<span>false</span>。</p>
+<p class="MsoNormal" style="margin-left: 42.0pt;">该方法将删除指定的事件监听器函数。参数<span>type</span>和<span>useCapture</span>必须与调用<span>addEventListener()</span>方法的相应参数一致。如果没有找到与指定的参数匹配的事件监听器，该方法什么都不做。</p>
+<p class="MsoNormal" style="margin-left: 42.0pt;">如果一个事件监听器函数被该方法删除，那么当节点发生指定类型的事件时，就不再调用它。即使一个事件监听器被同一个节点上同类型事件注册的另一个事件监听器删除，它也不再被调用。</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>停止事件传播
+<span>Event.stopPropagation()</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>阻止默认动作<span> Event.preventDefault()</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span><span>IE</span>事件模型</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>注册一个事件句柄<span> Element.attachEvent( String type, Function listener )</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;&nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>type </span>事件监听器调用所针对的事件的类型，带有一个“<span>on</span>”前缀。例如，<span>onload onclick onmousedown</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;&nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>listener </span>当指定类型的事件分派给这个元素的时候，事件监听器函数被调用。不会为这个函数传递任何参数，但是它可以从<span>Window</span>对象的<span>event</span>属性获得<span>Event</span>对象。</p>
+<p class="MsoNormal" style="margin-left: 42.0pt;">这个方法是一个特定与<span>IE</span>的事件注册方法。它和标准的<span>addEventListener()</span>方法（<span>IE</span>不支持它）具有相同的作用，但是，它和该函数也有一些重要的差别：</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span>由于<span>IE</span>事件模型不支持事件捕获，所以<span>attachEvent()</span>和<span>detachEvent()</span>只需要两个参数：事件类型和句柄函数</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span>传递给<span>IE</span>方法的事件句柄名应该包含<span>on</span>前缀。例如，和<span>attachEvent()</span>一起使用的是<span>onlick</span>，而不是和<span>addEventListener()</span>一起使用的<span>click</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span>使用<span>attachEvent()</span>注册的函数调用的时候没有<span>Event</span>对象参数。相反，它们必须读取<span>Window</span>对象的<span>event</span>属性</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span>使用<span>attachEvent()</span>注册的函数作为全局函数调用，而不是作为事件发生其上的文档元素的方法调用。也就是说，当使用<span>attachEvent()</span>注册的一个事件句柄执行的时候，<span>this</span>关键字引用的是<span>Window</span>对象，而不是事件目标元素。</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>attachEvent()</span>允许同一个事件句柄函数注册多次。当制定类型的一个事件发生的时候，注册的哈苏调用次数与它注册的次数相同</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>删除一个事件监听器<span> Event.detachEvent( String type, Function listener )</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>type </span>要删除的事件监听器所针对的事件的类型，带有一个<span>on</span>前缀。例如<span> onclick</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>u<span style="">&nbsp; </span></span></span><span>listener </span>要删除事件监听器函数</p>
+<p class="MsoNormal" style="margin-left: 42.0pt;">这个方法解除掉由<span>attachEvent()</span>方法所执行的事件句柄函数注册。它是<span>removeEventListener()</span>方法的特定与<span>IE</span>的替代。要为一个元素删除一个事件函数句柄，只需要使用你最初传递<span>attachEvent()</span>的相同参数来调用<span>detachEvent()</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>停止事件传播<span> window.event.cancelBubule = true;</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>阻止默认动作
+<span>window.event.returnValue = false</span></p>
+  </div>
+
+  
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/187.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1190189#" onclick="digg(&quot;blogs&quot;, 1190189, false);return false;"><div><strong>7</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1190189#" onclick="digg(&quot;blogs&quot;, 1190189, true);return false;"><div><strong>1</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1190542" class="next" title="[原创] jQuery源码分析系列目录（持续更新）">[原创] jQuery源码分析系列目录（持续更新 ...</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1189156" class="pre" title="[原创] jQuery源码分析-08队列 Queue">[原创] jQuery源码分析-08队列 Queue</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-10-12 00:16</li>
+      <li>浏览 8447</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1190189#comments">评论(0)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-10%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86-Event-%E6%A6%82%E8%BF%B0%E5%92%8C%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1190189" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-10%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86-Event-%E6%A6%82%E8%BF%B0%E5%92%8C%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1190189&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/spinner.gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1190189" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_idea.gif"><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1190189', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1190189;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-10事件处理-Event-概述和基础知识');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-10事件处理-Event-概述和基础知识');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349118 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed/772224" class="subscription" onclick="if (confirm(&#39;你确定要取消这个关注？&#39;)) { var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;delete&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit(); };return false;">取消关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-10事件处理-Event-概述和基础知识 - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

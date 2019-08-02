@@ -1,0 +1,1318 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1174798 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="       5. 异步队列 Deferred    5.1         概述  异步队列是一个链式对象，增强对回调函数的管理和调用，用于处理异步任务。  异步队列有三种状态：初始化（unresolved），成功（resolved），失败（rejected）。  执行哪些回调函数依赖于状态。  状态变为成功（resolved）或失败（rejected）后，将保持不变。  回调函数的绑定可以是同步 ...">
+    <meta name="keywords" content="web, javascript, jquery, deferred, ajax [原创] jQuery源码分析-05异步队列 Deferred">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1174798#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-05异步队列 Deferred</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/web">web</a><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/deferred">deferred</a><a href="http://www.iteye.com/blogs/tag/ajax">ajax</a>&nbsp;</div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <p>&nbsp;</p>
+<div class="WordSection1">
+<h1>
+<span><span><span><span><span>5.<span style=""> </span></span></span>异步队列</span></span></span><span><span><span> <span>Deferred</span></span></span></span>
+</h1>
+<h2><span><span><span><span>5.1<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>概述</span></span></h2>
+<p class="MsoNormal"><span><span>异步队列是一个链式对象，增强对回调函数的管理和调用，用于处理异步任务。</span></span></p>
+<p class="MsoNormal"><span><span><span>异步队列有三种状态：初始化（</span></span></span><span><span><span><span><span>unresolved</span></span></span></span></span><span><span><span><span><span>）</span>，成功（<span>resolved</span>），失败（<span>rejected</span>）。</span></span></span></span></p>
+<p class="MsoNormal"><span><span><span><span>执行哪些回调函数依赖于状态。</span></span></span></span></p>
+<p class="MsoNormal"><span><span><span><span>状态变为成功（<span>resolved</span>）或失败（<span>rejected</span>）后，将保持不变。</span></span></span></span></p>
+<p class="MsoNormal"><span><span>回调函数的绑定可以是同步，也可以是异步的，即可以在任何时候绑定。</span></span></p>
+<p class="MsoNormal"><span><span>（本节中的 </span></span><span><span><em><span style="font-size: 14.0pt;">绑定 注册 增加</span></em> 具有相同的含义）</span></span></p>
+<h2><span><span><span><span>5.2<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>关键方法</span></span></h2>
+<p class="MsoNormal"><span>先看看<span>jQuery. Deferred()</span>中的关键方法</span></p>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent3" cellspacing="0" style="border-collapse: collapse; border: none;">
+<tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><strong><span>分类</span></strong></span></span></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: center;"><span><span><strong><span>方法</span></strong></span></span></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: center;"><span><span><strong><span>说明</span></strong></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>增加</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>deferred.done()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>增加<em>成功回调函数</em></span></span></p>
+<p class="MsoNormal"><span><span>状态为<em>成功（<span>resolved</span>）</em>时立即调用</span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span><span>deferred.fail()</span></span></span></span><span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>增加<em>失败回调函数</em></span></span></p>
+<p class="MsoNormal"><span><span>状态为<em>失败（<span>rejected</span>）</em>时立即调用</span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span><span>deferred.</span></span></span></span><span><span><span>then()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>增加<em>成功回调函数</em>和<em>失败回调函数</em>到各自的队列中</span></span></p>
+<p class="MsoNormal"><span><span>便捷方法，两个参数可以是数组或<span>null</span></span></span></p>
+<p class="MsoNormal"><span><span>状态为<em>成功（<span>resolved</span>）</em>时立即调用<em>成功回调函数</em></span></span></p>
+<p class="MsoNormal"><span><span>状态为<em>失败（<span>rejected</span>）</em>时立即调用<em>失败回调函数</em></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>&nbsp;</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>deferred.always()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>增加<em>回调函数，</em>同时增加到<em>成功队列</em>和<em>失败队列</em></span></span></p>
+<p class="MsoNormal"><span><span>状态已确定（无论<em>成功</em>或<em>失败</em>）时立即调用<em>回调函数</em></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><strong><span>执行</span></strong></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span style="font-family: Consolas;">deferred.resolve()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>调用<em>成功回调函数队列</em></span></span></p>
+<p class="MsoNormal"><span><span>通过调用</span></span><span><span><span>deferred.resolveWith()</span></span></span><span><span><span>实现</span></span></span><span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span style="font-family: Consolas;">deferred.resolveWith()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>使用指定的上下文和参数执行</span><em>成功回调函数</em></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>deferred.reject()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>调用<em>失败回调函数队列</em></span></span></p>
+<p class="MsoNormal"><span><span>通过调用</span></span><span><span><span>deferred.rejectWith()</span></span></span><span><span><span>实现</span></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>deferred.rejectWith()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>使用指定的上下文和参数执行</span><em>失败回调函数队列</em></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><strong><span>其他</span></strong></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>deferred.isRejected()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>判断状态是否为<em>成功（<span>resolved</span>）</em></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>deferred.isResolved()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>判断状态是否为<em>失败</em></span><em>（<span>rejected</span>）</em></span></span><span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>deferred.pipe()</span></span></span></p>
+<p class="MsoNormal"><span><span><span>&nbsp;</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>每次调用<em>回调函数</em>之前先调用传入的<em>成功过滤函数</em>或<em>失败过滤函数</em>，并将<em>过滤函数</em>的返回值作为<em>回调函数</em>的参数</span></span></span><span></span></p>
+<p class="MsoNormal"><span><span><span>最终返回一个<em>只读视图</em>（调用</span></span></span><span><span><span style="font-family: Consolas;">promise</span></span></span><span><span><span>实现）</span></span></span><span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span><span>deferred</span></span></span></span><span><span><span>.promise()</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>返回</span></span></span><span><span><span>deferred</span></span></span><span><span><span>的只读视图</span></span></span><span></span></p>
+</td>
+</tr>
+</tbody></table>
+<p class="MsoNormal"><span><span>接下来将会<span>jQuery._Deferred</span>和<span>jQuery.Deferred</span>的源码详细剖析。</span></span></p>
+<span><br></span>
+<p class="MsoNormal" style="text-align: left;"><strong><span>&nbsp;</span></strong></p>
+</div>
+<p>
+<strong><span><br></span></strong></p>
+<div class="WordSection2">
+<h2>
+<span><span>5.3<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span>jQuery._Deferred</span>
+</h2>
+<p class="MsoNormal"><span>局部变量</span></p>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent2" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span><span><span>//
+  </span></span></span><span><span><span>参考资料：</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>//
+  </span></span></span><span><span><span>官网文档</span></span></span><span><span><span>
+  http://api.jquery.com/category/deferred-object/</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>//
+  Deferred</span></span></span><span><span><span>机制</span></span></span><span><span><span>
+  http://www.cnblogs.com/fjzhou/archive/2011/05/30/jquery-source-3.html</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>//
+  </span></span></span><span><span><span>在</span></span></span><span><span><span>jQuery 1.5</span></span></span><span><span><span>中使用</span></span></span><span><span><span>deferred</span></span></span><span><span><span>对象</span></span></span><span><span><span>
+  http://developer.51cto.com/art/201103/248638.htm</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>//
+  </span></span></span><span><span><span>拿着放大镜看</span></span></span><span><span><span>Promise
+  http://www.cnblogs.com/sanshi/archive/2011/03/11/1981789.html</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>//
+  Promises/A http://wiki.commonjs.org/wiki/Promises/A<span>&nbsp; </span></span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>var</span></span></span><span><span><span> </span></span></span><span><span><span>// Promise methods </span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>注意，没有以下方法：</span></span></span><span><span><span>resolveWith
+  resolve rejectWith reject pipe when cancel</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>即不允许调用</span></span></span><span><span><span>resolve
+  reject cancel</span></span></span><span><span><span>等</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span>promiseMethods = </span></span></span><span><span><span>"done fail isResolved isRejected promise
+  then always pipe"</span></span></span><span><span><span>.split(
+  </span></span></span><span><span><span>"
+  "</span></span></span><span><span><span> ),</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// Static reference to slice</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>静态引用</span></span></span><span><span><span>slice</span></span></span><span><span><span>方法，借鸡生蛋</span></span></span><span></span></p>
+<p class="MsoNormal"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span>sliceDeferred = [].slice;</span></span></span><span><span><strong></strong></span></span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal"><span><span><span style="font-size: 10.0pt;">_Deferred</span></span></span><span><span><span style="font-size: 10.0pt; color: black;">：</span></span></span></p>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent3" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span><span><span>_Deferred:
+  </span></span></span><span><span><span>function</span></span></span><span><span><span>() {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>var</span></span></span><span><span><span> </span></span></span><span><span><span>// callbacks list</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>回调函数数组（这里不翻译为队列，避免概念上的混淆）</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>callbacks = [],</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// stored [ context , args ]</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>存储上下文、参数，同时还可以标识是否执行完成（</span></span></span><span><span><span>fired</span></span></span><span><span><span>非空即表示已完成）</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>这里的</span></span></span><span><span><span>“</span></span></span><span><span><span>完成</span></span></span><span><span><span>”</span></span></span><span><span><span>指回调函数数组中</span></span></span><span><span><span>“</span></span></span><span><span><span>已有</span></span></span><span><span><span>”</span></span></span><span><span><span>的函数都已执行完成；</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>但是可以再次调用</span></span></span><span><span><span>done</span></span></span><span><span><span>添加回调函数，添加时</span></span></span><span><span><span>fired</span></span></span><span><span><span>会被重置为</span></span></span><span><span><span>0</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fired,</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// to avoid firing when already doing so</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>如果已经触发正在执行，避免再次触发</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>firing,</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// flag to know if the deferred has been
+  cancelled</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>标识异步队列是否已被取消，取消后将忽略对</span></span></span><span><span><span>done resolve resolveWith</span></span></span><span><span><span>的调用</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cancelled,</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>异步队列定义（这才是正主，上边的局部变量通过闭包引用）</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// the deferred itself</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred<span>&nbsp; </span>= {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// done( f1, f2, ...)</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>增加成功回调函数，状态为成功（</span></span></span><span><span><span>resolved</span></span></span><span><span><span>）时立即调用</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>done: </span></span></span><span><span><span>function</span></span></span><span><span><span>()
+  {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>如果已取消，则忽略本次调用</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>if</span></span></span><span><span><span> (
+  !cancelled ) {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>将后边代码用到的局部变量定义在代码块开始处的好处：</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// 1.</span></span></span><span><span><span>声明变量，增加代码可读性；</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// 2.</span></span></span><span><span><span>共享变量，提高性能</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>注：多年写</span></span></span><span><span><span>Java</span></span></span><span><span><span>的经验，养成了全局变量在开头、临时变量随用随定义的习惯，看来</span></span></span><span><span><span>JavaScript</span></span></span><span><span><span>有些不同</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>var</span></span></span><span><span><span>
+  args = arguments, </span></span></span><span><span><span>//
+  </span></span></span><span><span><span>回调函数数组</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>i, </span></span></span><span><span><span>// </span></span></span><span><span><span>遍历变量</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>length, </span></span></span><span><span><span>// </span></span></span><span><span><span>回调函数数组长度</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>elem, </span></span></span><span><span><span>// </span></span></span><span><span><span>单个回调函数</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type, </span></span></span><span><span><span>// elem</span></span></span><span><span><span>类型</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>_fired; </span></span></span><span><span><span>// </span></span></span><span><span><span>用于临时备份</span></span></span><span><span><span>fired</span></span></span><span><span><span>（</span></span></span><span><span><span>fired</span></span></span><span><span><span>中存储了上下文和参数）</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>如果已执行完成（即</span></span></span><span><span><span>fired</span></span></span><span><span><span>中保留了上下文和参数）</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>则备份上下文和参数到</span></span></span><span><span><span>_fired</span></span></span><span><span><span>，同时将</span></span></span><span><span><span>fired</span></span></span><span><span><span>置为</span></span></span><span><span><span>0</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>if</span></span></span><span><span><span> (
+  fired ) {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>_fired = fired;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fired = 0;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>添加</span></span></span><span><span><span>arguments</span></span></span><span><span><span>中的函数到回调函数数组</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>for</span></span></span><span><span><span> (
+  i = 0, length = args.length; i &lt; length; i++ ) {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>elem = args[ i ];</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = jQuery.type( elem
+  );</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>如果是数组，则递归调用</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>if</span></span></span><span><span><span> (
+  type === </span></span></span><span><span><span>"array"</span></span></span><span><span><span> ) {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>强制指定上下文为</span></span></span><span><span><span>deferred</span></span></span><span><span><span>，个人认为这里没必要指定上下文，因为默认的上下文即为</span></span></span><span><span><span>deferred</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred.done.apply(
+  deferred, elem );</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span></span></span><span><span><span>else</span></span></span><span><span><span> </span></span></span><span><span><span>if</span></span></span><span><span><span> (
+  type === </span></span></span><span><span><span>"function"</span></span></span><span><span><span> ) {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>callbacks.push( elem
+  );</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>如果已执行（</span></span></span><span><span><span>_fired</span></span></span><span><span><span>表示</span></span></span><span><span><span>Deferred</span></span></span><span><span><span>的状态是确定的），则立即执行新添加的函数</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>使用之前指定的上下文</span></span></span><span><span><span>context</span></span></span><span><span><span>和参数</span></span></span><span><span><span>args</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>if</span></span></span><span><span><span> (
+  _fired ) {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred.resolveWith(
+  _fired[ 0 ], _fired[ 1 ] );</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>return</span></span></span><span><span><span> </span></span></span><span><span><span>this</span></span></span><span><span><span>;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>},</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// resolve with given context and args</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>执行，使用指定的上下文和参数</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>resolveWith: </span></span></span><span><span><span>function</span></span></span><span><span><span>(
+  context, args ) {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>满足以下全部条件，才会执行：没有取消</span></span></span><span><span><span><span>&nbsp; </span></span></span></span><span><span><span>没有正在执行</span></span></span><span><span><span> </span></span></span><span><span><span>没有执行完成</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>如果已取消</span></span></span><span><span><span> </span></span></span><span><span><span>或</span></span></span><span><span><span> </span></span></span><span><span><span>已执行完成</span></span></span><span><span><span> </span></span></span><span><span><span>或</span></span></span><span><span><span> </span></span></span><span><span><span>正在执行，则忽略本次调用</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>if</span></span></span><span><span><span> (
+  !cancelled &amp;&amp; !fired &amp;&amp; !firing ) {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// make sure args are available (#8421)</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>确保</span></span></span><span><span><span>args</span></span></span><span><span><span>可用，一个避免</span></span></span><span><span><span>null</span></span></span><span><span><span>、</span></span></span><span><span><span>undefined</span></span></span><span><span><span>造成</span></span></span><span><span><span>ReferenceError</span></span></span><span><span><span>的常见技巧</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>args = args || [];</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>执行过程中将</span></span></span><span><span><span>firing</span></span></span><span><span><span>改为</span></span></span><span><span><span>1</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>firing = 1;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>try</span></span></span><span><span><span> {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>遍历动态数组的技巧</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>while</span></span></span><span><span><span>(
+  callbacks[ 0 ] ) {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>注意这里使用指定的</span></span></span><span><span><span>context</span></span></span><span><span><span>，而不是</span></span></span><span><span><span>this</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>callbacks.shift().apply(
+  context, args );</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// JavaScript</span></span></span><span><span><span>支持</span></span></span><span><span><span>try/catch/finally</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>finally</span></span></span><span><span><span> {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fired = [ context, args
+  ];</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>firing = 0;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>return</span></span></span><span><span><span> </span></span></span><span><span><span>this</span></span></span><span><span><span>;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>},</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// resolve with this as context and given
+  arguments</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>把状态设置为</span></span></span><span><span><span>Resolved</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>设置的理解不准确，因为是否</span></span></span><span><span><span>Resolved</span></span></span><span><span><span>，是调用</span></span></span><span><span><span>isResolved</span></span></span><span><span><span>判断</span></span></span><span><span><span>firing</span></span></span><span><span><span>、</span></span></span><span><span><span>fired</span></span></span><span><span><span>的状态得到的。</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>可以理解为执行</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>resolve: </span></span></span><span><span><span>function</span></span></span><span><span><span>()
+  {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred.resolveWith( </span></span></span><span><span><span>this</span></span></span><span><span><span>,
+  arguments );</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>return</span></span></span><span><span><span> </span></span></span><span><span><span>this</span></span></span><span><span><span>;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>},</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// Has this deferred been resolved?</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>是否已执行（或解决）？</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>在执行或已执行完毕，都认为已执行</span></span></span><span><span><span>/</span></span></span><span><span><span>解决</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// “</span></span></span><span><span><span>已</span></span></span><span><span><span>”</span></span></span><span><span><span>可能不准确，因为执行过程中也认为是已执行</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>isResolved: </span></span></span><span><span><span>function</span></span></span><span><span><span>()
+  {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>正在运行中</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>或</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>已运行完（即</span></span></span><span><span><span>fired</span></span></span><span><span><span>不为空</span></span></span><span><span><span>/0</span></span></span><span><span><span>）</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>return</span></span></span><span><span><span>
+  !!( firing || fired );</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>},</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// Cancel</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>取消异步队列</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>// </span></span></span><span><span><span>设置标记位，清空函数队列</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cancel: </span></span></span><span><span><span>function</span></span></span><span><span><span>()
+  {</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cancelled = 1;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>callbacks
+  = [];</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>return</span></span></span><span><span><span> </span></span></span><span><span><span>this</span></span></span><span><span><span>;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>};</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span></span></span></span><span><span><span>return</span></span></span><span><span><span>
+  deferred;</span></span></span><span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>}</span></span></span><span></span></p>
+</td>
+</tr></tbody></table>
+<h2>
+<span><span>5.4<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span>jQuery.Deferred</span>
+</h2>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent3" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span>//
+  Full fledged deferred (two callbacks list)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span>//
+  </span><span>创建一个完整的异步队列（包含两个回调函数数组）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span>//
+  </span><span>异步队列有三种状态：初始化（</span><span>unresolved</span><span>），成功（</span><span>resolved</span><span>），失败（</span><span>rejected</span><span>）。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span>//
+  </span><span>执行哪些回调函数依赖于状态。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span>//
+  </span><span>状态变为成功（</span><span>resolved</span><span>）或失败（</span><span>rejected</span><span>）后，将保持不变。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span>Deferred:
+  </span><span>function</span><span>(
+  func ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  _Deferred</span><span>本无成功状态或失败状态，有四种状态：初始化、执行中、执行完毕、已取消</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>为了代码复用，</span><span> </span><span>内部先实现了一个</span><span>_Deferred</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  failDeferred</span><span>通过闭包引用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>var</span><span> deferred = jQuery._Deferred(),</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>failDeferred = jQuery._Deferred(),</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>promise;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  Add errorDeferred methods, then and promise</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span>jQuery.extend( deferred, {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>增加成功回调函数和失败回调函数到各自的队列中</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>便捷方法，两个参数可以是数组或</span><span>null</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>状态为成功（</span><span>resolved</span><span>）时立即调用成功回调函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>状态为失败（</span><span>rejected</span><span>）时立即调用失败回调函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>then: </span><span>function</span><span>( doneCallbacks, failCallbacks ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>上下文在这里有切换：虽然</span><span>done</span><span>返回的是</span><span>deferred</span><span>，但是</span><span>fail</span><span>指向</span><span>failDeferred.done</span><span>，执行</span><span>fail</span><span>是上下文变为</span><span>failDeferred</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>简单点说就是：</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>调用</span><span>done</span><span>时向</span><span>deferred</span><span>添加回调函数</span><span>doneCallbacks</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>调用</span><span>fail</span><span>时向</span><span>failDeferred</span><span>添加回调函数</span><span>failCallbacks</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>因此这行表达式执行完后，返回的是</span><span>failDeferred</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred.done( doneCallbacks
+  ).fail( failCallbacks );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>强制返回</span><span>deferred</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>return</span><span> </span><span>this</span><span>;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>注册一个</span><span>callback</span><span>函数，无论是</span><span>resolved</span><span>或者</span><span>rejected</span><span>都会被</span><span> </span><span>调用。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>其实，是把传入的函数（数组），同时添加到</span><span>deferred</span><span>和</span><span>failDeferred</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>并没有像我想象的那样，存到单独的函数数组中</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>always: </span><span>function</span><span>() {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// done</span><span>的上下文设置为</span><span>deferred</span><span>，</span><span>fail</span><span>的上下文设置为</span><span>this</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// done</span><span>和</span><span>fail</span><span>的上下文不一致吗？一致！在这里</span><span>this</span><span>等于</span><span>deferred</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>但是这里如此设置上下文应该该如何解释呢？与</span><span>then</span><span>的实现有什么不一样呢？</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// fail</span><span>指向</span><span>fail</span><span>指向</span><span>failDeferred.done</span><span>，默认上下文是</span><span>failDeferred</span><span>，</span><span>failDeferred</span><span>的回调函数数组</span><span>callbacks</span><span>是通过闭包引用的，</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>这里虽然将</span><span>failDeferred.done</span><span>方法的上下文设置为</span><span>deferred</span><span>，但是不影响</span><span>failDeferred.done</span><span>的执行，</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>在</span><span>failDeferred.done</span><span>的最后将</span><span>this</span><span>替换为</span><span>deferred</span><span>，实现链式调用，</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>即调用过程中没有丢失上下文</span><span>this</span><span>，可以继续链式调用其他的方法而不会导致</span><span>this</span><span>混乱</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>从语法上，</span><span>always</span><span>要达到的效果与</span><span>then</span><span>要达到的效果一致</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>因此，这行代码可以改写为两行（类似</span><span>then</span><span>的实现方式）</span><span>,</span><span>效果是等价的：</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// deferred.done( arguments ).fail( arguments );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// returnr this;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>return</span><span> deferred.done.apply( deferred, arguments
+  ).fail.apply( </span><span>this</span><span>, arguments );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>增加失败回调函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>状态为失败（</span><span>rejected</span><span>）时立即调用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fail: failDeferred.done,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>使用指定的上下文和参数执行失败回调函数队列</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>通过调用</span><span>failDeferred.rejectWith()</span><span>实现</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>rejectWith: failDeferred.resolveWith,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>调用失败回调函数队列</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>通过调用</span><span>failDeferred.resolve()</span><span>实现</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>reject: failDeferred.resolve,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>判断状态是否为成功（</span><span>resolved</span><span>）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>isRejected: failDeferred.isResolved,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>每次调用回调函数之前先调用传入的成功过滤函数或失败过滤函数，并将过滤函数的返回值作为回调函数的参数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>最终返回一个只读视图（调用</span><span>promise</span><span>实现）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// fnDone</span><span>在状态是否为成功（</span><span>resolved</span><span>）时被调用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// fnFail</span><span>在状态是否为失败（</span><span>rejected</span><span>）时被调用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>关于其他的解释：</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// 1. </span><span>有的文章翻译为</span><span>“</span><span>管道机制</span><span>”</span><span>，从字面无法理解要表达什么含义，因此至少是不准确</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// 2. </span><span>错误理解：所谓的</span><span>pipe</span><span>，只是把传入的</span><span>fnDone</span><span>和</span><span>fnFail</span><span>放到了成功队列和失败队列的数组头部</span><span> </span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>pipe: </span><span>function</span><span>( fnDone, fnFail ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>return</span><span> jQuery.Deferred(</span><span>function</span><span>( newDefer ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.each( {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>done: [ fnDone, </span><span>"resolve"</span><span> ], </span><span>//
+  done</span><span>在后文中会指向</span><span>deferred.done</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fail: [ fnFail, </span><span>"reject"</span><span> ]</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}, </span><span>function</span><span>( handler, data ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>var</span><span> fn = data[ 0 ],</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>action = data[ 1 ],</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>returned;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>if</span><span> ( jQuery.isFunction( fn ) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred[ handler ](</span><span>function</span><span>() {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>returned = fn.apply( </span><span>this</span><span>, arguments );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>if</span><span> ( returned &amp;&amp;
+  jQuery.isFunction( returned.promise ) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>returned.promise().then(
+  newDefer.resolve, newDefer.reject );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><span>else</span><span> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>newDefer[ action
+  ]( returned );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><span>else</span><span> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred[ handler ](
+  newDefer[ action ] );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}).promise();</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// Get a promise for this deferred</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// If obj is provided, the promise aspect is added
+  to the object</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>返回的是一个不完整的</span><span>Deferred</span><span>的接口，没有</span><span>resolve</span><span>和</span><span>reject</span><span>，即不能</span><span> </span><span>修改</span><span>Deferred</span><span>对象的状态，</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>这是为了不让外部函数提早触发回调函数，可以看作是一种只读视图。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>比如</span><span>$.ajax</span><span>在</span><span>1.5</span><span>版本后不再返回</span><span>XMLHttpRequest</span><span>，而是返回一个封装了</span><span> XMLHttpRequest</span><span>和</span><span>Deferred</span><span>对象接口的</span><span>object</span><span>。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>其中</span><span>Deferred</span><span>部分就是</span><span>promise()</span><span>得到</span><span> </span><span>的，这样不让外部函数调用</span><span>resolve</span><span>和</span><span>reject</span><span>，防止在</span><span>ajax</span><span>完成前触发回调函数。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>把这两个函数的调用权限保留给</span><span>ajax</span><span>内部。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>promise: </span><span>function</span><span>( obj ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>if</span><span> ( obj == </span><span>null</span><span> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>实际只会执行一次</span><span>promise</span><span>，第一次执行的结果被存储在</span><span>promise</span><span>变量中</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>if</span><span> ( promise ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>return</span><span> promise;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>promise = obj = {};</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>var</span><span> i = promiseMethods.length;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>又一种循环遍历方式</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>我习惯用</span><span>: </span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// for( i = 0; i &lt; len; i++ ) </span><span>或</span><span> for( i = len-1; i &gt;=0;
+  i-- ) </span><span>或</span><span>
+  for( i = len; i--; )</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// jQuery</span><span>真是遍地是宝！</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>while</span><span>( i-- ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>obj[ promiseMethods[i] ] =
+  deferred[ promiseMethods[i] ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>return</span><span> obj;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  Make sure only one callback list will be used</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>成功队列执行完成后，会执行失败带列的取消方法</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>失败队列执行完成后，会执行成功队列的取消方法</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>确保只有一个函数队列会被执行，即要么执行成功队列，要么执行失败队列；</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>即状态只能是或成功、或失败，无交叉调用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  deferred</span><span>和</span><span>failDeferred</span><span>的</span><span>canceled</span><span>属性，只能通过闭包引用，因此不用担心状态、上下文的混乱</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span>deferred.done( failDeferred.cancel ).fail(
+  deferred.cancel );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  Unexpose cancel</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>隐藏</span><span>cancel</span><span>接口，即无法从外部取消成功函数队列</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>delete</span><span> deferred.cancel;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  Call given func if any</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>执行传入的</span><span>func</span><span>函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>if</span><span> ( func ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>func.call( deferred, deferred );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>return</span><span> deferred;</span></p>
+<p class="MsoNormal"><span>}</span></p>
+</td>
+</tr></tbody></table>
+<h2>
+<span><span>5.5<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span>jQuery.when</span>
+</h2>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent2" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span>//
+  Deferred helper</span></p>
+<p class="MsoNormal" style="text-align: left;"><span>//
+  </span><span>异步队列工具函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span>//
+  firstParam</span><span>：一个或多个</span><span>Deferred</span><span>对象或</span><span>JavaScript</span><span>普通对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span>when:
+  </span><span>function</span><span>(
+  firstParam ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>var</span><span> args = arguments,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>i = 0,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>length = args.length,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>count = length,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>如果</span><span>arguments.length</span><span>等于</span><span>1,</span><span>并且</span><span>firstParam</span><span>是</span><span>Deferred</span><span>，则</span><span>deferred=firstParam</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>否则创建一个新的</span><span>Deferred</span><span>对象（如果</span><span>arguments.length</span><span>等于</span><span>0</span><span>或大于</span><span>1</span><span>，则创建一个新的</span><span>Deferred</span><span>对象）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>通过</span><span>jQuery.isFunction( firstParam.promise )</span><span>简单的判断是否是</span><span>Deferred</span><span>对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred = length &lt;= 1 &amp;&amp;
+  firstParam &amp;&amp; jQuery.isFunction( firstParam.promise ) ?</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>firstParam :</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.Deferred();</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>构造成功（</span><span>resolve</span><span>）回调函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>function</span><span> resolveFunc( i ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>return</span><span> </span><span>function</span><span>( value ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>如果传入的参数大于一个，则将传入的参数转换为真正的数组（</span><span>arguments</span><span>没有</span><span>slice</span><span>方法，借鸡生蛋）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>args[ i ] = arguments.length &gt; 1
+  ? sliceDeferred.call( arguments, 0 ) : value;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>if</span><span> ( !( --count ) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// Strange bug in FF4:</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// Values changed onto the arguments object
+  sometimes end up as undefined values</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// outside the $.when method. Cloning the object
+  into a fresh array solves the issue</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>执行成功回调函数队列，上下文强制为传入的第一个</span><span>Deferred</span><span>对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred.resolveWith( deferred,
+  sliceDeferred.call( args, 0 ) );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>};</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>如果参数多于一个</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>if</span><span> ( length &gt; 1 ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>for</span><span>( ; i &lt; length; i++ ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>简单的判断是否是</span><span>Deferred</span><span>对象，是则调用</span><span>.promise().then()</span><span>，否则忽略</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>if</span><span> ( args[ i ] &amp;&amp; jQuery.isFunction( args[ i
+  ].promise ) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>增加成功回调函数和失败回调函数到各自的队列中</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>args[ i ].promise().then(
+  resolveFunc(i), deferred.reject );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><span>else</span><span> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>计数器，表示发现不是</span><span>Deferred</span><span>对象，而是普通</span><span>JavaScript</span><span>对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>--count;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>计数器为</span><span>0</span><span>时，表示传入的参数都不是</span><span>Deferred</span><span>对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>执行成功回调函数队列，上下文强制为传入的第一个</span><span>Deferred</span><span>对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>if</span><span> ( !count ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred.resolveWith( deferred,
+  args );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  deferred !== firstParam</span><span>，即</span><span>deferred</span><span>为新创建的</span><span>Deferred</span><span>对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>即</span><span>length
+  == 0</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span>} </span><span>else</span><span> </span><span>if</span><span> ( deferred !== firstParam ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span>// </span><span>执行成功回调函数队列，上下文强制为新创建的</span><span>Deferred</span><span>对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferred.resolveWith( deferred, length
+  ? [ firstParam ] : [] );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>返回传入的第一个</span><span>Deferred</span><span>或新创建的</span><span>Deferred</span><span>对象的只读视图</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>return</span><span> deferred.promise();</span></p>
+<p class="MsoNormal"><span>}</span><strong></strong></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal"><span>&nbsp;</span></p>
+<span><br></span>
+<p class="MsoNormal" style="text-align: left;"><strong><span>&nbsp;</span></strong></p>
+</div>
+<p>
+<strong><span><br></span></strong></p>
+<h2>
+<span><span>5.6<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span>Deferred</span>应用</h2>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span><span>jQuery.ajax()</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span style="font-family: Wingdings;">n</span><span style="">&nbsp; </span></span><span>TODO</span></p>
+<h2>
+<span><span>5.7<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>可以学习的技巧</h2>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>闭包</p>
+<p>&nbsp;</p>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent3" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td width="712" style="width: 534.1pt; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>function a(){</span></span></p>
+<p class="MsoNormal"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span>var guid = 1;</span></span></span></p>
+<p class="MsoNormal"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span>return function(){</span></span></span></p>
+<p class="MsoNormal"><span><span><span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>return guid++;</span></span></span></p>
+<p class="MsoNormal"><span><span><span><span>&nbsp;&nbsp;&nbsp; </span>}</span></span></span></p>
+<p class="MsoNormal"><span><span><span>}</span></span></span></p>
+<p class="MsoNormal"><span><span><span>&nbsp;</span></span></span></p>
+<p class="MsoNormal"><span><span><span>var defer = a();</span></span></span></p>
+<p class="MsoNormal"><span><span><span>&nbsp;</span></span></span></p>
+<p class="MsoNormal"><span><span><span>console.info( defer() ); // 1</span></span></span></p>
+<p class="MsoNormal"><span><span><span>console.info( defer() ); // 2</span></span></span></p>
+<p class="MsoNormal"><span><span><span>console.info( defer() ); // 3</span></span></span></p>
+<p class="MsoNormal"><span><span><span>console.info( defer() ); // 4</span></span></span><span><span><strong></strong></span></span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>避免<span>null</span>、<span>undefined</span>造成<span>ReferenceError</span>的常见技巧</p>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent3" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td width="712" style="width: 534.1pt; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><strong><span>args
+  = args || [];</span></strong><strong></strong></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>遍历动态数组的技巧</p>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent3" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td width="712" style="width: 534.1pt; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span>while</span><strong><span>(
+  callbacks[ 0 ] ) {</span></strong><strong></strong></p>
+<p class="MsoNormal" style="text-align: left;"><strong><span><span>&nbsp;&nbsp;&nbsp; </span>callbacks.shift().apply( context, args );</span></strong><strong></strong></p>
+<p class="MsoNormal"><strong><span>}</span></strong><strong></strong></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span><span>try/catch/finally </span>实现错误处理</p>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent3" cellspacing="0" style="border-collapse: collapse; border: none;">
+<tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt; height: 24.6pt;">
+<p class="MsoNormal" style="text-align: center;"><strong><span>语法</span></strong><strong></strong></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 24.6pt;">
+<p class="MsoNormal" style="text-align: center;"><strong><span>说明</span></strong><strong></strong></p>
+</td>
+</tr>
+<tr style="height: 45.25pt;">
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 45.25pt;">
+<p class="MsoNormal"><span>try </span><strong><span>{</span></strong><strong></strong></p>
+<p class="MsoNormal"><strong><span><span>&nbsp;&nbsp;&nbsp; </span></span></strong><strong><span>// tryStatements </span></strong><strong></strong></p>
+<p class="MsoNormal"><strong><span>} </span></strong><span>catch</span><strong><span>( exception ) {</span></strong><strong></strong></p>
+<p class="MsoNormal"><strong><span><span>&nbsp;&nbsp;&nbsp; </span></span></strong><strong><span>// catchStatements </span></strong></p>
+<p class="MsoNormal"><strong><span>} </span></strong><span>finally</span><strong><span> {</span></strong><strong></strong></p>
+<p class="MsoNormal"><strong><span><span>&nbsp;&nbsp;&nbsp; </span></span></strong><strong><span>// finallyStatements </span></strong></p>
+<p class="MsoNormal"><strong><span>}</span></strong><strong></strong></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 45.25pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt;">tryStatements<strong></strong></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 45.25pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt;">必选项。</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">可能发生错误的语句。</span><strong></strong></p>
+</td>
+</tr>
+<tr style="height: 45.2pt;">
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 45.2pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt;">exception<strong></strong></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 45.2pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt;">必选项。任何变量名。</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">exception </span><span style="font-size: 10.0pt;">的初始化值是扔出的错误的值。</span><strong></strong></p>
+</td>
+</tr>
+<tr style="height: 45.2pt;">
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 45.2pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt;">catchStatements<strong></strong></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 45.2pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt;">可选项。</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">处理在相关联的</span><span style="font-size: 10.0pt;"> tryStatement </span><span style="font-size: 10.0pt;">中发生的错误的语句。</span><strong></strong></p>
+</td>
+</tr>
+<tr style="height: 45.2pt;">
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 45.2pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt;">finallyStatements<strong></strong></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt; height: 45.2pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt;">可选项。</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">在所有其他过程发生之后无条件执行的语句。</span><strong></strong></p>
+</td>
+</tr>
+</tbody></table>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>链式对象：通过返回<span>this</span>实现链式调用</p>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent2" width="100%" cellspacing="0" style="width: 100.0%; border-collapse: collapse; border: none;">
+<tbody><tr>
+<td width="50%" style="width: 50.0%; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><strong><span>方法</span></strong></p>
+</td>
+<td width="50%" style="width: 50.0%; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><strong><span>返回值</span></strong></p>
+</td>
+</tr>
+<tr>
+<td width="50%" style="width: 50.0%; border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>done</span></p>
+</td>
+<td width="50%" style="width: 50.0%; border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>this</span>（即<span>deferred</span>）</p>
+</td>
+</tr>
+<tr>
+<td width="50%" style="width: 50.0%; border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>resolveWith</span></p>
+</td>
+<td width="50%" style="width: 50.0%; border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>this</span>（即<span>deferred</span>）</p>
+</td>
+</tr>
+<tr>
+<td width="50%" style="width: 50.0%; border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>resolve</span></p>
+</td>
+<td width="50%" style="width: 50.0%; border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>this</span>（即<span>deferred</span>）</p>
+</td>
+</tr>
+<tr>
+<td width="50%" style="width: 50.0%; border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>cancel</span></p>
+</td>
+<td width="50%" style="width: 50.0%; border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>this</span>（即<span>deferred</span>）</p>
+</td>
+</tr>
+</tbody></table>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>代码复用<span> $.each</span></p>
+<table border="1" cellpadding="0" class="MsoTableLightGridAccent3" width="100%" cellspacing="0" style="width: 100.0%; border-collapse: collapse; border: none;"><tbody><tr>
+<td width="100%" style="width: 100.0%; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span>jQuery.each(
+  {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span>&nbsp;&nbsp;&nbsp; </span></span></span><span>done: [ fnDone, </span><span>"resolve"</span><span> ], </span><span>//
+  done</span><span>在后文中会指向</span><span>deferred.done</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span>fail: [ fnFail, </span><span>"reject"</span><span> ]</span></p>
+<p class="MsoNormal"><span>}, </span><span>function</span><span>( handler, data )
+  {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span>&nbsp;&nbsp;&nbsp; </span></span><span>//
+  </span><span>公共代码复用</span></p>
+<p class="MsoNormal"><span>});</span></p>
+</td>
+</tr></tbody></table>
+<h2>
+<span><span>5.8<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>后续</h2>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span><span>Deferred</span>在<span>jQuery</span>中的应用</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span><span>Deferred</span>的自定义应用</p>
+  </div>
+
+  
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/794.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1174798#" onclick="digg(&quot;blogs&quot;, 1174798, false);return false;"><div><strong>3</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1174798#" onclick="digg(&quot;blogs&quot;, 1174798, true);return false;"><div><strong>1</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1177436" class="next" title="天天向上--充分利用Win7+大屏幕显示器">天天向上--充分利用Win7+大屏幕显示器</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1172137" class="pre" title="[原创] jQuery源码分析-16动画分析和扩展 Effects">[原创] jQuery源码分析-16动画分析和扩展 ...</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-09-19 01:50</li>
+      <li>浏览 10700</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1174798#comments">评论(7)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-05%E5%BC%82%E6%AD%A5%E9%98%9F%E5%88%97+Deferred&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1174798" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-05%E5%BC%82%E6%AD%A5%E9%98%9F%E5%88%97+Deferred&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1174798&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/spinner.gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1174798" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    <div id="bc2327452">
+  <div class="comment_title">
+    7 楼
+    <a href="http://zzy7186.iteye.com/" target="_blank" title="zzy7186">zzy7186</a>
+    2013-10-09&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1174798#" onclick="quote_comment(2327452);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_idea.gif"> 谢了 学习了&nbsp; 很详细啊 不知道作者的书什么时候出版啊 </div>
+</div>
+
+<div id="bc2293718">
+  <div class="comment_title">
+    6 楼
+    <a href="http://cbhjatarj.iteye.com/" target="_blank" title="cbhjatarj">cbhjatarj</a>
+    2012-12-15&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1174798#" onclick="quote_comment(2293718);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">mu0001 写道</div><div class="quote_div">好晕啊，水平不够<img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_redface.gif"> </div><br></div>
+</div>
+
+<div id="bc2287081">
+  <div class="comment_title">
+    5 楼
+    <a href="http://coolicer.iteye.com/" target="_blank" title="mu0001">mu0001</a>
+    2012-10-29&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1174798#" onclick="quote_comment(2287081);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">好晕啊，水平不够<img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_redface.gif"> </div>
+</div>
+
+<div id="bc2250646">
+  <div class="comment_title">
+    4 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2012-03-31&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1174798#" onclick="quote_comment(2250646);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">王向众 写道</div><div class="quote_div">看得一塌糊涂啊。。。</div><br>耐心的看吧，jQuery值得投入精力去研究</div>
+</div>
+
+<div id="bc2250645">
+  <div class="comment_title">
+    3 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2012-03-31&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1174798#" onclick="quote_comment(2250645);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">王向众 写道</div><div class="quote_div">看得一塌糊涂啊。。。</div><br>后边多的是，哈哈</div>
+</div>
+
+<div id="bc2250415">
+  <div class="comment_title">
+    2 楼
+    <a href="http://742766812-qq-com.iteye.com/" target="_blank" title="王向众">王向众</a>
+    2012-03-30&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1174798#" onclick="quote_comment(2250415);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">看得一塌糊涂啊。。。</div>
+</div>
+
+<div id="bc2225610">
+  <div class="comment_title">
+    1 楼
+    <a href="http://xiaofei85390656-163-com.iteye.com/" target="_blank" title="晨曦的朝阳">晨曦的朝阳</a>
+    2011-10-29&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1174798#" onclick="quote_comment(2225610);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">这一节确实有难度，断断续续看了好多遍，总算明白了一些，设计得确实很精妙。</div>
+</div>
+
+
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_redface(1).gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_idea(1).gif"><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1174798', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1174798;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-05异步队列 Deferred');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-05异步队列 Deferred');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349112 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed?subscription%5Bsubscribed_user_name%5D=nuysoft" class="subscription" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-05异步队列 Deferred - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

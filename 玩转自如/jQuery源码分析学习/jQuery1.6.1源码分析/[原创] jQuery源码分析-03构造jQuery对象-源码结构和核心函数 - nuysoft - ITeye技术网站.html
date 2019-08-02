@@ -1,0 +1,968 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1182087 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com  毕竟是边读边写，不对的地方请告诉我，多多交流共同进步。本章还未写完，完了会提交PDF。     前记：  想系统的好好写写，但是会先从感兴趣的部分开始。  近期有读者把PDF传到了百度文库上，首先感谢转载和传播，但是据为已有并设置了挺高的财富值才能下载就不好了，以后我整理好了会传到文库上。请体谅一下 ...">
+    <meta name="keywords" content="web, javascript, jquery, 构造jquery对象, 源码结构和核心函数 [原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/web">web</a><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/%E6%9E%84%E9%80%A0jquery%E5%AF%B9%E8%B1%A1">构造jquery对象</a><a href="http://www.iteye.com/blogs/tag/%E6%BA%90%E7%A0%81%E7%BB%93%E6%9E%84%E5%92%8C%E6%A0%B8%E5%BF%83%E5%87%BD%E6%95%B0">源码结构和核心函数</a></div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <p>作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com</p>
+<p>毕竟是边读边写，不对的地方请告诉我，多多交流共同进步。本章还未写完，完了会提交PDF。</p>
+<p>&nbsp;</p>
+<p>前记：</p>
+<p>想系统的好好写写，但是会先从感兴趣的部分开始。</p>
+<p>近期有读者把PDF传到了百度文库上，首先感谢转载和传播，但是据为已有并设置了挺高的财富值才能下载就不好了，以后我整理好了会传到文库上。请体谅一下。</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 24px; font-weight: bold;"><span><span>3.<span style=""> </span></span></span>构造<span>jQuery</span>对象</span></p>
+<h2>
+<span><span>3.1<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>源码结构</h2>
+<p class="MsoNormal">先看看总体结构，再做分解：</p>
+<table class="MsoTableLightGridAccent3" style="border-collapse: collapse; border: none;" cellpadding="0" border="1" cellspacing="0"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">(</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( window, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery = (</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">() {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">构建</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( selector, context ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">new</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery.fn.init( selector, context,
+  rootjQuery );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">对象原型</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.fn = jQuery.prototype = {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>constructor: jQuery,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( selector, context, rootjQuery )
+  {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// selector</span><span style="font-size: 11.0pt; color: #3f7f5f;">有以下</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">7</span><span style="font-size: 11.0pt; color: #3f7f5f;">种分支情况：</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// DOM</span><span style="font-size: 11.0pt; color: #3f7f5f;">元素</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// body</span><span style="font-size: 11.0pt; color: #3f7f5f;">（优化）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">字符串：</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">HTML</span><span style="font-size: 11.0pt; color: #3f7f5f;">标签、</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">HTML</span><span style="font-size: 11.0pt; color: #3f7f5f;">字符串、</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">#id</span><span style="font-size: 11.0pt; color: #3f7f5f;">、选择器表达式</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">函数（作为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">ready</span><span style="font-size: 11.0pt; color: #3f7f5f;">回调函数）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">最后返回伪数组</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>};</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Give the <span style="text-decoration: underline;">init</span> function the jQuery prototype for later
+  instantiation</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.fn.init.prototype = jQuery.fn;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">合并内容到第一个参数中，后续大部分功能都通过该函数扩展</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">通过</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.fn.extend</span><span style="font-size: 11.0pt; color: #3f7f5f;">扩展的函数，大部分都会调用通过</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.extend</span><span style="font-size: 11.0pt; color: #3f7f5f;">扩展的同名函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.extend = jQuery.fn.extend = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">() {};</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">在</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">上扩展静态方法</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.extend({</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// ready bindReady</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// isPlainObject isEmptyObject</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// parseJSON parseXML</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// globalEval</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// each makeArray inArray merge grep
+  map</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// proxy</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// access</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// uaMatch</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// sub</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// browser</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">到这里，</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">对象构造完成，后边的代码都是对</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">或</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">对象的扩展</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>})();</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>window.jQuery = window.$ = jQuery;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">})(window);</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span style="font-size: 11.0pt; font-family: Wingdings;"><span>l<span style="">&nbsp;</span></span></span><span>jQuery</span>对象不是通过 <strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">new</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery</span><span style="font-family: Consolas;"> </span>创建的，而是通过
+<strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">new</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery.fn.init </span>创建的</p>
+<p class="MsoListParagraph">&nbsp;</p>
+<table class="MsoTableLightGridAccent3" style="margin-left: 26.7pt; border-collapse: collapse; border: none;" cellpadding="0" border="1" cellspacing="0"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( selector, context ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">new</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery.fn.init( selector, context,
+  rootjQuery );</span></p>
+<p class="MsoListParagraph" style="text-align: left; text-indent: 0cm;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">}</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span style="font-size: 11.0pt; font-family: Wingdings; color: black;"><span>n<span style="">&nbsp; </span></span></span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery</span><span style="font-size: 11.0pt; color: black;">对象就是</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.fn.init</span><span style="font-size: 11.0pt; color: black;">对象</span></p>
+<p class="MsoListParagraph"><span style="font-size: 11.0pt; font-family: Wingdings; color: black;"><span>n<span style="">&nbsp; </span></span></span><span style="font-size: 11.0pt;">如果执行</span><span style="font-size: 11.0pt; font-family: Consolas;">new
+jQeury(),</span><span style="font-size: 11.0pt;">生成的</span><span style="font-size: 11.0pt; font-family: Consolas;">jQuery</span><span style="font-size: 11.0pt;">对象会被抛弃，最后返回</span><span style="font-size: 11.0pt; font-family: Consolas;"> <span style="color: black;">jQuery.fn.init</span></span><span style="font-size: 11.0pt; color: black;">对象；因此可以直接调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery( selector, context )</span><span style="font-size: 11.0pt; color: black;">，没有必要使用</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">new</span><span style="font-size: 11.0pt; color: black;">关键字</span></p>
+<p class="MsoListParagraph"><span style="font-size: 11.0pt; font-family: Wingdings; color: black;"><span>l<span style="">&nbsp; </span></span></span><span style="font-size: 11.0pt; color: black;">先执行</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">
+<span>jQuery.fn = jQuery.prototype</span></span><span style="font-size: 11.0pt; color: black;">，再执行</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">
+<span>jQuery.fn.init.prototype = jQuery.fn</span></span><span style="font-size: 11.0pt; color: black;">，合并后的代码如下：</span></p>
+<table class="MsoTableLightGridAccent3" style="margin-left: 26.7pt; border-collapse: collapse; border: none;" cellpadding="0" border="1" cellspacing="0"><tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoListParagraph" style="text-align: left; text-indent: 0cm;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left; text-indent: 21.0pt;"><span style="font-size: 11.0pt;">所有挂载到</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.fn</span><span style="font-size: 11.0pt; color: black;">的方法，相当于挂载到了</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.prototype</span><span style="font-size: 11.0pt; color: black;">，即挂载到了</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery
+</span><span style="font-size: 11.0pt; color: black;">函数上（一开始的</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">
+<span>jQuery = </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( selector, context ) </span><span style="font-size: 11.0pt; color: black;">），但是最后都相当于挂载到了</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> <span>jQuery.fn.init.prototype</span></span><span style="font-size: 11.0pt; color: black;">，即相当于挂载到了一开始的</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery </span><span style="font-size: 11.0pt; color: black;">函数返回的对象上，即挂载到了我们最终使用的</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery</span><span style="font-size: 11.0pt; color: black;">对象上。</span></p>
+<p class="MsoNormal" style="text-align: left; text-indent: 21.0pt;"><span style="font-size: 11.0pt; color: black;">这个过程非常的绕，金玉其外“败絮”其中啊！</span></p>
+<h2>
+<span><span>3.2<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span>jQuery.fn.init</span>
+</h2>
+<p class="MsoNormal"><span>jQuery.fn.init</span>的功能是对传进来的<span>selector</span>参数进行分析，进行各种不同的处理，然后生成<span>jQuery</span>对象。</p>
+<p>&nbsp;</p>
+<table class="MsoTableLightGridAccent3" style="border-collapse: collapse; border: none;" cellpadding="0" border="1" cellspacing="0">
+<tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><a name="OLE_LINK31"></a><a name="OLE_LINK30"><span><strong><span>类型（<span>selector</span>）</span></strong></span></a></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><strong><span>处理方式</span></strong></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>DOM</span></span></span><span><span><span>元素</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>包装成<span>jQuery</span>对象，直接返回</span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>body</span></span></span><span><span><span>（优化）</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>从<span>document.body</span>读取</span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>单独的<span>HTML</span>标签</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>document.createElement</span></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>HTML</span></span></span><span><span><span>字符串</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>document.createDocumentFragment</span></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>#id</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>document.getElementById</span></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>选择器表达式</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>$(…).find</span></span></span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span><span>函数</span></span></span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span><span>注册到<span>dom ready</span>的回调函数</span></span></p>
+</td>
+</tr>
+</tbody></table>
+<h2>
+<span><span>3.3<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><span>jQuery.extend =
+jQuery.fn.extend</span>
+</h2>
+<table class="MsoTableLightGridAccent3" style="border-collapse: collapse; border: none;" cellpadding="0" border="1" cellspacing="0"><tbody><tr>
+<td width="891" style="width: 668.0pt; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">合并两个或更多对象的属性到第一个对象中，</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">后续的大部分功能都通过该函数扩展</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">通过</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.fn.extend</span><span style="font-size: 11.0pt; color: #3f7f5f;">扩展的函数，大部分都会调用通过</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.extend</span><span style="font-size: 11.0pt; color: #3f7f5f;">扩展的同名函数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果传入两个或多个对象，所有对象的属性会被添加到第一个对象</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">target</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果只传入一个对象，则将对象的属性添加到</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">对象中。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">用这种方式，我们可以为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">命名空间增加新的方法。可以用于编写</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">插件。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果不想改变传入的对象，可以传入一个空对象：</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">$.extend({}, object1, object2);</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">默认合并操作是不迭代的，即便</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">target</span><span style="font-size: 11.0pt; color: #3f7f5f;">的某个属性是对象或属性，也会被完全覆盖而不是合并</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">第一个参数是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">true</span><span style="font-size: 11.0pt; color: #3f7f5f;">，则会迭代合并</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">从</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">object</span><span style="font-size: 11.0pt; color: #3f7f5f;">原型继承的属性会被拷贝</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// undefined</span><span style="font-size: 11.0pt; color: #3f7f5f;">值不会被拷贝</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">因为性能原因，</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">JavaScript</span><span style="font-size: 11.0pt; color: #3f7f5f;">自带类型的属性不会合并</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// jQuery.extend(
+  target, [ object1 ], [ objectN ] )</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// jQuery.extend( [
+  deep ], target, object1, [ objectN ] )</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.extend =
+  jQuery.fn.extend = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">() {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> options, name, src, copy, copyIsArray,
+  clone,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>target = arguments[0] || {},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>i = 1,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>length = arguments.length,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deep = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">false</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Handle a
+  deep copy situation</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果第一个参数是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">boolean</span><span style="font-size: 11.0pt; color: #3f7f5f;">型，可能是深度拷贝</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">typeof</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> target === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"boolean"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deep = target;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>target = arguments[1] || {};</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// skip the boolean and the target</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">跳过</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">boolean</span><span style="font-size: 11.0pt; color: #3f7f5f;">和</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">target</span><span style="font-size: 11.0pt; color: #3f7f5f;">，从第</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">3</span><span style="font-size: 11.0pt; color: #3f7f5f;">个开始</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>i = 2;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Handle
+  case when target is a string or something (possible in deep copy)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// target</span><span style="font-size: 11.0pt; color: #3f7f5f;">不是对象也不是函数，则强制设置为空对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">typeof</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> target !== </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"object"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> &amp;&amp; !jQuery.isFunction(target) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>target = {};</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// extend
+  jQuery itself if only one argument is passed</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果只传入一个参数，则认为是对</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">扩展</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( length === i ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>target = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>--i;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">for</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( ; i &lt; length; i++ ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Only deal with non-null/undefined values</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">只处理非空参数</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( (options = arguments[ i ]) != </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">null</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Extend the base object</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">for</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( name </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">in</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> options ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>src = target[ name ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>copy = options[ name ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Prevent never-ending loop</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// </span><span style="font-size: 11.0pt; color: #3f7f5f;">避免循环引用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( target === copy ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">continue</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Recurse if we're merging plain objects or arrays</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">深度拷贝且值是纯对象或数组，则递归</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( deep &amp;&amp; copy &amp;&amp; (
+  jQuery.isPlainObject(copy) || (copyIsArray = jQuery.isArray(copy)) ) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">copy</span><span style="font-size: 11.0pt; color: #3f7f5f;">是数组</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( copyIsArray ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>copyIsArray = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">false</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// clone</span><span style="font-size: 11.0pt; color: #3f7f5f;">为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">src</span><span style="font-size: 11.0pt; color: #3f7f5f;">的修正值</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>clone = src &amp;&amp;
+  jQuery.isArray(src) ? src : [];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">copy</span><span style="font-size: 11.0pt; color: #3f7f5f;">的是对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// clone</span><span style="font-size: 11.0pt; color: #3f7f5f;">为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">src</span><span style="font-size: 11.0pt; color: #3f7f5f;">的修正值</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>clone = src &amp;&amp;
+  jQuery.isPlainObject(src) ? src : {};</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Never move original objects, clone them</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">递归调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.extend</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>target[ name ] =
+  jQuery.extend( deep, clone, copy );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Don't bring in undefined values</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">不能拷贝空值</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( copy !== </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>target[ name ] = copy;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Return the
+  modified object</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">返回更改后的对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> target;</span></p>
+<p class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">};</span></p>
+</td>
+</tr></tbody></table>
+<p>&nbsp;</p>
+<p>未完待续</p>
+  </div>
+
+  
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/794.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1182087#" onclick="digg(&quot;blogs&quot;, 1182087, false);return false;"><div><strong>21</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1182087#" onclick="digg(&quot;blogs&quot;, 1182087, true);return false;"><div><strong>0</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1182844" class="next" title="[原创] jQuery源码分析-15AJAX-类型转换器">[原创] jQuery源码分析-15AJAX-类型转换器</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1180967" class="pre" title="[原创] jQuery源码分析-如何做jQuery源码分析">[原创] jQuery源码分析-如何做jQuery源码 ...</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-09-28 02:20</li>
+      <li>浏览 36391</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1182087#comments">评论(27)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-03%E6%9E%84%E9%80%A0jQuery%E5%AF%B9%E8%B1%A1-%E6%BA%90%E7%A0%81%E7%BB%93%E6%9E%84%E5%92%8C%E6%A0%B8%E5%BF%83%E5%87%BD%E6%95%B0&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1182087" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-03%E6%9E%84%E9%80%A0jQuery%E5%AF%B9%E8%B1%A1-%E6%BA%90%E7%A0%81%E7%BB%93%E6%9E%84%E5%92%8C%E6%A0%B8%E5%BF%83%E5%87%BD%E6%95%B0&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1182087&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/spinner.gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1182087" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    <div id="bc2323248">
+  <div class="comment_title">
+    27 楼
+    <a href="http://edword3838.iteye.com/" target="_blank" title="edword3838">edword3838</a>
+    2013-08-22&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2323248);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">shenwa12 写道</div><div class="quote_div"><div class="quote_title">hanazawakana 写道</div><div class="quote_div"><div class="quote_title">dingchao.lonton 写道</div><div class="quote_div"><div class="quote_title">清风扬思 写道</div><div class="quote_div"><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype<br><br>这个并不绕啊，将jQuery.fn.init的prototype属性设置为jQuery.fn，那么使用new jQuery.fn.init()生成的对象的原型对象就是jQuery.fn，<br><br>所以挂载到jQuery.fn上面的函数就相当于挂载到jQuery.fn.init()生成的jQuery对象上。</div><br><br><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype 对于这句话， 前面的jQuery.fn.init.prototype = jQuery.fn这个赋值很好理解，刚开始我没有弄懂为什么jQuery.fn = jQuery.prototype，貌似没什么必要，是，在 var x = jQuery(yyy);这种情况下，确实是没什么必要， 但是如果是这样写&nbsp; var x = new jQuery();这种写法，就是必须的了<br>总之： jQuery.fn.init.prototype = jQuery.fn 是应付 var x = jQuery(yyy);这种写法的jQuery.fn = jQuery.prototype&nbsp; 是应付var x = new jQuery(yyy);这种写法的。<br></div><br><br>你好，请问为什么 jQuery.fn.init.prototype = jQuery.fn 是应付 var x = jQuery(yyy)？？？</div><br>主要是对 对象的维护 因为只要一旦new 就会去查找实例的静态属性方法和对象的prototype属性，将其copy生成一个新的对象，如果中途修改或增加原型对象的属性，那么也会同时更新这个Object对象，原型对象的属性是被其所有的实例所共享的，所以在修改其属性值的同时也需要额外小心，因为一不小心会影响其它的实例对象，所以对象的prototype在这边的重要性不言而喻&nbsp; jQuery.fn === jQuery.prototype === jQuery.fn.init.prototype ，最后， jQuery返回的对象的成员和 jQuery.fn 的成员匹配。</div><br><div class="quote_title">flybbjcs70 写道</div><div class="quote_div">lz:<br>不清楚为什么要jquery.prototype.<br>最终生成的jquery对象原型都是init.prototype吧<br></div><br><br>没那么复杂， 我想原因很简单 jquery.fn比jquery.prototype短，prototype这玩意不能优化, jquery插件都要引用jquery.fn的，我想这是jquery.fn的作用。至于jquery.fn.init.prototype是为了保护jquery， 比如某个笨蛋刚接触jquery直接用jquery.prototype扩展jquery(这是直觉上最容易想到的方法，js嘛)，还是这种错误写法jquery.prototype={...} ，如果没有init.prototype， jquery就不能用了。如果这个笨蛋还写了jquery.fn.init.prototype={...}，好吧，这个笨蛋很变态，我给他跪了<br></div>
+</div>
+
+<div id="bc2318561">
+  <div class="comment_title">
+    26 楼
+    <a href="http://flybbjcs70.iteye.com/" target="_blank" title="flybbjcs70">flybbjcs70</a>
+    2013-07-14&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2318561);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">lz:<br>不清楚为什么要jquery.prototype.<br>最终生成的jquery对象原型都是init.prototype吧<br></div>
+</div>
+
+<div id="bc2307664">
+  <div class="comment_title">
+    25 楼
+    <a href="http://shenwa12.iteye.com/" target="_blank" title="shenwa12">shenwa12</a>
+    2013-04-14&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2307664);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">hanazawakana 写道</div><div class="quote_div"><div class="quote_title">dingchao.lonton 写道</div><div class="quote_div"><div class="quote_title">清风扬思 写道</div><div class="quote_div"><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype<br><br>这个并不绕啊，将jQuery.fn.init的prototype属性设置为jQuery.fn，那么使用new jQuery.fn.init()生成的对象的原型对象就是jQuery.fn，<br><br>所以挂载到jQuery.fn上面的函数就相当于挂载到jQuery.fn.init()生成的jQuery对象上。</div><br><br><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype 对于这句话， 前面的jQuery.fn.init.prototype = jQuery.fn这个赋值很好理解，刚开始我没有弄懂为什么jQuery.fn = jQuery.prototype，貌似没什么必要，是，在 var x = jQuery(yyy);这种情况下，确实是没什么必要， 但是如果是这样写&nbsp; var x = new jQuery();这种写法，就是必须的了<br>总之： jQuery.fn.init.prototype = jQuery.fn 是应付 var x = jQuery(yyy);这种写法的jQuery.fn = jQuery.prototype&nbsp; 是应付var x = new jQuery(yyy);这种写法的。<br></div><br><br>你好，请问为什么 jQuery.fn.init.prototype = jQuery.fn 是应付 var x = jQuery(yyy)？？？</div><br>主要是对 对象的维护 因为只要一旦new 就会去查找实例的静态属性方法和对象的prototype属性，将其copy生成一个新的对象，如果中途修改或增加原型对象的属性，那么也会同时更新这个Object对象，原型对象的属性是被其所有的实例所共享的，所以在修改其属性值的同时也需要额外小心，因为一不小心会影响其它的实例对象，所以对象的prototype在这边的重要性不言而喻&nbsp; jQuery.fn === jQuery.prototype === jQuery.fn.init.prototype ，最后， jQuery返回的对象的成员和 jQuery.fn 的成员匹配。</div>
+</div>
+
+<div id="bc2304544">
+  <div class="comment_title">
+    24 楼
+    <a href="http://hanazawakana.iteye.com/" target="_blank" title="hanazawakana">hanazawakana</a>
+    2013-03-19&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2304544);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">dingchao.lonton 写道</div><div class="quote_div"><div class="quote_title">清风扬思 写道</div><div class="quote_div"><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype<br><br>这个并不绕啊，将jQuery.fn.init的prototype属性设置为jQuery.fn，那么使用new jQuery.fn.init()生成的对象的原型对象就是jQuery.fn，<br><br>所以挂载到jQuery.fn上面的函数就相当于挂载到jQuery.fn.init()生成的jQuery对象上。</div><br><br><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype 对于这句话， 前面的jQuery.fn.init.prototype = jQuery.fn这个赋值很好理解，刚开始我没有弄懂为什么jQuery.fn = jQuery.prototype，貌似没什么必要，是，在 var x = jQuery(yyy);这种情况下，确实是没什么必要， 但是如果是这样写&nbsp; var x = new jQuery();这种写法，就是必须的了<br>总之： jQuery.fn.init.prototype = jQuery.fn 是应付 var x = jQuery(yyy);这种写法的jQuery.fn = jQuery.prototype&nbsp; 是应付var x = new jQuery(yyy);这种写法的。<br></div><br><br>你好，请问为什么 jQuery.fn.init.prototype = jQuery.fn 是应付 var x = jQuery(yyy)？？？</div>
+</div>
+
+<div id="bc2304524">
+  <div class="comment_title">
+    23 楼
+    <a href="http://hanazawakana.iteye.com/" target="_blank" title="hanazawakana">hanazawakana</a>
+    2013-03-19&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2304524);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">nuysoft 写道</div><div class="quote_div"><div class="quote_title">wwwsyccom 写道</div><div class="quote_div">"如果执行new jQeury(),生成的jQuery对象会被抛弃，最后返回 jQuery.fn.init对象；"<br>这句话是不是有问题哈，如果执行new jquery()，返回的还是jquery对象吧，而不是jquery,fn.init对象，平时我们用jquery()或$()返回的是jquery.fn.init对象。<br><br>执行new jquery(),js会创建一个jquery类型的对象jqueryTemp，然后调用jquery()方法，把jquery的执行环境设置为先创建的object,类似于调用jquery.call(jqueryTemp)，最后返回jqueryTemp。这是通过new jquery()创建对象时，js底层的执行机制吧，其他的通过new创建对象也是一样的。<br><br></div><br>构造函数如果有返回值，并且返回值是一个对象，则会丢弃运算符 new 创建的临时对象。这个与 jQuery 无关，属于运算符 new 的知识。</div><br><br><br>同意!</div>
+</div>
+
+<div id="bc2302699">
+  <div class="comment_title">
+    22 楼
+    <a href="http://javatozhang.iteye.com/" target="_blank" title="javatozhang">javatozhang</a>
+    2013-03-06&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2302699);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">javatozhang 写道</div><div class="quote_div"><div class="quote_title">nuysoft 写道</div><div class="quote_div">@javatozhang 调用 jQuery.extend() 时 this 指向 jQuery，调用 jQuery.fn.extend() 时 this 指向 jQuery.fn。</div><br>明白了。谢谢！还是对js基础知识掌握的不牢。在学习中！非常感谢！！！</div><br>看了lz的回复又重新温故了一下js的基础知识对于以下经典的例子就容易理解了。<br>例子代码贴出来：<br>//例子1<br>var name = "The Window";<br>　　var object = {<br>　　　　name : "My Object",<br><br>　　　　getNameFunc : function(){<br>　　　　　　return function(){<br>　　　　　　　　return this.name;<br>　　　　　　};<br>　　　　}<br>　　};<br>　　alert(object.getNameFunc()());<br>//例子2<br>var name = "The Window";<br>　　var object = {<br>　　　　name : "My Object",<br>　　　　getNameFunc : function(){<br>　　　　　　var that = this;<br>　　　　　　return function(){<br>　　　　　　　　return that.name;<br>　　　　　　};<br>　　　　}<br>　　};<br>　　alert(object.getNameFunc()()); <br>谢谢lz。<br></div>
+</div>
+
+<div id="bc2302648">
+  <div class="comment_title">
+    21 楼
+    <a href="http://javatozhang.iteye.com/" target="_blank" title="javatozhang">javatozhang</a>
+    2013-03-05&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2302648);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">nuysoft 写道</div><div class="quote_div">@javatozhang 调用 jQuery.extend() 时 this 指向 jQuery，调用 jQuery.fn.extend() 时 this 指向 jQuery.fn。</div><br>明白了。谢谢！还是对js基础知识掌握的不牢。在学习中！非常感谢！！！</div>
+</div>
+
+<div id="bc2302634">
+  <div class="comment_title">
+    20 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2013-03-05&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2302634);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">@javatozhang 调用 jQuery.extend() 时 this 指向 jQuery，调用 jQuery.fn.extend() 时 this 指向 jQuery.fn。</div>
+</div>
+
+<div id="bc2302610">
+  <div class="comment_title">
+    19 楼
+    <a href="http://javatozhang.iteye.com/" target="_blank" title="javatozhang">javatozhang</a>
+    2013-03-05&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2302610);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">//源代码贴出来 <br>jQuery.extend = jQuery.fn.extend = function() {<br><br>&nbsp;&nbsp;&nbsp; var options, name, src, copy, copyIsArray, clone,<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; target = arguments[0] || {},<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i = 1,<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; length = arguments.length,<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; deep = false;<br><br> <br><br>&nbsp;&nbsp;&nbsp; // Handle a deep copy situation<br><br>&nbsp;&nbsp;&nbsp; // 如果第一个参数是boolean型，可能是深度拷贝<br><br>&nbsp;&nbsp;&nbsp; if ( typeof target === "boolean" ) {<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; deep = target;<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; target = arguments[1] || {};<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // skip the boolean and the target<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // 跳过boolean和target，从第3个开始<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i = 2;<br><br>&nbsp;&nbsp;&nbsp; }<br><br> <br><br>&nbsp;&nbsp;&nbsp; // Handle case when target is a string or something (possible in deep copy)<br><br>&nbsp;&nbsp;&nbsp; // target不是对象也不是函数，则强制设置为空对象<br><br>&nbsp;&nbsp;&nbsp; if ( typeof target !== "object" &amp;&amp; !jQuery.isFunction(target) ) {<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; target = {};<br><br>&nbsp;&nbsp;&nbsp; }<br><br> <br><br>&nbsp;&nbsp;&nbsp; // extend jQuery itself if only one argument is passed<br><br>&nbsp;&nbsp;&nbsp; // 如果只传入一个参数，则认为是对jQuery扩展<br><br>&nbsp;&nbsp;&nbsp; if ( length === i ) {<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color: red;"> target = this;</span><br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --i;<br><br>&nbsp;&nbsp;&nbsp; }<br>//…………此处省去 大部分代码<br>本人对上述代码红色字体中&nbsp; <span style="color: red;"> target = this;</span> this具体指代那个对象，此处叫迷惑。希望lz能在百忙之中帮助解答。谢谢<br> </div>
+</div>
+
+<div id="bc2297808">
+  <div class="comment_title">
+    18 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2013-01-16&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2297808);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">wwwsyccom 写道</div><div class="quote_div">"如果执行new jQeury(),生成的jQuery对象会被抛弃，最后返回 jQuery.fn.init对象；"<br>这句话是不是有问题哈，如果执行new jquery()，返回的还是jquery对象吧，而不是jquery,fn.init对象，平时我们用jquery()或$()返回的是jquery.fn.init对象。<br><br>执行new jquery(),js会创建一个jquery类型的对象jqueryTemp，然后调用jquery()方法，把jquery的执行环境设置为先创建的object,类似于调用jquery.call(jqueryTemp)，最后返回jqueryTemp。这是通过new jquery()创建对象时，js底层的执行机制吧，其他的通过new创建对象也是一样的。<br><br></div><br>构造函数如果有返回值，并且返回值是一个对象，则会丢弃运算符 new 创建的临时对象。这个与 jQuery 无关，属于运算符 new 的知识。</div>
+</div>
+
+<div id="bc2297348">
+  <div class="comment_title">
+    17 楼
+    <a href="http://dingchao-lonton.iteye.com/" target="_blank" title="dingchao.lonton">dingchao.lonton</a>
+    2013-01-14&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2297348);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">wwwsyccom 写道</div><div class="quote_div">"如果执行new jQeury(),生成的jQuery对象会被抛弃，最后返回 jQuery.fn.init对象；"<br>这句话是不是有问题哈，如果执行new jquery()，返回的还是jquery对象吧，而不是jquery,fn.init对象，平时我们用jquery()或$()返回的是jquery.fn.init对象。<br><br>执行new jquery(),js会创建一个jquery类型的对象jqueryTemp，然后调用jquery()方法，把jquery的执行环境设置为先创建的object,类似于调用jquery.call(jqueryTemp)，最后返回jqueryTemp。这是通过new jquery()创建对象时，js底层的执行机制吧，其他的通过new创建对象也是一样的。<br><br></div><br>你看看这句就明白了 jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype<br>有上面这句 那么 new jQuery.fn.init() === new jQuery()了 只不过 <br>jQuery() 是返回的 new jQuery.fn.init(); 而 var o = new jQuery(); 这2者是相当的了</div>
+</div>
+
+<div id="bc2297305">
+  <div class="comment_title">
+    16 楼
+    <a href="http://wwwsyccom.iteye.com/" target="_blank" title="wwwsyccom">wwwsyccom</a>
+    2013-01-13&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2297305);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">"如果执行new jQeury(),生成的jQuery对象会被抛弃，最后返回 jQuery.fn.init对象；"<br>这句话是不是有问题哈，如果执行new jquery()，返回的还是jquery对象吧，而不是jquery,fn.init对象，平时我们用jquery()或$()返回的是jquery.fn.init对象。<br><br>执行new jquery(),js会创建一个jquery类型的对象jqueryTemp，然后调用jquery()方法，把jquery的执行环境设置为先创建的object,类似于调用jquery.call(jqueryTemp)，最后返回jqueryTemp。这是通过new jquery()创建对象时，js底层的执行机制吧，其他的通过new创建对象也是一样的。<br><br></div>
+</div>
+
+<div id="bc2294935">
+  <div class="comment_title">
+    15 楼
+    <a href="http://qixuenaner.iteye.com/" target="_blank" title="qixuenaner">qixuenaner</a>
+    2012-12-25&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2294935);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">水平不够，看起来很吃力，该怎么办啊<img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_redface.gif"> </div>
+</div>
+
+<div id="bc2283589">
+  <div class="comment_title">
+    14 楼
+    <a href="http://leolai.iteye.com/" target="_blank" title="无赖君子">无赖君子</a>
+    2012-09-27&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2283589);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">楼主v5，码农顶起</div>
+</div>
+
+<div id="bc2281714">
+  <div class="comment_title">
+    13 楼
+    <a href="http://dingchao-lonton.iteye.com/" target="_blank" title="dingchao.lonton">dingchao.lonton</a>
+    2012-09-14&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2281714);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">清风扬思 写道</div><div class="quote_div"><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype<br><br>这个并不绕啊，将jQuery.fn.init的prototype属性设置为jQuery.fn，那么使用new jQuery.fn.init()生成的对象的原型对象就是jQuery.fn，<br><br>所以挂载到jQuery.fn上面的函数就相当于挂载到jQuery.fn.init()生成的jQuery对象上。</div><br><br><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype 对于这句话， 前面的jQuery.fn.init.prototype = jQuery.fn这个赋值很好理解，刚开始我没有弄懂为什么jQuery.fn = jQuery.prototype，貌似没什么必要，是，在 var x = jQuery(yyy);这种情况下，确实是没什么必要， 但是如果是这样写&nbsp; var x = new jQuery();这种写法，就是必须的了<br>总之： jQuery.fn.init.prototype = jQuery.fn 是应付 var x = jQuery(yyy);这种写法的jQuery.fn = jQuery.prototype&nbsp; 是应付var x = new jQuery(yyy);这种写法的。<br></div>
+</div>
+
+<div id="bc2279549">
+  <div class="comment_title">
+    12 楼
+    <a href="http://tgw.iteye.com/" target="_blank" title="tgwiloveyou">tgwiloveyou</a>
+    2012-08-31&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2279549);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_idea.gif"> 　牛啊，我怎么好多读不懂呢……<img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_redface.gif"> </div>
+</div>
+
+<div id="bc2272083">
+  <div class="comment_title">
+    11 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2012-07-24&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2272083);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">清风扬思 写道</div><div class="quote_div"><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype<br><br>这个并不绕啊，将jQuery.fn.init的prototype属性设置为jQuery.fn，那么使用new jQuery.fn.init()生成的对象的原型对象就是jQuery.fn，<br><br>所以挂载到jQuery.fn上面的函数就相当于挂载到jQuery.fn.init()生成的jQuery对象上。</div><br>再读感觉也不饶，而是惊叹于如此写法的精妙与必要。</div>
+</div>
+
+<div id="bc2271435">
+  <div class="comment_title">
+    10 楼
+    <a href="http://adgjjjjjjl-163-com.iteye.com/" target="_blank" title="清风扬思">清风扬思</a>
+    2012-07-21&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2271435);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><br>jQuery.fn.init.prototype = jQuery.fn = jQuery.prototype<br><br>这个并不绕啊，将jQuery.fn.init的prototype属性设置为jQuery.fn，那么使用new jQuery.fn.init()生成的对象的原型对象就是jQuery.fn，<br><br>所以挂载到jQuery.fn上面的函数就相当于挂载到jQuery.fn.init()生成的jQuery对象上。</div>
+</div>
+
+<div id="bc2269303">
+  <div class="comment_title">
+    9 楼
+    <a href="http://rexblog.iteye.com/" target="_blank" title="rex357451651">rex357451651</a>
+    2012-07-11&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2269303);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">其实我想知道jquery对象是怎么弄出伪数组的</div>
+</div>
+
+<div id="bc2263012">
+  <div class="comment_title">
+    8 楼
+    <a href="http://shenwa12.iteye.com/" target="_blank" title="shenwa12">shenwa12</a>
+    2012-06-06&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1182087#" onclick="quote_comment(2263012);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">最大的好处就是减少对外部环境的依赖。当外部环境发生改变的时候，可以很容易的修改。加强了内部的封装。 <br></div>
+</div>
+
+
+    
+    <div class="pagination"><span class="disabled prev_page">« 上一页</span> <span class="current">1</span> <a href="http://nuysoft.iteye.com/blog/1182087?page=2#comments" rel="next">2</a> <a href="http://nuysoft.iteye.com/blog/1182087?page=2#comments" class="next_page" rel="next">下一页 »</a></div>
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_redface(1).gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_idea(1).gif"><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1182087', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1182087;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349111 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed?subscription%5Bsubscribed_user_name%5D=nuysoft" class="subscription" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-03构造jQuery对象-源码结构和核心函数 - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

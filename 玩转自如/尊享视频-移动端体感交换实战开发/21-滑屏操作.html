@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="text/javascript" src="js/mTween.js"></script>
+    <script type="text/javascript" src="js/data.js"></script>
+    <style type="text/css" id="style">
+    #view {
+        position: fixed;
+        left: 0;
+        top: 100px;
+        width: 100%;
+        height: 100%;
+    }
+    #lsit {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 2000px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    #lsit li {
+        float: left;
+        width: 100px;
+        height: 100%;
+        box-sizing: border-box;
+        border: 1px solid #000;
+        font: 50px/200px "宋体";
+        text-align: center;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="view">
+        <ul id="list"></ul>
+    </div>
+    <script type="text/javascript">
+    document.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+    }, {
+        passive: false
+    });
+    (function() {
+        var list = document.querySelector("#list");
+        var inner = "";
+        for (var i = 0; i < 20; i++) {
+            inner += '<li>' + i + '</li>';
+        }
+        list.innerHTML = inner;
+        //touchstart
+        //touchmove
+        //touchend
+        var startPoint = 0;
+        var startPosition = 0;
+        list.addEventListener("touchstart", function(e) {
+            startPoint = e.changedTouches[0].pageX;
+            startPosition = css(list, "left");
+            console.log(startPoint);
+        });
+        list.addEventListener("touchmove", function(e) {
+            var nowPoint = e.changedTouches[0].pageX;
+            var dis = nowPoint - startPoint;
+            css(list, "left", list + startPoint);
+            console.log(nowPoint - startPoint);
+        });
+    })();
+    </script>
+</body>
+
+</html>

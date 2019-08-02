@@ -1,0 +1,60 @@
+#view {
+    position: fixed;
+    left: 0;
+    top: 100px;
+    width: 100%;
+    height: 100%;
+}
+#disZ, #translateZ {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-style: preserve-3d;
+}
+/*背景图片的宽高分别是129，1170*/
+
+#box3D {
+    position: absolute;
+    width: 129px;
+    height: 1170px;
+    left: 50%;
+    top: 50%;
+    margin: -585px 0 0 -64.5px;
+    transform-style: preserve-3d;
+    background: url(img.gif);
+}
+#box3D div {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 129px;
+    height: 1170px;
+    backface-visibility: hidden;
+}
+#load {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-style: preserve-3d;
+    transform: translate3d(-50%, -45%, -400px);
+}
+#loadZ {
+    float: left;
+}
+@keyframe rotateY {
+    0% {
+        transform: rotateY(0deg);
+    }
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+#load img {
+    display: block;
+    width: 60vw;
+    animation: 3s linear rotateY infinite;
+}
+#load p {
+    font: 8vw/1.5 "宋体";
+    text-align: center;
+}

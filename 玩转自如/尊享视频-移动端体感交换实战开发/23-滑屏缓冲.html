@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="text/javascript" src="js/mTween.js"></script>
+    <script type="text/javascript" src="js/data.js"></script>
+    <style type="text/css" id="style">
+    #view {
+        position: fixed;
+        left: 0;
+        top: 100px;
+        width: 100%;
+        height: 100%;
+    }
+    #disZ,
+    #translateZ {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform-style: preserve-3d;
+    }
+    /*背景图片的宽高分别是129，1170*/
+    
+    #box3D {
+        position: absolute;
+        width: 129px;
+        height: 1170px;
+        left: 50%;
+        top: 50%;
+        margin: -585px 0 0 -64.5px;
+        transform-style: preserve-3d;
+        background: url(img.gif);
+    }
+    #box3D div {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 129px;
+        height: 1170px;
+        backface-visibility: hidden;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="view">
+        <div id="disZ">
+            <div id="translateZ">
+                <div id="box3D"></div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    document.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+    }, {
+        passive: false
+    });
+    //固定了视野夹角，并且固定和景物的距离，那看到的画面大小一定是固定的
+
+    //3D 适配
+
+    (function() {
+        var view = document.querySelector("#view");
+        var disZ = document.querySelector("#disZ");
+        var translateZ = document.querySelector("#translateZ");
+        var deg = 52; //固定一个视野角度
+        setZ();
+        css(translateZ, "translateZ", -6000);
+        window.addEventListener("resize", setZ);
+
+        function setZ() {
+            var h = window.innerHeight; //根据高度适配 如果根据宽度适配 可以换成宽度
+            var R = Math.tan(Math.PI / 180 * deg) * h / 2;
+            view.style.perspective = R + "px";
+            css(disZ, "translateZ", R);
+            // console.log(R);
+        }
+    })();
+
+    //布局生成
+    (function() {
+        var div = document.querySelector("#box3D");
+        var style = document.querySelector("#style");
+        var inner = "";
+        var cssInner = "";
+        var deg = 360 / data.length;
+        var rad = Math.PI / 180 * ((180 - deg) / 2);
+        w = div.offsetWidth;
+        var R = Math.tan(rad) * w / 2; //tan 接收的是一个弧度
+        var translateZ = document.querySelector("#translateZ");
+        console.log(R);
+        //tan 直角三角形中 临边 和 对边的比值
+        //弧度 = π/180 * 角度
+        data.forEach((item, index) => {
+            inner += `<div></div>`;
+            cssInner += `
+    #box3D div:nth-child(${(index + 1)}){
+        background-image:url(${item});
+        transform:rotateY(${-deg * index}deg) translateZ(${R}px);
+    }
+            `;
+        });
+        div.innerHTML = inner;
+        style.innerHTML += cssInner;
+
+    })();
+
+    //添加动画
+
+    (function() {
+        var div = document.querySelector("#box3D");
+        var translateZ = document.querySelector("#translateZ");
+        css(div, "rotateY", -1080);
+        mTween({
+            el: div,
+            attrs: {
+                rotateY: 0
+            },
+            duration: 2000,
+            ease: "easeBothStrong"
+        });
+        mTween({
+            el: translateZ,
+            attrs: {
+                translateZ: -160
+            },
+            duration: 1200,
+            ease: "easeBothStrong"
+        });
+    })();
+
+    //添加滑屏
+
+    (function() {
+        var div = document.querySelector("#box3D");
+        var translateZ = document.querySelector("#translateZ");
+        var startDeg = 0;
+        var startPoint = 0;
+        var viewDeg = 90; //滑动一屏是90deg
+        var lastPoint = 0; //上一次的手指位置
+        var lastTime = 0; //上一次时间
+        var lastSpeed = 0; //最后的滑动速度
+        box.addEventListener("touchstart", function(e) {
+            startPoint = e.changedTouches[0].pageX;
+            startDeg = css(box, "rotateY");
+            lastTime = Date.now();
+            lastSpeed = 0;
+            mTween.stop(box);
+            mTween.stop(translateZ);
+            mTween({
+                el: translateZ,
+                attrs: {
+                    translateZ: -300
+                }
+            });
+
+        });
+        box.addEventListener("touchmove", function(e) {
+            lastPoint = nowPoint = e.changedTouches[0].pageX;
+            var dis = nowPoint - startPoint;
+            var disDeg = dis / innerWidth * viewDeg;
+            var nowTime = Date.now();
+            css(box, "rotateY", startDeg - disDeg);
+            lastSpeed = (nowPoint - lastPoint) / (nowTime - lastTime);
+            lastPoint = nowPoint;
+            lastTime = nowTime;
+        });
+        box.addEventListener("touchend", function(e) {
+            var nowTime = Date.now();
+            mTween.stop(translateZ);
+            mTween({
+                el: translateZ,
+                attrs: {
+                    translateZ: -160
+                },
+                duration: 700
+            });
+            if (lastSpeed == 0 || nowTime - lastTime >= 100) {
+                return 0;
+            }
+            var dis = lastSpeed * 200; //速度 和 缓冲距离成正比
+            var disDeg = dis / innerWidth * viewDeg;
+            var target = css(box, "rotateY") - disDeg;
+            mTween({
+                el: box,
+                attrs: {
+                    rotateY: target
+                },
+                fx: "easeOutStrong",
+                duration: {
+                    multiple: 3,
+                    min: 200,
+                    max: 1500
+                }
+            });
+
+        });
+
+    })();
+    </script>
+</body>
+
+</html>

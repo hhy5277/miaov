@@ -1,0 +1,567 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1172137 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="   16.	动画     16.1	源码解析     jquery1.43源码分析之动画部分 http://www.iteye.com/topic/786984  上边这篇文章分析的很透彻，由浅入深，我就不再重复了，下面附两张jQuery 1.6.1的程序执行流程图：               16.2	动画支持的属性  jQuery仅支持数值型的属性和特殊标记show/hide/toggle， ...">
+    <meta name="keywords" content="jquery, animate, easing, step [原创] jQuery源码分析-16动画分析和扩展 Effects">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1172137#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-16动画分析和扩展 Effects</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/animate">animate</a><a href="http://www.iteye.com/blogs/tag/easing">easing</a><a href="http://www.iteye.com/blogs/tag/step">step</a></div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <p>&nbsp;</p>
+<p>16.<span style="white-space: pre;">	</span>动画</p>
+<p>&nbsp;</p>
+<p>16.1<span style="white-space: pre;">	</span>源码解析</p>
+<p>&nbsp;</p>
+<p>jquery1.43源码分析之动画部分 http://www.iteye.com/topic/786984</p>
+<p>上边这篇文章分析的很透彻，由浅入深，我就不再重复了，下面附两张jQuery 1.6.1的程序执行流程图：</p>
+<p>&nbsp;</p>
+<p><br><img alt="" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/3f05465b-aa3e-32ce-ad76-3b22a9a47712.png" title="点击查看原始大小图片" class="magplus" width="700" height="584"></p>
+<p><br><img alt="" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/b217346b-130e-32a4-ab52-d1b121fb7419.png" title="点击查看原始大小图片" class="magplus" width="700" height="858"></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>16.2<span style="white-space: pre;">	</span>动画支持的属性</p>
+<p>jQuery仅支持数值型的属性和特殊标记show/hide/toggle，非数值型的属性需要插件支持。</p>
+<p>&nbsp;</p>
+<p>16.3<span style="white-space: pre;">	</span>动画算法 jQuery.easing</p>
+<p>&nbsp;</p>
+<p class="MsoNormal" style="text-align: left;"><span>jQuery</span>自带了线性动画<span>linear</span>、余弦动画<span>swing</span>，下边是源码分析：</p>
+<table cellpadding="0" border="1" cellspacing="0" class="MsoTableGrid" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">/**</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">如果要扩展动画效果，则扩展这个属性</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">jQuery.easing</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*/</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">easing: {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">/**</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">线性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">p</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">完成时间百分比</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">n</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">已执行时间</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">firstNum</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">0</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">起始偏移百分比</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">diff</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">1</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">结束偏移百分比</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">通常情况下，等于直接返回</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">p</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">动画效果：匀速运动</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*/</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>linear: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( p, n, firstNum, diff ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> firstNum + diff * p;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">/**</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">http://baike.baidu.com/view/303443.htm</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">余弦</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #7f7f9f;">-</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">Math.cos(p*Math.PI)</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #7f7f9f;">-</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">1~1</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">(</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">(</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #7f7f9f;">-</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">Math.cos(p*Math.PI)/2</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">)</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">+</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">0.5</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">)</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">0~1</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">根据余弦图，最终的动画效果是：慢</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">&gt;</span><span style="font-size: 11.0pt; color: #3f5fbf;">快</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">&gt;</span><span style="font-size: 11.0pt; color: #3f5fbf;">慢</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*/</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>swing: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( p, n, firstNum, diff ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( ( -Math.cos(p*Math.PI)/2 ) +
+  0.5 ) * diff + firstNum;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">}</span></p>
+</td>
+</tr></tbody></table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>16.4<span style="white-space: pre;">	</span>扩展</p>
+<p>&nbsp;</p>
+<p>从上面的图（定时器timerId）可以看到，动画的执行进度用执行时间衡量，再由jQuery.easing转换为带特效的进度，最后实际执行样式更新的是jQuery.fx.step，jQuery.easing并不涉及具体的样式值，jQuery的这种低耦合的架构使得无论是扩展属性还是扩展动画，都变得非常方便。</p>
+<p>&nbsp;</p>
+<p>1.<span style="white-space: pre;">	</span>扩展支持动画的属性 jQuery.fx.step，jQuery自带opacity _default；</p>
+<p>&nbsp;</p>
+<p>?<span style="white-space: pre;">	</span>颜色 color</p>
+<p>颜色的表示方法有rgb(num, num, num)、#RRGGBB、#RGB等，例如rgb(12, 23, 45)、#123456、#123，要产生颜色动画的关键在于，将颜色值转换为可变化的数值型，作为起始值和结束值。</p>
+<p><span style="white-space: pre;">	</span>?<span style="white-space: pre;">	</span>rgb(num, num, num) 用正则解析其中3个num，放进一个数组中；这样开始值和结束值都变为包含了三个整型元素的数组，step调用时分别计算3个整型元素的当前值，再拼装成颜色值，更新样值就可以实现颜色动画。</p>
+<p><span style="white-space: pre;">	</span>?<span style="white-space: pre;">	</span># RRGGBB 是24位色，由6个十六进制数组成，可以分为三部分，第一部分代表红色，第二部分绿色，最后是蓝色，将三部分分别解析成整型，其余部分同rgb(num, num, num)</p>
+<p><span style="white-space: pre;">	</span>?<span style="white-space: pre;">	</span>#RGB 是# RRGGBB的简写，解析时将每一位重复一次，其余部分同# RRGGBB</p>
+<p>&nbsp;</p>
+<p>?<span style="white-space: pre;">	</span>旋转 rotate</p>
+<p>旋转的效果很酷，配合精美的图片可以做出很玄的网页。旋转的实现关键是兼容IE和非IE，有两种实现方式：使用浏览器自定义接口和canvas标记，因为canvas标记在IE9以下的版本中不支持，需要额外的插件支持，单独再讲，这里先介绍下浏览器自定义接口实现：</p>
+<p><span style="white-space: pre;">	</span>?<span style="white-space: pre;">	</span>IE: matirx滤镜&nbsp;</p>
+<p><span style="white-space: pre;">	</span>?<span style="white-space: pre;">	</span>webkit: elemstyle.webkitTransform = 'rotate(45deg)'</p>
+<p><span style="white-space: pre;">	</span>?<span style="white-space: pre;">	</span>Opera: Otransform = 'rotate(45deg)'</p>
+<p><span style="white-space: pre;">	</span>?<span style="white-space: pre;">	</span>firefox: MozTransform = 'rotate(45deg)'</p>
+<p>&nbsp;</p>
+<p>2.<span style="white-space: pre;">	</span>扩展动画算法 jQuery.easing，jQuery自带linear swing</p>
+<p>&nbsp;</p>
+<p>从上边的jQuery.easing 源码分析可以看到，最关键的参数是p，表示已执行时间的百分比，jQueryUI扩展的动画算法以p为输入，经过不同的公式，输出一个具有动画效果的新的进度，这个进度乘以结束值减去开始值的差值，就是当前值。</p>
+<p>&nbsp;</p>
+<p>jQueryUI扩展的动画算法 http://jqueryui.com/demos/effect/easing.html</p>
+<div><br></div>
+  </div>
+
+  
+  <div class="attachments">
+    
+      
+        <ul style="display:none;">
+          <li><a href="http://dl2.iteye.com/upload/attachment/0055/4317/3f05465b-aa3e-32ce-ad76-3b22a9a47712.png" target="_blank"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/3f05465b-aa3e-32ce-ad76-3b22a9a47712-thumb.png" class="magplus" title="点击查看原始大小图片"></a></li>
+          
+          <li>大小: 51 KB</li>
+        </ul>
+      
+    
+      
+        <ul style="display:none;">
+          <li><a href="http://dl2.iteye.com/upload/attachment/0055/4319/b217346b-130e-32a4-ab52-d1b121fb7419.png" target="_blank"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/b217346b-130e-32a4-ab52-d1b121fb7419-thumb.png" class="magplus" title="点击查看原始大小图片"></a></li>
+          
+          <li>大小: 65.1 KB</li>
+        </ul>
+      
+    
+    
+      <ul>
+        <li><a href="http://nuysoft.iteye.com/blog/1172137#" onclick="$$(&#39;div.attachments ul&#39;).invoke(&#39;show&#39;);$(this).up(1).hide();return false;">查看图片附件</a></li>
+      </ul>
+    
+  </div>
+
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/187.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1172137#" onclick="digg(&quot;blogs&quot;, 1172137, false);return false;"><div><strong>1</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1172137#" onclick="digg(&quot;blogs&quot;, 1172137, true);return false;"><div><strong>0</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1174798" class="next" title="[原创] jQuery源码分析-05异步队列 Deferred">[原创] jQuery源码分析-05异步队列 Defer ...</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1172122" class="pre" title="[原创] jQuery源码分析-09属性操作">[原创] jQuery源码分析-09属性操作</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-09-14 23:46</li>
+      <li>浏览 7559</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1172137#comments">评论(0)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-16%E5%8A%A8%E7%94%BB%E5%88%86%E6%9E%90%E5%92%8C%E6%89%A9%E5%B1%95+Effects&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1172137" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-16%E5%8A%A8%E7%94%BB%E5%88%86%E6%9E%90%E5%92%8C%E6%89%A9%E5%B1%95+Effects&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1172137&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/spinner.gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1172137" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_idea.gif"><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1172137', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1172137;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-16动画分析和扩展 Effects');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-16动画分析和扩展 Effects');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349125 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed/772224" class="subscription" onclick="if (confirm(&#39;你确定要取消这个关注？&#39;)) { var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;delete&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit(); };return false;">取消关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-16动画分析和扩展 Effects - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

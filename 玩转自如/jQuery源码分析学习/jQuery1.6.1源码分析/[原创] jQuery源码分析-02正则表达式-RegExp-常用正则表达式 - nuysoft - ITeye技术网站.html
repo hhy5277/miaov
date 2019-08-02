@@ -1,0 +1,867 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1217898 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="作者：nuysoft/JS攻城师/高云　QQ：47214707　EMail：nuysoft@gmail.com      声明：本文为原创文章，如需转载，请注明来源并保留原文链接。  后文预告：jQuery中的 ...">
+    <meta name="keywords" content="javascript, regexp, 常用正则表达式 [原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/regexp">regexp</a><a href="http://www.iteye.com/blogs/tag/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F">常用正则表达式</a></div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E4%BD%9C%E8%80%85%EF%BC%9Anuysoft%2FJS%E6%94%BB%E5%9F%8E%E5%B8%88%2F%E9%AB%98%E4%BA%91%E3%80%80QQ%EF%BC%9A47214707%E3%80%80EMail%EF%BC%9Anuysoft%40gmail.com%20%20%20%20%0A%E5%A3%B0%E6%98%8E%EF%BC%9A%E6%9C%AC%E6%96%87%E4%B8%BA%E5%8E%9F%E5%88%9B%E6%96%87%E7%AB%A0%EF%BC%8C%E5%A6%82%E9%9C%80%E8%BD%AC%E8%BD%BD%EF%BC%8C%E8%AF%B7%E6%B3%A8%E6%98%8E%E6%9D%A5%E6%BA%90%E5%B9%B6%E4%BF%9D%E7%95%99%E5%8E%9F%E6%96%87%E9%93%BE%E6%8E%A5%E3%80%82%0A%E5%90%8E%E6%96%87%E9%A2%84%E5%91%8A%EF%BC%9AjQuery%E4%B8%AD%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%86%E6%9E%90" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>作者：nuysoft/JS攻城师/高云　QQ：47214707　EMail：nuysoft@gmail.com&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></span></li><li><span>声明：本文为原创文章，如需转载，请注明来源并保留原文链接。&nbsp;&nbsp;</span></li><li><span>后文预告：jQuery中的正则表达式分析&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="0" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">作者：nuysoft/JS攻城师/高云　QQ：47214707　EMail：nuysoft@gmail.com    
+声明：本文为原创文章，如需转载，请注明来源并保留原文链接。
+后文预告：jQuery中的正则表达式分析</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=2.4%09%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%0A%E5%9C%A8%E7%BD%91%E4%B8%8A%E6%89%BE%E5%88%B0%E4%B8%80%E7%AF%87%E5%B9%BF%E4%B8%BA%E6%B5%81%E4%BC%A0%E7%9A%84%E6%96%87%E7%AB%A0%E3%80%8A%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E3%80%8B%EF%BC%8C%E9%80%90%E4%B8%80%E5%88%86%E6%9E%90%EF%BC%8C%E4%B8%8D%E8%B6%B3%E5%9C%B0%E6%96%B9%E8%BF%9B%E8%A1%8C%E8%A1%A5%E5%85%85%E5%92%8C%E7%BA%A0%E6%AD%A3%E3%80%82%0A" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>2.4&nbsp;常用正则表达式&nbsp;&nbsp;</span></span></li><li><span>在网上找到一篇广为流传的文章《常用正则表达式》，逐一分析，不足地方进行补充和纠正。&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="1" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">2.4	常用正则表达式
+在网上找到一篇广为流传的文章《常用正则表达式》，逐一分析，不足地方进行补充和纠正。
+</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%B8%B8%E7%94%A8%E7%9A%84%E6%95%B0%E5%AD%97%E6%AD%A3%E5%88%99%EF%BC%88%E4%B8%A5%E6%A0%BC%E5%8C%B9%E9%85%8D%EF%BC%89%0A%0A%E6%AD%A3%E5%88%99%09%E5%90%AB%E4%B9%89%0A%5E%5B1-9%5D%5Cd*%24%09%E5%8C%B9%E9%85%8D%E6%AD%A3%E6%95%B4%E6%95%B0%0A%5E-%5B1-9%5D%5Cd*%24%09%E5%8C%B9%E9%85%8D%E8%B4%9F%E6%95%B4%E6%95%B0%0A%5E-%3F%5B1-9%5D%5Cd*%24%09%E5%8C%B9%E9%85%8D%E6%95%B4%E6%95%B0%0A%5E%5B1-9%5D%5Cd*%7C0%24%09%E5%8C%B9%E9%85%8D%E9%9D%9E%E8%B4%9F%E6%95%B4%E6%95%B0%EF%BC%88%E6%AD%A3%E6%95%B4%E6%95%B0%20%2B%200%EF%BC%89%0A%5E-%5B1-9%5D%5Cd*%7C0%24%09%E5%8C%B9%E9%85%8D%E9%9D%9E%E6%AD%A3%E6%95%B4%E6%95%B0%EF%BC%88%E8%B4%9F%E6%95%B4%E6%95%B0%20%2B%200%EF%BC%89%0A%5E%5B1-9%5D%5Cd*%5C.%5Cd*%7C0%5C.%5Cd*%5B1-9%5D%5Cd*%24%09%E5%8C%B9%E9%85%8D%E6%AD%A3%E6%B5%AE%E7%82%B9%E6%95%B0%0A%5E-(%5B1-9%5D%5Cd*%5C.%5Cd*%7C0%5C.%5Cd*%5B1-9%5D%5Cd*)%24%09%E5%8C%B9%E9%85%8D%E8%B4%9F%E6%B5%AE%E7%82%B9%E6%95%B0%0A%5E-%3F(%5B1-9%5D%5Cd*%5C.%5Cd*%7C0%5C.%5Cd*%5B1-9%5D%5Cd*%7C0%3F%5C.0%2B%7C0)%24%20%09%E5%8C%B9%E9%85%8D%E6%B5%AE%E7%82%B9%E6%95%B0%0A%5E%5B1-9%5D%5Cd*%5C.%5Cd*%7C0%5C.%5Cd*%5B1-9%5D%5Cd*%7C0%3F%5C.0%2B%7C0%24%09%E5%8C%B9%E9%85%8D%E9%9D%9E%E8%B4%9F%E6%B5%AE%E7%82%B9%E6%95%B0%EF%BC%88%E6%AD%A3%E6%B5%AE%E7%82%B9%E6%95%B0%20%2B%200%EF%BC%89%0A%5E(-(%5B1-9%5D%5Cd*%5C.%5Cd*%7C0%5C.%5Cd*%5B1-9%5D%5Cd*))%7C0%3F%5C.0%2B%7C0%24%09%E5%8C%B9%E9%85%8D%E9%9D%9E%E6%AD%A3%E6%B5%AE%E7%82%B9%E6%95%B0%EF%BC%88%E8%B4%9F%E6%B5%AE%E7%82%B9%E6%95%B0%20%2B%200%EF%BC%89" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>常用的数字正则（严格匹配）&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>正则&nbsp;&nbsp;含义&nbsp;&nbsp;</span></li><li><span>^[1-9]\d*$&nbsp;&nbsp;匹配正整数&nbsp;&nbsp;</span></li><li><span>^-[1-9]\d*$&nbsp;匹配负整数&nbsp;&nbsp;</span></li><li><span>^-?[1-9]\d*$&nbsp;&nbsp;&nbsp;&nbsp;匹配整数&nbsp;&nbsp;</span></li><li><span>^[1-9]\d*|0$&nbsp;&nbsp;&nbsp;&nbsp;匹配非负整数（正整数&nbsp;+&nbsp;0）&nbsp;&nbsp;</span></li><li><span>^-[1-9]\d*|0$&nbsp;&nbsp;&nbsp;匹配非正整数（负整数&nbsp;+&nbsp;0）&nbsp;&nbsp;</span></li><li><span>^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$&nbsp;&nbsp;匹配正浮点数&nbsp;&nbsp;</span></li><li><span>^-([1-9]\d*\.\d*|0\.\d*[1-9]\d*)$&nbsp;&nbsp;&nbsp;匹配负浮点数&nbsp;&nbsp;</span></li><li><span>^-?([1-9]\d*\.\d*|0\.\d*[1-9]\d*|0?\.0+|0)$&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;匹配浮点数&nbsp;&nbsp;</span></li><li><span>^[1-9]\d*\.\d*|0\.\d*[1-9]\d*|0?\.0+|0$&nbsp;匹配非负浮点数（正浮点数&nbsp;+&nbsp;0）&nbsp;&nbsp;</span></li><li><span>^(-([1-9]\d*\.\d*|0\.\d*[1-9]\d*))|0?\.0+|0$&nbsp;&nbsp;&nbsp;&nbsp;匹配非正浮点数（负浮点数&nbsp;+&nbsp;0）&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="2" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">常用的数字正则（严格匹配）
+
+正则	含义
+^[1-9]\d*$	匹配正整数
+^-[1-9]\d*$	匹配负整数
+^-?[1-9]\d*$	匹配整数
+^[1-9]\d*|0$	匹配非负整数（正整数 + 0）
+^-[1-9]\d*|0$	匹配非正整数（负整数 + 0）
+^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$	匹配正浮点数
+^-([1-9]\d*\.\d*|0\.\d*[1-9]\d*)$	匹配负浮点数
+^-?([1-9]\d*\.\d*|0\.\d*[1-9]\d*|0?\.0+|0)$ 	匹配浮点数
+^[1-9]\d*\.\d*|0\.\d*[1-9]\d*|0?\.0+|0$	匹配非负浮点数（正浮点数 + 0）
+^(-([1-9]\d*\.\d*|0\.\d*[1-9]\d*))|0?\.0+|0$	匹配非正浮点数（负浮点数 + 0）</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%B8%B8%E7%94%A8%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%AD%A3%E5%88%99%0A%0A%E6%AD%A3%E5%88%99%09%E5%90%AB%E4%B9%89%09%E8%A1%A5%E5%85%85%0A%5E%5BA-Za-z%5D%2B%24%09%E5%8C%B9%E9%85%8D%E7%94%B126%E4%B8%AA%E8%8B%B1%E6%96%87%E5%AD%97%E6%AF%8D%E7%BB%84%E6%88%90%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2%09%E6%88%96%20%2F%5E%5Ba-z%5D%2B%24%2Fi%0A%5E%5BA-Z%5D%2B%24%09%E5%8C%B9%E9%85%8D%E7%94%B126%E4%B8%AA%E8%8B%B1%E6%96%87%E5%AD%97%E6%AF%8D%E7%9A%84%E5%A4%A7%E5%86%99%E7%BB%84%E6%88%90%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2%09%0A%5E%5Ba-z%5D%2B%24%09%E5%8C%B9%E9%85%8D%E7%94%B126%E4%B8%AA%E8%8B%B1%E6%96%87%E5%AD%97%E6%AF%8D%E7%9A%84%E5%B0%8F%E5%86%99%E7%BB%84%E6%88%90%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2%09%0A%5E%5BA-Za-z0-9%5D%2B%24%09%E5%8C%B9%E9%85%8D%E7%94%B1%E6%95%B0%E5%AD%97%E5%92%8C26%E4%B8%AA%E8%8B%B1%E6%96%87%E5%AD%97%E6%AF%8D%E7%BB%84%E6%88%90%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2%09%E6%B3%A8%E6%84%8F%5Cw%E5%8C%85%E5%90%AB%E4%B8%8B%E5%88%92%E7%BA%BF_%0A%5E%5Cw%2B%24%09%E5%8C%B9%E9%85%8D%E7%94%B1%E6%95%B0%E5%AD%97%E3%80%8126%E4%B8%AA%E8%8B%B1%E6%96%87%E5%AD%97%E6%AF%8D%E6%88%96%E8%80%85%E4%B8%8B%E5%88%92%E7%BA%BF%E7%BB%84%E6%88%90%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2%09%0A%E5%B8%B8%E7%94%A8%E6%95%B0%E5%AD%97%E6%AD%A3%E5%88%99%E5%92%8C%E5%B8%B8%E7%94%A8%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%AD%A3%E5%88%99%EF%BC%8C%E6%98%AF%E6%9C%80%E5%9F%BA%E6%9C%AC%E7%9A%84%E6%AD%A3%E5%88%99%E5%BA%94%E7%94%A8%EF%BC%8C%E8%AF%BB%E8%80%85%E5%8F%AF%E4%BB%A5%E4%BD%9C%E4%B8%BA%E5%85%A5%E9%97%A8%E7%9A%84%E7%BB%83%E4%B9%A0%EF%BC%8C%E8%AF%95%E8%AF%95%E8%83%BD%E4%B8%8D%E8%83%BD%E5%BF%AB%E9%80%9F%E7%9A%84%E8%AF%BB%E6%87%82%E5%85%B6%E4%B8%AD%E7%9A%84%E5%90%AB%E4%B9%89%E3%80%82" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>常用字符串正则&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>正则&nbsp;&nbsp;含义&nbsp;&nbsp;补充&nbsp;&nbsp;</span></li><li><span>^[A-Za-z]+$&nbsp;匹配由26个英文字母组成的字符串&nbsp;&nbsp;&nbsp;&nbsp;或&nbsp;/^[a-z]+$/i&nbsp;&nbsp;</span></li><li><span>^[A-Z]+$&nbsp;&nbsp;&nbsp;&nbsp;匹配由26个英文字母的大写组成的字符串&nbsp;&nbsp;&nbsp;</span></li><li><span>^[a-z]+$&nbsp;&nbsp;&nbsp;&nbsp;匹配由26个英文字母的小写组成的字符串&nbsp;&nbsp;&nbsp;</span></li><li><span>^[A-Za-z0-9]+$&nbsp;&nbsp;匹配由数字和26个英文字母组成的字符串&nbsp;注意\w包含下划线_&nbsp;&nbsp;</span></li><li><span>^\w+$&nbsp;&nbsp;&nbsp;匹配由数字、26个英文字母或者下划线组成的字符串&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></li><li><span>常用数字正则和常用字符串正则，是最基本的正则应用，读者可以作为入门的练习，试试能不能快速的读懂其中的含义。&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="3" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">常用字符串正则
+
+正则	含义	补充
+^[A-Za-z]+$	匹配由26个英文字母组成的字符串	或 /^[a-z]+$/i
+^[A-Z]+$	匹配由26个英文字母的大写组成的字符串	
+^[a-z]+$	匹配由26个英文字母的小写组成的字符串	
+^[A-Za-z0-9]+$	匹配由数字和26个英文字母组成的字符串	注意\w包含下划线_
+^\w+$	匹配由数字、26个英文字母或者下划线组成的字符串	
+常用数字正则和常用字符串正则，是最基本的正则应用，读者可以作为入门的练习，试试能不能快速的读懂其中的含义。</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8D%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%0A%0A%E6%99%AE%E9%81%8D%E4%BD%BF%E7%94%A8%E7%9A%84%E6%AD%A3%E5%88%99%E6%98%AF%5B%5Cu4e00-%5Cu9fa5%5D%EF%BC%8C%E4%BD%86%E8%BF%99%E4%B8%AA%E8%8C%83%E5%9B%B4%E5%B9%B6%E4%B8%8D%E5%AE%8C%E6%95%B4%E3%80%82%E4%BE%8B%E5%A6%82%EF%BC%9A%0A%2F%5B%5Cu4e00-%5Cu9fa5%5D%2F.test(%20&#39;%E2%BB%8F&#39;%20)%20%2F%2F%20%E6%B5%8B%E8%AF%95%E9%83%A8%E9%A6%96%E2%BB%8F%EF%BC%8C%E8%BF%94%E5%9B%9Efalse%0A%E6%A0%B9%E6%8D%AEUnicode%205.0%E7%89%88%E7%BC%96%E7%A0%81%EF%BC%8C%E8%A6%81%E5%87%86%E7%A1%AE%E7%9A%84%E5%88%A4%E6%96%AD%E4%B8%80%E4%B8%AA%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E8%A6%81%E5%8C%85%E6%8B%AC%EF%BC%9A%0A%E8%8C%83%E5%9B%B4%09%E5%90%AB%E4%B9%89%09%E8%8C%83%E5%9B%B4%09%E5%90%AB%E4%B9%89%0A2E80-2EFF%09CJK%20%E9%83%A8%E9%A6%96%E8%A1%A5%E5%85%85%092F00-2FDF%09%E5%BA%B7%E7%86%99%E5%AD%97%E5%85%B8%E9%83%A8%E9%A6%96%0A3000-303F%09CJK%20%E7%AC%A6%E5%8F%B7%E5%92%8C%E6%A0%87%E7%82%B9%0931C0-31EF%09CJK%20%E7%AC%94%E7%94%BB%0A3200-32FF%09%E5%B0%81%E9%97%AD%E5%BC%8F%20CJK%20%E6%96%87%E5%AD%97%E5%92%8C%E6%9C%88%E4%BB%BD%093300-33FF%09CJK%20%E5%85%BC%E5%AE%B9%0A3400-4DBF%09CJK%20%E7%BB%9F%E4%B8%80%E8%A1%A8%E6%84%8F%E7%AC%A6%E5%8F%B7%E6%89%A9%E5%B1%95%20A%094DC0-4DFF%09%E6%98%93%E7%BB%8F%E5%85%AD%E5%8D%81%E5%9B%9B%E5%8D%A6%E7%AC%A6%E5%8F%B7%0A4E00-9FBF%09CJK%20%E7%BB%9F%E4%B8%80%E8%A1%A8%E6%84%8F%E7%AC%A6%E5%8F%B7%09F900-FAFF%09CJK%20%E5%85%BC%E5%AE%B9%E8%B1%A1%E5%BD%A2%E6%96%87%E5%AD%97%0AFE30-FE4F%09CJK%20%E5%85%BC%E5%AE%B9%E5%BD%A2%E5%BC%8F%09FF00-FFEF%09%E5%85%A8%E8%A7%92ASCII%E3%80%81%E5%85%A8%E8%A7%92%E6%A0%87%E7%82%B9%0A%E5%9B%A0%E6%AD%A4%EF%BC%8C%E6%AD%A3%E7%A1%AE%E7%9A%84%E5%8C%B9%E9%85%8D%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%BA%EF%BC%9A%0Avar%20rcjk%20%3D%20%2F%5B%5Cu2E80-%5Cu2EFF%5Cu2F00-%5Cu2FDF%5Cu3000-%5Cu303F%5Cu31C0-%5Cu31EF%5Cu3200-%5Cu32FF%5Cu3300-%5Cu33FF%5Cu3400-%5Cu4DBF%5Cu4DC0-%5Cu4DFF%5Cu4E00-%5Cu9FBF%5CuF900-%5CuFAFF%5CuFE30-%5CuFE4F%5CuFF00-%5CuFFEF%5D%2B%2Fg%3B%0A%E5%A6%82%E6%9E%9C%E4%B8%8D%E5%B8%8C%E6%9C%9B%E5%8C%B9%E9%85%8D%E6%A0%87%E7%82%B9%E3%80%81%E7%AC%A6%E5%8F%B7%EF%BC%8C%E5%9C%A8%E6%AD%A3%E5%88%99%E4%B8%AD%E5%8E%BB%E6%8E%89%E5%AF%B9%E5%BA%94%E7%9A%84%E8%8C%83%E5%9B%B4%E5%8D%B3%E5%8F%AF%EF%BC%9A%0A3000-303F%09CJK%20%E7%AC%A6%E5%8F%B7%E5%92%8C%E6%A0%87%E7%82%B9%09FF00-FFEF%09%E5%85%A8%E8%A7%92ASCII%E3%80%81%E5%85%A8%E8%A7%92%E6%A0%87%E7%82%B9%0A%0A" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配中文字符&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>普遍使用的正则是[\u4e00-\u9fa5]，但这个范围并不完整。例如：&nbsp;&nbsp;</span></li><li><span>/[\u4e00-\u9fa5]/.test(&nbsp;<span class="string">'⻏'</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;测试部首⻏，返回false</span><span>&nbsp;&nbsp;</span></span></li><li><span>根据Unicode&nbsp;5.0版编码，要准确的判断一个中文字符要包括：&nbsp;&nbsp;</span></li><li><span>范围&nbsp;&nbsp;含义&nbsp;&nbsp;范围&nbsp;&nbsp;含义&nbsp;&nbsp;</span></li><li><span>2E80-2EFF&nbsp;&nbsp;&nbsp;CJK&nbsp;部首补充&nbsp;&nbsp;&nbsp;&nbsp;2F00-2FDF&nbsp;&nbsp;&nbsp;康熙字典部首&nbsp;&nbsp;</span></li><li><span>3000-303F&nbsp;&nbsp;&nbsp;CJK&nbsp;符号和标点&nbsp;&nbsp;&nbsp;31C0-31EF&nbsp;&nbsp;&nbsp;CJK&nbsp;笔画&nbsp;&nbsp;</span></li><li><span>3200-32FF&nbsp;&nbsp;&nbsp;封闭式&nbsp;CJK&nbsp;文字和月份&nbsp;&nbsp;&nbsp;3300-33FF&nbsp;&nbsp;&nbsp;CJK&nbsp;兼容&nbsp;&nbsp;</span></li><li><span>3400-4DBF&nbsp;&nbsp;&nbsp;CJK&nbsp;统一表意符号扩展&nbsp;A&nbsp;&nbsp;4DC0-4DFF&nbsp;&nbsp;&nbsp;易经六十四卦符号&nbsp;&nbsp;</span></li><li><span>4E00-9FBF&nbsp;&nbsp;&nbsp;CJK&nbsp;统一表意符号&nbsp;&nbsp;F900-FAFF&nbsp;&nbsp;&nbsp;CJK&nbsp;兼容象形文字&nbsp;&nbsp;</span></li><li><span>FE30-FE4F&nbsp;&nbsp;&nbsp;CJK&nbsp;兼容形式&nbsp;&nbsp;&nbsp;&nbsp;FF00-FFEF&nbsp;&nbsp;&nbsp;全角ASCII、全角标点&nbsp;&nbsp;</span></li><li><span>因此，正确的匹配中文字符正则表达式为：&nbsp;&nbsp;</span></li><li><span><span class="keyword">var</span><span>&nbsp;rcjk&nbsp;=&nbsp;/[\u2E80-\u2EFF\u2F00-\u2FDF\u3000-\u303F\u31C0-\u31EF\u3200-\u32FF\u3300-\u33FF\u3400-\u4DBF\u4DC0-\u4DFF\u4E00-\u9FBF\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFFEF]+/g;&nbsp;&nbsp;</span></span></li><li><span>如果不希望匹配标点、符号，在正则中去掉对应的范围即可：&nbsp;&nbsp;</span></li><li><span>3000-303F&nbsp;&nbsp;&nbsp;CJK&nbsp;符号和标点&nbsp;&nbsp;&nbsp;FF00-FFEF&nbsp;&nbsp;&nbsp;全角ASCII、全角标点&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="4" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配中文字符
+
+普遍使用的正则是[\u4e00-\u9fa5]，但这个范围并不完整。例如：
+/[\u4e00-\u9fa5]/.test( '⻏' ) // 测试部首⻏，返回false
+根据Unicode 5.0版编码，要准确的判断一个中文字符要包括：
+范围	含义	范围	含义
+2E80-2EFF	CJK 部首补充	2F00-2FDF	康熙字典部首
+3000-303F	CJK 符号和标点	31C0-31EF	CJK 笔画
+3200-32FF	封闭式 CJK 文字和月份	3300-33FF	CJK 兼容
+3400-4DBF	CJK 统一表意符号扩展 A	4DC0-4DFF	易经六十四卦符号
+4E00-9FBF	CJK 统一表意符号	F900-FAFF	CJK 兼容象形文字
+FE30-FE4F	CJK 兼容形式	FF00-FFEF	全角ASCII、全角标点
+因此，正确的匹配中文字符正则表达式为：
+var rcjk = /[\u2E80-\u2EFF\u2F00-\u2FDF\u3000-\u303F\u31C0-\u31EF\u3200-\u32FF\u3300-\u33FF\u3400-\u4DBF\u4DC0-\u4DFF\u4E00-\u9FBF\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFFEF]+/g;
+如果不希望匹配标点、符号，在正则中去掉对应的范围即可：
+3000-303F	CJK 符号和标点	FF00-FFEF	全角ASCII、全角标点
+
+</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8D%E5%8F%8C%E5%AD%97%E8%8A%82%E5%AD%97%E7%AC%A6(%E5%8C%85%E6%8B%AC%E6%B1%89%E5%AD%97%E5%9C%A8%E5%86%85)%0A%0A%5B%5E%5Cx00-%5Cxff%5D%EF%BC%8C%E5%8F%AF%E4%BB%A5%E7%94%A8%E6%9D%A5%E8%AE%A1%E7%AE%97%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E9%95%BF%E5%BA%A6%EF%BC%88%E4%B8%80%E4%B8%AA%E5%8F%8C%E5%AD%97%E8%8A%82%E5%AD%97%E7%AC%A6%E9%95%BF%E5%BA%A6%E8%AE%A12%EF%BC%8CASCII%E5%AD%97%E7%AC%A6%E8%AE%A11%EF%BC%89%EF%BC%8C%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B%E5%A6%82%E4%B8%8B%EF%BC%9A%0Aconsole.info(%20%22abc%22.replace(%20%2F%5B%5E%5Cx00-%5Cxff%5D%2Fg%2C%22aa%22%20).length%20)%20%2F%2F%203%0Aconsole.info(%20%22%E6%B1%89%E5%AD%97%22.replace(%20%2F%5B%5E%5Cx00-%5Cxff%5D%2Fg%2C%22aa%22%20).length%20)%20%2F%2F%204%0Aconsole.info(%20%22abc%E6%B1%89%E5%AD%97%22.replace(%20%2F%5B%5E%5Cx00-%5Cxff%5D%2Fg%2C%22aa%22).length%20)%20%2F%2F%207" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配双字节字符(包括汉字在内)&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>[^\x00-\xff]，可以用来计算字符串的长度（一个双字节字符长度计2，ASCII字符计1），代码示例如下：&nbsp;&nbsp;</span></li><li><span>console.info(&nbsp;<span class="string">"abc"</span><span>.replace(&nbsp;/[^\x00-\xff]/g,</span><span class="string">"aa"</span><span>&nbsp;).length&nbsp;)&nbsp;</span><span class="comment">//&nbsp;3</span><span>&nbsp;&nbsp;</span></span></li><li><span>console.info(&nbsp;<span class="string">"汉字"</span><span>.replace(&nbsp;/[^\x00-\xff]/g,</span><span class="string">"aa"</span><span>&nbsp;).length&nbsp;)&nbsp;</span><span class="comment">//&nbsp;4</span><span>&nbsp;&nbsp;</span></span></li><li><span>console.info(&nbsp;<span class="string">"abc汉字"</span><span>.replace(&nbsp;/[^\x00-\xff]/g,</span><span class="string">"aa"</span><span>).length&nbsp;)&nbsp;</span><span class="comment">//&nbsp;7</span><span>&nbsp;&nbsp;</span></span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="5" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配双字节字符(包括汉字在内)
+
+[^\x00-\xff]，可以用来计算字符串的长度（一个双字节字符长度计2，ASCII字符计1），代码示例如下：
+console.info( "abc".replace( /[^\x00-\xff]/g,"aa" ).length ) // 3
+console.info( "汉字".replace( /[^\x00-\xff]/g,"aa" ).length ) // 4
+console.info( "abc汉字".replace( /[^\x00-\xff]/g,"aa").length ) // 7</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8DHTML%E6%A0%87%E8%AE%B0%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%0A%0A%E5%85%88%E8%AF%B4%E8%AF%B4%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%EF%BC%9A%0A%3C(%5CS*%3F)%5B%5E%3E%5D*%3E.*%3F%3C%2F%5C1%3E%7C%3C.*%3F%20%2F%3E%0A*%3F%09*%E8%A1%A8%E7%A4%BA0%E4%B8%AA%E6%88%96%E5%A4%9A%E4%B8%AA%EF%BC%8C%3F%E8%A1%A8%E7%A4%BA0%E4%B8%AA%E6%88%961%E4%B8%AA%EF%BC%8C%E4%B8%A4%E4%B8%AA%E5%8F%A0%E5%8A%A0%E8%B5%B7%E6%9D%A5%E6%A0%87%E8%AF%860%E4%B8%AA%E5%A4%9A%E4%B8%AA%EF%BC%8C%E4%B8%8E*%E7%9A%84%E5%8A%9F%E8%83%BD%E9%87%8D%E5%8F%A0%0A(%5CS*%3F)%09%E6%A0%87%E7%AD%BE%E7%9A%84%E9%95%BF%E5%BA%A6%E5%BF%85%E9%A1%BB%E5%A4%A7%E4%BA%8E0%EF%BC%8C%E5%9B%A0%E6%AD%A4%E4%B8%8D%E8%83%BD%E7%94%A8*%3F%20%0A%7C%3C.*%3F%5C%2F%3E%09%E6%B2%A1%E6%9C%89%E5%88%86%E7%BB%84%EF%BC%8C%E6%97%A0%E6%B3%95%E8%8E%B7%E5%8F%96%E4%BB%A5%3Cdiv%2F%3E%E8%BF%99%E7%A7%8D%E8%87%AA%E5%85%B3%E9%97%AD%E6%A0%BC%E5%BC%8F%E4%B9%A6%E5%86%99%E7%9A%84%E6%A0%87%E7%AD%BE%0A%3C%2F%5C1%3E%0A%3C.*%3F%20%2F%3E%09%E6%9C%89%E7%9A%84%E6%A0%87%E7%AD%BE%E6%98%AF%E4%B8%8D%E5%85%B3%E9%97%AD%E7%9A%84%EF%BC%8C%E6%AF%94%E5%A6%82%3Cbr%3E%3Chr%3E%EF%BC%8C%E5%9B%A0%E6%AD%A4%E4%B8%8D%E8%83%BD%E5%BC%BA%E5%88%B6%E5%85%B3%E9%97%AD%0A%E4%BF%AE%E6%AD%A3%E5%A6%82%E4%B8%8B%EF%BC%9A%0Avar%20rtag%20%3D%20%2F%5E%3C(%5Ba-z%5D%2B)%5Cs*%5C%2F%3F%3E.*(%3F%3A%3C%5C%2F%5C1%3E)%3F%24%2Fi%0Artag.exec(%20&#39;%3C-div%3E%3C%2F-div%3E&#39;)%20%2F%2F%20null%20%0Artag.exec(%20&#39;%3Cdiv%3Eabc&#39;)%20%2F%2F%20%5B%22%3Cdiv%3Eabc%22%2C%20%22div%22%5D%0A%E8%BF%99%E4%B8%AA%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B9%9F%E4%B8%8D%E5%AE%8C%E5%96%84%EF%BC%8C%E6%AF%94%E5%A6%82%E7%AC%AC%E4%BA%8C%E6%9D%A1%E6%B5%8B%E8%AF%95%E8%AF%AD%E5%8F%A5%EF%BC%8C%E8%BF%99%E4%B9%88%E5%86%99%E6%98%AF%E4%B8%BA%E4%BA%86%E8%83%BD%E6%8F%90%E5%8F%96%E4%B8%AD%E5%8C%85%E5%90%AB%E4%BA%86%E6%96%87%E6%9C%AC%E5%86%85%E5%AE%B9%E7%9A%84%E6%A0%87%E7%AD%BE%EF%BC%8C%E5%A6%82%E6%9E%9C%E8%A6%81%E4%B8%A5%E6%A0%BC%E5%8C%B9%E9%85%8D%EF%BC%8C%E5%8F%AF%E5%86%8D%E6%AC%A1%E4%BF%AE%E6%94%B9%E4%B8%BA%EF%BC%9A%0Avar%20rtag%20%3D%20%2F%5E%3C(%5Ba-z%5D%2B)%5Cs*%5C%2F%3F%3E%20(%3F%3A%3C%5C%2F%5C1%3E)%3F%24%2Fi%20%2F%2F%20%E5%8E%BB%E6%8E%89%E4%BA%86%E4%B8%AD%E9%97%B4%E7%9A%84.*%0A%E8%BF%99%E4%B8%AA%E6%AD%A3%E5%88%99%E7%9A%84%E5%BA%94%E7%94%A8%E8%8C%83%E5%9B%B4%E4%BB%85%E9%99%90%E4%BA%8E%E7%AE%80%E5%8D%95%E7%9A%84%E6%A0%87%E7%AD%BE%E5%8C%B9%E9%85%8D%E3%80%81%E6%8F%90%E5%8F%96%EF%BC%8C%E4%B8%8D%E8%83%BD%E5%8C%B9%E9%85%8D%E5%B5%8C%E5%A5%97%E6%A0%87%E8%AE%B0%E3%80%82" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配HTML标记的正则表达式&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>先说说网上流传的版本：&nbsp;&nbsp;</span></li><li><span>&lt;(\S*?)[^&gt;]*&gt;.*?&lt;/\1&gt;|&lt;.*?&nbsp;/&gt;&nbsp;&nbsp;</span></li><li><span>*?&nbsp;&nbsp;*表示0个或多个，?表示0个或1个，两个叠加起来标识0个多个，与*的功能重叠&nbsp;&nbsp;</span></li><li><span>(\S*?)&nbsp;&nbsp;标签的长度必须大于0，因此不能用*?&nbsp;&nbsp;&nbsp;</span></li><li><span>|&lt;.*?\/&gt;&nbsp;&nbsp;没有分组，无法获取以&lt;div/&gt;这种自关闭格式书写的标签&nbsp;&nbsp;</span></li><li><span>&lt;/\1&gt;&nbsp;&nbsp;</span></li><li><span>&lt;.*?&nbsp;/&gt;&nbsp;&nbsp;&nbsp;有的标签是不关闭的，比如&lt;br&gt;&lt;hr&gt;，因此不能强制关闭&nbsp;&nbsp;</span></li><li><span>修正如下：&nbsp;&nbsp;</span></li><li><span><span class="keyword">var</span><span>&nbsp;rtag&nbsp;=&nbsp;/^&lt;([a-z]+)\s*\/?&gt;.*(?:&lt;\/\1&gt;)?$/i&nbsp;&nbsp;</span></span></li><li><span>rtag.exec(&nbsp;<span class="string">'&lt;-div&gt;&lt;/-div&gt;'</span><span>)&nbsp;</span><span class="comment">//&nbsp;null&nbsp;</span><span>&nbsp;&nbsp;</span></span></li><li><span>rtag.exec(&nbsp;<span class="string">'&lt;div&gt;abc'</span><span>)&nbsp;</span><span class="comment">//&nbsp;["&lt;div&gt;abc",&nbsp;"div"]</span><span>&nbsp;&nbsp;</span></span></li><li><span>这个表达式也不完善，比如第二条测试语句，这么写是为了能提取中包含了文本内容的标签，如果要严格匹配，可再次修改为：&nbsp;&nbsp;</span></li><li><span><span class="keyword">var</span><span>&nbsp;rtag&nbsp;=&nbsp;/^&lt;([a-z]+)\s*\/?&gt;&nbsp;(?:&lt;\/\1&gt;)?$/i&nbsp;</span><span class="comment">//&nbsp;去掉了中间的.*</span><span>&nbsp;&nbsp;</span></span></li><li><span>这个正则的应用范围仅限于简单的标签匹配、提取，不能匹配嵌套标记。&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="6" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配HTML标记的正则表达式
+
+先说说网上流传的版本：
+&lt;(\S*?)[^&gt;]*&gt;.*?&lt;/\1&gt;|&lt;.*? /&gt;
+*?	*表示0个或多个，?表示0个或1个，两个叠加起来标识0个多个，与*的功能重叠
+(\S*?)	标签的长度必须大于0，因此不能用*? 
+|&lt;.*?\/&gt;	没有分组，无法获取以&lt;div/&gt;这种自关闭格式书写的标签
+&lt;/\1&gt;
+&lt;.*? /&gt;	有的标签是不关闭的，比如&lt;br&gt;&lt;hr&gt;，因此不能强制关闭
+修正如下：
+var rtag = /^&lt;([a-z]+)\s*\/?&gt;.*(?:&lt;\/\1&gt;)?$/i
+rtag.exec( '&lt;-div&gt;&lt;/-div&gt;') // null 
+rtag.exec( '&lt;div&gt;abc') // ["&lt;div&gt;abc", "div"]
+这个表达式也不完善，比如第二条测试语句，这么写是为了能提取中包含了文本内容的标签，如果要严格匹配，可再次修改为：
+var rtag = /^&lt;([a-z]+)\s*\/?&gt; (?:&lt;\/\1&gt;)?$/i // 去掉了中间的.*
+这个正则的应用范围仅限于简单的标签匹配、提取，不能匹配嵌套标记。</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8D%E9%A6%96%E5%B0%BE%E7%A9%BA%E7%99%BD%E5%AD%97%E7%AC%A6%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%0A%0A%E5%85%88%E8%AF%B4%E8%AF%B4%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%EF%BC%9A%0A%5E%5Cs*%7C%5Cs*%24%0A%E5%8F%AF%E4%BB%A5%E5%88%A0%E9%99%A4%E8%A1%8C%E9%A6%96%E8%A1%8C%E5%B0%BE%E7%9A%84%E7%A9%BA%E7%99%BD%E5%AD%97%E7%AC%A6%EF%BC%8C%E4%BE%8B%E5%A6%82%EF%BC%9A%0A&#39;%20%20%20%5Ct%20%20%20%20%5Cn%5Cr%20%20%20abc%20%20%20%5Ct%20%20%20%20%5Cn%5Cr%20%20%20&#39;.replace(%20%2F%5E%5Cs*%7C%5Cs*%24%2Fg%2C%20&#39;&#39;%20)%20%2F%2F%20abc%0A%E4%BD%86%E6%98%AF%E7%94%A8%5Cs*%E4%B8%8D%E8%83%BD%E5%88%A4%E6%96%AD%E5%87%BA%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%98%AF%E5%90%A6%E5%9C%A8%E5%BC%80%E5%A4%B4%E6%88%96%E7%BB%93%E5%B0%BE%E5%A4%84%E6%9C%89%5Cs%EF%BC%8C%E4%BE%8B%E5%A6%82%EF%BC%9A%0A%2F%5E%5Cs*%7C%5Cs*%24%2F.test(%20&#39;abc&#39;%20)%20%2F%2F%20true%0A%E4%BF%AE%E6%AD%A3%E5%A6%82%E4%B8%8B%EF%BC%9A%0A%5E%5Cs%2B%7C%5Cs%2B%24%0A&#39;%20%20%20%5Ct%20%20%20%20%5Cn%5Cr%20%20%20abc%20%20%20%5Ct%20%20%20%20%5Cn%5Cr%20%20%20&#39;.replace(%20%2F%5E%5Cs%2B%7C%5Cs%2B%24%2Fg%2C%20&#39;&#39;%20)%20%2F%2F%20abc%0A%2F%5E%5Cs%2B%7C%5Cs%2B%24%2F.test(%20&#39;abc&#39;%20)%20%2F%2F%20false" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配首尾空白字符的正则表达式&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>先说说网上流传的版本：&nbsp;&nbsp;</span></li><li><span>^\s*|\s*$&nbsp;&nbsp;</span></li><li><span>可以删除行首行尾的空白字符，例如：&nbsp;&nbsp;</span></li><li><span><span class="string">'&nbsp;&nbsp;&nbsp;\t&nbsp;&nbsp;&nbsp;&nbsp;\n\r&nbsp;&nbsp;&nbsp;abc&nbsp;&nbsp;&nbsp;\t&nbsp;&nbsp;&nbsp;&nbsp;\n\r&nbsp;&nbsp;&nbsp;'</span><span>.replace(&nbsp;/^\s*|\s*$/g,&nbsp;</span><span class="string">''</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;abc</span><span>&nbsp;&nbsp;</span></span></li><li><span>但是用\s*不能判断出字符串是否在开头或结尾处有\s，例如：&nbsp;&nbsp;</span></li><li><span>/^\s*|\s*$/.test(&nbsp;<span class="string">'abc'</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;true</span><span>&nbsp;&nbsp;</span></span></li><li><span>修正如下：&nbsp;&nbsp;</span></li><li><span>^\s+|\s+$&nbsp;&nbsp;</span></li><li><span><span class="string">'&nbsp;&nbsp;&nbsp;\t&nbsp;&nbsp;&nbsp;&nbsp;\n\r&nbsp;&nbsp;&nbsp;abc&nbsp;&nbsp;&nbsp;\t&nbsp;&nbsp;&nbsp;&nbsp;\n\r&nbsp;&nbsp;&nbsp;'</span><span>.replace(&nbsp;/^\s+|\s+$/g,&nbsp;</span><span class="string">''</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;abc</span><span>&nbsp;&nbsp;</span></span></li><li><span>/^\s+|\s+$/.test(&nbsp;<span class="string">'abc'</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;false</span><span>&nbsp;&nbsp;</span></span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="7" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配首尾空白字符的正则表达式
+
+先说说网上流传的版本：
+^\s*|\s*$
+可以删除行首行尾的空白字符，例如：
+'   \t    \n\r   abc   \t    \n\r   '.replace( /^\s*|\s*$/g, '' ) // abc
+但是用\s*不能判断出字符串是否在开头或结尾处有\s，例如：
+/^\s*|\s*$/.test( 'abc' ) // true
+修正如下：
+^\s+|\s+$
+'   \t    \n\r   abc   \t    \n\r   '.replace( /^\s+|\s+$/g, '' ) // abc
+/^\s+|\s+$/.test( 'abc' ) // false</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8DEmail%E5%9C%B0%E5%9D%80%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%0A%0A%E5%85%88%E4%BB%8B%E7%BB%8D%E4%B8%8BEmail%E7%9A%84%E8%A7%84%E5%88%99%EF%BC%9Alocal-part%40domain%0A%EF%81%AC%09local-part%E6%9C%80%E9%95%BF64%EF%BC%8Cdomain%E6%9C%80%E9%95%BF253%EF%BC%8C%E6%80%BB%E9%95%BF%E6%9C%80%E9%95%BF256%0A%EF%81%AC%09local-part%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8%E4%BB%BB%E6%84%8FASCII%E5%AD%97%E7%AC%A6%EF%BC%9A%0A%EF%81%AE%09%E5%A4%A7%E5%B0%8F%E5%86%99%E8%8B%B1%E6%96%87%E5%AD%97%E6%AF%8D%20a-z%2CA-Z%0A%EF%81%AE%09%E6%95%B0%E5%AD%97%200-9%0A%EF%81%AE%09%E5%AD%97%E7%AC%A6%20!%23%24%25%26&#39;*%2B-%2F%3D%3F%5E_%60%7B%7C%7D~%0A%EF%81%AE%09%E5%AD%97%E7%AC%A6%20.%E4%B8%8D%E8%83%BD%E6%98%AF%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%92%8C%E6%9C%80%E5%90%8E%E4%B8%80%E4%B8%AA%EF%BC%8C%E4%B8%8D%E8%83%BD%E8%BF%9E%E7%BB%AD%E5%87%BA%E7%8E%B0%E4%B8%A4%E6%AC%A1%0A%EF%81%AE%09%E4%BD%86%E6%98%AF%E6%9C%89%E4%BA%9B%E9%82%AE%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%BC%9A%E6%8B%92%E7%BB%9D%E5%8C%85%E5%90%AB%E6%9C%89%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6%E7%9A%84%E9%82%AE%E4%BB%B6%E5%9C%B0%E5%9D%80%0A%EF%81%AC%09domain%EF%BC%88%E5%9F%9F%E5%90%8D%EF%BC%89%E4%BB%85%E9%99%90%E4%BA%8E26%E4%B8%AA%E8%8B%B1%E6%96%87%E5%AD%97%E6%AF%8D%E3%80%8110%E4%B8%AA%E6%95%B0%E5%AD%97%E3%80%81%E8%BF%9E%E8%AF%8D%E5%8F%B7-%0A%EF%81%AE%09%E8%BF%9E%E8%AF%8D%E5%8F%B7-%E4%B8%8D%E8%83%BD%E6%98%AF%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%AD%97%E7%AC%A6%0A%EF%81%AE%09%E9%A1%B6%E7%BA%A7%E5%9F%9F%E5%90%8D%EF%BC%88com%E3%80%81cn%E7%AD%89%EF%BC%89%E9%95%BF%E5%BA%A6%E4%B8%BA2%E5%88%B06%E4%B8%AA%0A%E5%85%88%E8%AF%B4%E8%AF%B4%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%EF%BC%9A%0A%5Cw%2B(%5B-%2B.%5D%5Cw%2B)*%40%5Cw%2B(%5B-.%5D%5Cw%2B)*%5C.%5Cw%2B(%5B-.%5D%5Cw%2B)*%0A()%09%E8%8E%AB%E5%90%8D%E5%A5%87%E5%A6%99%E7%9A%84%E5%88%86%E7%BB%84%EF%BC%8C%E5%A6%82%E6%9E%9C%E5%8F%AA%E5%88%86%E7%BB%84%E4%B8%8D%E8%AE%B0%E5%BD%95%EF%BC%8C%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8(%3F%3A)%0A%40%5Cw%09domain%E4%B8%8D%E8%83%BD%E5%8C%85%E5%90%AB%E4%B8%8B%E5%88%92%E7%BA%BF_%0A%5Cw%2B(%5B-.%5D%5Cw%2B)*%09%E9%A1%B6%E7%BA%A7%E5%9F%9F%E5%90%8D%E4%B8%8D%E7%AC%A6%E5%90%88%E8%A7%84%E5%88%99%0A%E4%BF%AE%E6%AD%A3%E5%A6%82%E4%B8%8B%EF%BC%9A%0Avar%20remail%20%3D%20%2F%5E(%5B%5Cw-_%5D%2B(%3F%3A%5C.%5B%5Cw-_%5D%2B)*)%40((%3F%3A%5Ba-z0-9%5D%2B(%3F%3A-%5Ba-zA-Z0-9%5D%2B)*)%2B%5C.%5Ba-z%5D%7B2%2C6%7D)%24%2Fi%0Aremail.exec(%20&#39;nuysoft%40gmail.com&#39;%20)%20%2F%2F%20%22nuysoft%40gmail.com%22%2C%20%22nuysoft%22%2C%20%22gmail.com%22%5D%0Aremail.exec(%20&#39;nuysoft%40gmail.comcomcom&#39;%20)%20%2F%2F%20null%0Aremail.exec(%20&#39;nuysoft%40_gmail.com%20)%20%2F%2F%20null%0A%E4%BF%AE%E6%AD%A3%E5%90%8E%E7%9A%84%E6%AD%A3%E5%88%99%E6%9C%89%E5%A6%82%E4%B8%8B%E5%B1%80%E9%99%90%E6%80%A7%EF%BC%9A%0A%EF%81%AC%09%E4%B8%8D%E6%94%AF%E6%8C%81%E4%B8%AD%E6%96%87%E9%82%AE%E7%AE%B1%E3%80%81%E4%B8%AD%E6%96%87%E5%9F%9F%E5%90%8D%EF%BC%8C%E4%B9%8B%E6%89%80%E4%BB%A5%E4%B8%8D%E5%9C%A8%E5%85%B6%E4%B8%AD%E6%94%AF%E6%8C%81%E6%98%AF%E5%9B%A0%E4%B8%BA%E6%88%91%E4%B8%AA%E4%BA%BA%E7%9A%84%E7%88%B1%E5%A5%BD%E5%80%BE%E5%90%91%EF%BC%8C%E5%8F%8D%E6%84%9F%E8%BF%99%E7%B1%BB%E5%8D%8E%E8%80%8C%E4%B8%8D%E5%AE%9E%E7%9A%84%E7%8E%A9%E6%84%8F%0A%EF%81%AC%09%E4%B8%8D%E6%94%AF%E6%8C%81%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7%EF%BC%8C%E9%81%BF%E5%85%8D%E9%9D%9E%E9%82%AE%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%8B%92%E7%BB%9D%EF%BC%8C%E5%A6%82%E6%9E%9C%E9%9C%80%E8%A6%81%EF%BC%8C%E5%8F%AF%E4%BB%A5%E6%B7%BB%E5%8A%A0%E3%80%82%0A%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0%EF%BC%9A%0Ahttp%3A%2F%2Fen.wikipedia.org%2Fwiki%2FEmail_address%0Ahttp%3A%2F%2Fbaike.baidu.com%2Fview%2F119298.htm" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配Email地址的正则表达式&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>先介绍下Email的规则：local-part@domain&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;local-part最长64，domain最长253，总长最长256&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;local-part可以使用任意ASCII字符：&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;大小写英文字母&nbsp;a-z,A-Z&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;数字&nbsp;0-9&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;字符&nbsp;!#$%&amp;'*+-/=?^_`{|}~&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;字符&nbsp;.不能是第一个和最后一个，不能连续出现两次&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;但是有些邮件服务器会拒绝包含有特殊字符的邮件地址&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;domain（域名）仅限于26个英文字母、10个数字、连词号-&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;连词号-不能是第一个字符&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;顶级域名（com、cn等）长度为2到6个&nbsp;&nbsp;</span></li><li><span>先说说网上流传的版本：&nbsp;&nbsp;</span></li><li><span>\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*&nbsp;&nbsp;</span></li><li><span>()&nbsp;&nbsp;莫名奇妙的分组，如果只分组不记录，可以使用(?:)&nbsp;&nbsp;</span></li><li><span>@\w&nbsp;domain不能包含下划线_&nbsp;&nbsp;</span></li><li><span>\w+([-.]\w+)*&nbsp;&nbsp;&nbsp;顶级域名不符合规则&nbsp;&nbsp;</span></li><li><span>修正如下：&nbsp;&nbsp;</span></li><li><span><span class="keyword">var</span><span>&nbsp;remail&nbsp;=&nbsp;/^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})$/i&nbsp;&nbsp;</span></span></li><li><span>remail.exec(&nbsp;<span class="string">'nuysoft@gmail.com'</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;"nuysoft@gmail.com",&nbsp;"nuysoft",&nbsp;"gmail.com"]</span><span>&nbsp;&nbsp;</span></span></li><li><span>remail.exec(&nbsp;<span class="string">'nuysoft@gmail.comcomcom'</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;null</span><span>&nbsp;&nbsp;</span></span></li><li><span>remail.exec(&nbsp;'nuysoft@_gmail.com&nbsp;)&nbsp;<span class="comment">//&nbsp;null</span><span>&nbsp;&nbsp;</span></span></li><li><span>修正后的正则有如下局限性：&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;不支持中文邮箱、中文域名，之所以不在其中支持是因为我个人的爱好倾向，反感这类华而不实的玩意&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;不支持特殊符号，避免非邮件服务器拒绝，如果需要，可以添加。&nbsp;&nbsp;</span></li><li><span>参考文章：&nbsp;&nbsp;</span></li><li><span>http:<span class="comment">//en.wikipedia.org/wiki/Email_address</span><span>&nbsp;&nbsp;</span></span></li><li><span>http:<span class="comment">//baike.baidu.com/view/119298.htm</span><span>&nbsp;&nbsp;</span></span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="8" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配Email地址的正则表达式
+
+先介绍下Email的规则：local-part@domain
+	local-part最长64，domain最长253，总长最长256
+	local-part可以使用任意ASCII字符：
+	大小写英文字母 a-z,A-Z
+	数字 0-9
+	字符 !#$%&amp;'*+-/=?^_`{|}~
+	字符 .不能是第一个和最后一个，不能连续出现两次
+	但是有些邮件服务器会拒绝包含有特殊字符的邮件地址
+	domain（域名）仅限于26个英文字母、10个数字、连词号-
+	连词号-不能是第一个字符
+	顶级域名（com、cn等）长度为2到6个
+先说说网上流传的版本：
+\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*
+()	莫名奇妙的分组，如果只分组不记录，可以使用(?:)
+@\w	domain不能包含下划线_
+\w+([-.]\w+)*	顶级域名不符合规则
+修正如下：
+var remail = /^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})$/i
+remail.exec( 'nuysoft@gmail.com' ) // "nuysoft@gmail.com", "nuysoft", "gmail.com"]
+remail.exec( 'nuysoft@gmail.comcomcom' ) // null
+remail.exec( 'nuysoft@_gmail.com ) // null
+修正后的正则有如下局限性：
+	不支持中文邮箱、中文域名，之所以不在其中支持是因为我个人的爱好倾向，反感这类华而不实的玩意
+	不支持特殊符号，避免非邮件服务器拒绝，如果需要，可以添加。
+参考文章：
+http://en.wikipedia.org/wiki/Email_address
+http://baike.baidu.com/view/119298.htm</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8D%E7%BD%91%E5%9D%80URL%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%0A%0A%E5%85%88%E8%AF%B4%E8%AF%B4%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%EF%BC%9A%0A%5Ba-zA-z%5D%2B%3A%2F%2F%5B%5E%5Cs%5D*%0A%E7%B2%97%E7%B3%99%EF%BC%8C%E6%B2%A1%E6%9C%89%E5%AF%B9URL%E4%B8%AD%E5%90%84%E4%B8%AA%E5%9D%97%E8%BF%9B%E8%A1%8C%E5%88%86%E7%BB%84%0A%E4%BF%AE%E6%AD%A3%E5%A6%82%E4%B8%8B%EF%BC%88%E5%8F%88%E4%B8%80%E6%AE%B5%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%EF%BC%89%EF%BC%9A%0Avar%20_url%20%3D%20%22%5E((https%7Chttp%7Cftp%7Crtsp%7Cmms)%3F%3A%2F%2F)%3F%22%20%2F%2F%0A%09%09%20%2B%20%22((%5B0-9a-z_!~*&#39;().%26%3D%2B%24%25-%5D%2B%3A%20)%3F%5B0-9a-z_!~*&#39;().%26%3D%2B%24%25-%5D%2B%40)%3F%22%20%2F%2F%20ftp%E7%9A%84user%40%0A%09%09%20%2B%20%22((%5B0-9%5D%7B1%2C3%7D.)%7B3%7D%5B0-9%5D%7B1%2C3%7D%22%20%2F%2F%20IP%E5%BD%A2%E5%BC%8F%E7%9A%84URL-%20199.194.52.184%0A%09%09%20%2B%20%22%7C%22%20%2F%2F%20%E5%85%81%E8%AE%B8IP%E5%92%8CDOMAIN%EF%BC%88%E5%9F%9F%E5%90%8D%EF%BC%89%0A%09%09%20%2B%20%22(%5B0-9a-z_!~*&#39;()-%5D%2B.)*%22%20%2F%2F%20%E5%9F%9F%E5%90%8D-%20www.%0A%09%09%20%2B%20%22(%5B0-9a-z%5D%5B0-9a-z-%5D%7B0%2C61%7D)%3F%5B0-9a-z%5D.%22%20%2F%2F%20%E4%BA%8C%E7%BA%A7%E5%9F%9F%E5%90%8D%0A%09%09%20%2B%20%22%5Ba-z%5D%7B2%2C6%7D)%22%20%2F%2F%20first%20level%20domain-%20.com%20or%20.museum%0A%09%09%20%2B%20%22(%3A%5B0-9%5D%7B1%2C4%7D)%3F%22%20%2F%2F%20%E7%AB%AF%E5%8F%A3-%20%3A80%0A%09%09%20%2B%20%22((%2F%3F)%7C%22%20%2F%2F%20a%20slash%20isn&#39;t%20required%20if%20there%20is%20no%20file%20name%0A%09%09%20%2B%20%22(%2F%5B0-9a-z_!~*&#39;().%3B%3F%3A%40%26%3D%2B%24%2C%25%23-%5D%2B)%2B%2F%3F)%24%22%3B%0Avar%20rurl%20%3D%20new%20RegExp(%20_url%2C%20&#39;i&#39;%20)%3B%0A%0A%E6%B5%8B%E8%AF%95%EF%BC%9A%0Arurl.exec(%20&#39;baidu.com&#39;%20)%20%2F%2F%20%5B%22baidu.com%22%2C%20undefined%2C%20undefined%2C%20undefined%2C%20undefined%2C%20%22baidu.com%22%2C%20undefined%2C%20%22baid%22%2C%20undefined%2C%20undefined%2C%20%22%22%2C%20%22%22%2C%20undefined%5D%0Arurl.exec(%20&#39;http%3A%2F%2Fbaidu.com&#39;%20)%20%2F%2F%20%0Arurl.exec(%20&#39;http%3A%2F%2Fwww.baidu.com&#39;%20)%20%2F%2F%20%5B%22http%3A%2F%2Fbaidu.com%22%2C%20%22http%3A%2F%2F%22%2C%20%22http%22%2C%20undefined%2C%20undefined%2C%20%22baidu.com%22%2C%20undefined%2C%20%22baid%22%2C%20undefined%2C%20undefined%2C%20%22%22%2C%20%22%22%2C%20undefined%5D%0Arurl.test(%20&#39;baidu&#39;%20)%20%2F%2F%20true%0A%E7%9C%8B%E6%9D%A5%E4%B8%8D%E6%80%8E%E4%B9%88%E4%B9%9F%E5%A5%BD%E7%94%A8%EF%BC%8C%E6%9C%89%E5%BE%85%E5%AD%A6%E4%B9%A0TODO%E3%80%82" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配网址URL的正则表达式&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>先说说网上流传的版本：&nbsp;&nbsp;</span></li><li><span>[a-zA-z]+:<span class="comment">//[^\s]*</span><span>&nbsp;&nbsp;</span></span></li><li><span>粗糙，没有对URL中各个块进行分组&nbsp;&nbsp;</span></li><li><span>修正如下（又一段网上流传的版本）：&nbsp;&nbsp;</span></li><li><span><span class="keyword">var</span><span>&nbsp;_url&nbsp;=&nbsp;</span><span class="string">"^((https|http|ftp|rtsp|mms)?://)?"</span><span>&nbsp;//&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;<span class="string">"(([0-9a-z_!~*'().&amp;=+$%-]+:&nbsp;)?[0-9a-z_!~*'().&amp;=+$%-]+@)?"</span><span>&nbsp;</span><span class="comment">//&nbsp;ftp的user@</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;<span class="string">"(([0-9]{1,3}.){3}[0-9]{1,3}"</span><span>&nbsp;</span><span class="comment">//&nbsp;IP形式的URL-&nbsp;199.194.52.184</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;<span class="string">"|"</span><span>&nbsp;</span><span class="comment">//&nbsp;允许IP和DOMAIN（域名）</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;<span class="string">"([0-9a-z_!~*'()-]+.)*"</span><span>&nbsp;</span><span class="comment">//&nbsp;域名-&nbsp;www.</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;<span class="string">"([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]."</span><span>&nbsp;</span><span class="comment">//&nbsp;二级域名</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;<span class="string">"[a-z]{2,6})"</span><span>&nbsp;</span><span class="comment">//&nbsp;first&nbsp;level&nbsp;domain-&nbsp;.com&nbsp;or&nbsp;.museum</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;<span class="string">"(:[0-9]{1,4})?"</span><span>&nbsp;</span><span class="comment">//&nbsp;端口-&nbsp;:80</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;<span class="string">"((/?)|"</span><span>&nbsp;</span><span class="comment">//&nbsp;a&nbsp;slash&nbsp;isn't&nbsp;required&nbsp;if&nbsp;there&nbsp;is&nbsp;no&nbsp;file&nbsp;name</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;<span class="string">"(/[0-9a-z_!~*'().;?:@&amp;=+$,%#-]+)+/?)$"</span><span>;&nbsp;&nbsp;</span></span></li><li><span><span class="keyword">var</span><span>&nbsp;rurl&nbsp;=&nbsp;</span><span class="keyword">new</span><span>&nbsp;RegExp(&nbsp;_url,&nbsp;</span><span class="string">'i'</span><span>&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>测试：&nbsp;&nbsp;</span></li><li><span>rurl.exec(&nbsp;<span class="string">'baidu.com'</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;["baidu.com",&nbsp;undefined,&nbsp;undefined,&nbsp;undefined,&nbsp;undefined,&nbsp;"baidu.com",&nbsp;undefined,&nbsp;"baid",&nbsp;undefined,&nbsp;undefined,&nbsp;"",&nbsp;"",&nbsp;undefined]</span><span>&nbsp;&nbsp;</span></span></li><li><span>rurl.exec(&nbsp;<span class="string">'http://baidu.com'</span><span>&nbsp;)&nbsp;//&nbsp;&nbsp;&nbsp;</span></span></li><li><span>rurl.exec(&nbsp;<span class="string">'http://www.baidu.com'</span><span>&nbsp;)&nbsp;//&nbsp;[</span><span class="string">"http://baidu.com"</span><span>,&nbsp;</span><span class="string">"http://"</span><span>,&nbsp;</span><span class="string">"http"</span><span>,&nbsp;undefined,&nbsp;undefined,&nbsp;</span><span class="string">"baidu.com"</span><span>,&nbsp;undefined,&nbsp;</span><span class="string">"baid"</span><span>,&nbsp;undefined,&nbsp;undefined,&nbsp;</span><span class="string">""</span><span>,&nbsp;</span><span class="string">""</span><span>,&nbsp;undefined]&nbsp;&nbsp;</span></span></li><li><span>rurl.test(&nbsp;<span class="string">'baidu'</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;true</span><span>&nbsp;&nbsp;</span></span></li><li><span>看来不怎么也好用，有待学习TODO。&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="9" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配网址URL的正则表达式
+
+先说说网上流传的版本：
+[a-zA-z]+://[^\s]*
+粗糙，没有对URL中各个块进行分组
+修正如下（又一段网上流传的版本）：
+var _url = "^((https|http|ftp|rtsp|mms)?://)?" //
+		 + "(([0-9a-z_!~*'().&amp;=+$%-]+: )?[0-9a-z_!~*'().&amp;=+$%-]+@)?" // ftp的user@
+		 + "(([0-9]{1,3}.){3}[0-9]{1,3}" // IP形式的URL- 199.194.52.184
+		 + "|" // 允许IP和DOMAIN（域名）
+		 + "([0-9a-z_!~*'()-]+.)*" // 域名- www.
+		 + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]." // 二级域名
+		 + "[a-z]{2,6})" // first level domain- .com or .museum
+		 + "(:[0-9]{1,4})?" // 端口- :80
+		 + "((/?)|" // a slash isn't required if there is no file name
+		 + "(/[0-9a-z_!~*'().;?:@&amp;=+$,%#-]+)+/?)$";
+var rurl = new RegExp( _url, 'i' );
+
+测试：
+rurl.exec( 'baidu.com' ) // ["baidu.com", undefined, undefined, undefined, undefined, "baidu.com", undefined, "baid", undefined, undefined, "", "", undefined]
+rurl.exec( 'http://baidu.com' ) // 
+rurl.exec( 'http://www.baidu.com' ) // ["http://baidu.com", "http://", "http", undefined, undefined, "baidu.com", undefined, "baid", undefined, undefined, "", "", undefined]
+rurl.test( 'baidu' ) // true
+看来不怎么也好用，有待学习TODO。</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8D%E5%B8%90%E5%8F%B7%E6%98%AF%E5%90%A6%E5%90%88%E6%B3%95%0A%0A%E5%85%88%E8%AF%B4%E8%AF%B4%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%EF%BC%9A%0A%5E%5Ba-zA-Z%5D%5Ba-zA-Z0-9_%5D%7B4%2C15%7D%24%0A(%E5%AD%97%E6%AF%8D%E5%BC%80%E5%A4%B4%EF%BC%8C%E5%85%81%E8%AE%B85-16%E5%AD%97%E8%8A%82%EF%BC%8C%E5%85%81%E8%AE%B8%E5%AD%97%E6%AF%8D%E6%95%B0%E5%AD%97%E4%B8%8B%E5%88%92%E7%BA%BF)%0A%E9%99%90%E5%88%B6%E5%BF%85%E9%A1%BB%E4%BB%A5%E5%AD%97%E6%AF%8D%E5%BC%80%E5%A4%B4%E7%8E%B0%E5%9C%A8%E7%9C%8B%E6%9D%A5%E4%B8%8D%E5%90%88%E9%80%82%EF%BC%8C%E6%AF%94%E5%A6%82QQ%E7%99%BB%E5%BD%95%E5%B9%B3%E5%8F%B0%0A%E9%99%90%E5%88%B6%E4%B8%8D%E8%83%BD%E4%BB%A5%E4%B8%8B%E5%88%92%E7%BA%BF%E5%BC%80%E5%A4%B4%E4%B9%9F%E6%B2%A1%E6%9C%89%E5%BF%85%E8%A6%81%EF%BC%8C%E6%AF%94%E5%A6%82%E7%99%BE%E5%BA%A6%E5%B0%B1%E5%85%81%E8%AE%B8%EF%BC%8C%E5%9B%A0%E6%AD%A4%E7%AE%80%E5%8D%95%E7%82%B9%0A%E4%BF%AE%E6%AD%A3%E5%A6%82%E4%B8%8B%EF%BC%9A%0Avar%20ruser%20%3D%20%2F%5Cw%7B4%2C16%7D%2F" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配帐号是否合法&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>先说说网上流传的版本：&nbsp;&nbsp;</span></li><li><span>^[a-zA-Z][a-zA-Z0-9_]{4,15}$&nbsp;&nbsp;</span></li><li><span>(字母开头，允许5-16字节，允许字母数字下划线)&nbsp;&nbsp;</span></li><li><span>限制必须以字母开头现在看来不合适，比如QQ登录平台&nbsp;&nbsp;</span></li><li><span>限制不能以下划线开头也没有必要，比如百度就允许，因此简单点&nbsp;&nbsp;</span></li><li><span>修正如下：&nbsp;&nbsp;</span></li><li><span><span class="keyword">var</span><span>&nbsp;ruser&nbsp;=&nbsp;/\w{4,16}/&nbsp;&nbsp;</span></span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="10" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配帐号是否合法
+
+先说说网上流传的版本：
+^[a-zA-Z][a-zA-Z0-9_]{4,15}$
+(字母开头，允许5-16字节，允许字母数字下划线)
+限制必须以字母开头现在看来不合适，比如QQ登录平台
+限制不能以下划线开头也没有必要，比如百度就允许，因此简单点
+修正如下：
+var ruser = /\w{4,16}/</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8D%E5%9B%BD%E5%86%85%E7%94%B5%E8%AF%9D%E5%8F%B7%E7%A0%81%0A%0A%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%E5%BE%88%E5%A5%BD%E7%94%A8%EF%BC%9A%0A%5Cd%7B3%7D-%5Cd%7B8%7D%7C%5Cd%7B4%7D-%5Cd%7B7%7D%0A%E8%AF%84%E6%B3%A8%EF%BC%9A%E5%8C%B9%E9%85%8D%E5%BD%A2%E5%BC%8F%E5%A6%82%200511-4405222%20%E6%88%96%20021-87888822" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配国内电话号码&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>网上流传的版本很好用：&nbsp;&nbsp;</span></li><li><span>\d{3}-\d{8}|\d{4}-\d{7}&nbsp;&nbsp;</span></li><li><span>评注：匹配形式如&nbsp;0511-4405222&nbsp;或&nbsp;021-87888822&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="11" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配国内电话号码
+
+网上流传的版本很好用：
+\d{3}-\d{8}|\d{4}-\d{7}
+评注：匹配形式如 0511-4405222 或 021-87888822</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8D%E8%85%BE%E8%AE%AFQQ%E5%8F%B7%0A%0A%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%E5%BE%88%E5%A5%BD%E7%94%A8%EF%BC%9A%0A%20%5B1-9%5D%5B0-9%5D%7B4%2C%7D%0A%E8%AF%84%E6%B3%A8%EF%BC%9A%E8%85%BE%E8%AE%AFQQ%E5%8F%B7%E4%BB%8E10000%E5%BC%80%E5%A7%8B" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配腾讯QQ号&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>网上流传的版本很好用：&nbsp;&nbsp;</span></li><li><span>&nbsp;[1-9][0-9]{4,}&nbsp;&nbsp;</span></li><li><span>评注：腾讯QQ号从10000开始&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="12" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配腾讯QQ号
+
+网上流传的版本很好用：
+ [1-9][0-9]{4,}
+评注：腾讯QQ号从10000开始</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8D%E4%B8%AD%E5%9B%BD%E9%82%AE%E6%94%BF%E7%BC%96%E7%A0%81%0A%0A%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%E5%BE%88%E5%A5%BD%E7%94%A8%EF%BC%9A%0A%5B1-9%5D%5Cd%7B5%7D(%3F!%5Cd)%0A%E8%AF%84%E6%B3%A8%EF%BC%9A%E4%B8%AD%E5%9B%BD%E9%82%AE%E6%94%BF%E7%BC%96%E7%A0%81%E4%B8%BA6%E4%BD%8D%E6%95%B0%E5%AD%97" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配中国邮政编码&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>网上流传的版本很好用：&nbsp;&nbsp;</span></li><li><span>[1-9]\d{5}(?!\d)&nbsp;&nbsp;</span></li><li><span>评注：中国邮政编码为6位数字&nbsp;&nbsp;</span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="13" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配中国邮政编码
+
+网上流传的版本很好用：
+[1-9]\d{5}(?!\d)
+评注：中国邮政编码为6位数字</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8D%E8%BA%AB%E4%BB%BD%E8%AF%81%0A%0A%E5%85%88%E8%AF%B4%E8%AF%B4%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%EF%BC%9A%0A%5Cd%7B15%7D%7C%5Cd%7B18%7D%0Ad%7B15%7D%0A%5Cd%7B18%7D%09%E5%8F%AF%E4%BB%A5%E5%88%A4%E6%96%AD%EF%BC%8C%E4%BD%86%E6%98%AF%E6%9C%89%E4%BA%9B%E7%B2%97%E7%B3%99%20%0A%E4%BB%8E%E8%BA%AB%E4%BB%BD%E8%AF%81%E5%8F%AF%E4%BB%A5%E8%A7%A3%E6%9E%90%E5%87%BA%E5%9C%B0%E5%9D%80%E3%80%81%E7%94%9F%E6%97%A5%E3%80%81%E6%80%A7%E5%88%AB%E7%AD%89%EF%BC%8C%E5%9B%A0%E6%AD%A4%E7%89%B9%E5%88%AB%E8%AF%B4%E6%98%8E%E4%B8%80%E4%B8%8B%EF%BC%9A%0A%EF%81%AC%09%E8%BA%AB%E4%BB%BD%E8%AF%81%E8%A7%84%E5%88%99%0A%E4%B8%AD%E5%9B%BD%E7%9A%84%E8%BA%AB%E4%BB%BD%E8%AF%81%E4%B8%BA15%E4%BD%8D%EF%BC%88%E4%B8%80%E4%BB%A3%EF%BC%89%E6%88%9618%E4%BD%8D%EF%BC%88%E4%BA%8C%E4%BB%A3%EF%BC%89%EF%BC%8C%E5%8C%BA%E5%88%AB%E5%9C%A8%E4%BA%8E%E4%BA%8C%E4%BB%A3%E8%AF%81%E5%8F%AA%E6%98%AF%E5%9C%A8%E4%B8%80%E4%BB%A3%E8%AF%81%E7%9A%84%E7%AC%AC%E4%B8%83%E4%BD%8D%E6%95%B0%E5%AD%97%E5%89%8D%E5%8A%A0%E4%BA%8619%E5%92%8C%E5%9C%A8%E6%9C%AB%E5%B0%BE%E5%8A%A0%E4%BA%86%E4%B8%80%E4%BD%8D%E9%AA%8C%E8%AF%81%E7%A0%81%0A%EF%81%AC%09%E5%B0%8615%E4%BD%8D%E5%8D%87%E7%BA%A7%E4%B8%BA18%E4%BD%8D%EF%BC%8C%E5%B9%B6%E8%A7%A3%E6%9E%9018%E4%BD%8D%E5%8F%B7%E7%A0%81%E6%9E%84%E6%88%90%EF%BC%88%E5%9C%B0%E5%9D%80%E3%80%81%E7%94%9F%E6%97%A5%E3%80%81%E6%80%A7%E5%88%AB%EF%BC%89%0A%E4%BB%A3%E7%A0%81%E5%A6%82%E4%B8%8B%EF%BC%9A%0Afunction%20parseID(ID)%20%7B%0A%09if%20(%20ID.length%20%3D%3D%2015%20)%20%7B%0A%09%09%2F%2F%20%E5%8D%87%E7%BA%A7%E4%B8%BA18%E4%BD%8D%0A%09%09ID%20%3D%20ID.substr(%200%2C%206%20)%20%2B%20%2219%22%20%2B%20ID.substr(%206%20)%3B%0A%09%09%2F%2F%20%E5%89%8D17%E4%BD%8D%E5%AF%B9%E5%BA%94%E7%9A%84%E7%B3%BB%E6%95%B0%0A%09%09var%20rank%20%3D%20%5B%0A%09%09%09%09%227%22%2C%20%229%22%2C%20%2210%22%2C%20%225%22%2C%20%228%22%2C%20%224%22%2C%20%222%22%2C%20%221%22%2C%20%226%22%2C%20%223%22%2C%20%227%22%2C%20%229%22%2C%20%2210%22%2C%20%225%22%2C%20%228%22%2C%20%224%22%2C%20%222%22%0A%09%09%5D%3B%0A%09%09%2F%2F%20%E5%89%8D17%E4%B8%BA%E5%8A%A0%E6%9D%83%E9%99%A4%E4%BB%A517%E5%90%8E%E7%9A%84%E4%BD%99%E6%95%B0%E5%AF%B9%E5%BA%94%E7%9A%84%E6%9C%80%E5%90%8E%E4%B8%80%E4%BD%8D%E8%BA%AB%E4%BB%BD%E8%AF%81%E5%8F%B7%E7%A0%81%0A%09%09var%20last%20%3D%20%5B%0A%09%09%09%09%221%22%2C%20%220%22%2C%20%22X%22%2C%20%229%22%2C%20%228%22%2C%20%227%22%2C%20%226%22%2C%20%225%22%2C%20%224%22%2C%20%223%22%2C%20%222%22%0A%09%09%5D%3B%0A%09%09%2F%2F%20%E5%8A%A0%E6%9D%83%E5%92%8C%0A%09%09for%20(%20var%20i%20%3D%200%2C%20sum%20%3D%200%2C%20len%20%3D%20ID.length%3B%20i%20%3C%20len%3B%20i%2B%2B)%0A%09%09%09sum%20%2B%3D%20ID%5B%20i%20%5D%20*%20rank%5B%20i%20%5D%3B%0A%09%09%2F%2F%20%E5%8A%A0%E4%B8%8A%E6%9C%80%E5%90%8E%E4%B8%80%E4%BD%8D%0A%09%09ID%20%2B%3D%20last%5B%20sum%20%25%2011%20%5D%3B%0A%09%7D%0A%09if%20(%20ID.length%20!%3D%2018%20)%20return%20null%3B%0A%0A%09var%20match%20%3D%20rid.exec(%20ID%20)%3B%0A%09return%20match%20%3F%20%7B%0A%09%09ID%20%3A%20ID%2C%0A%09%09area%20%3A%20match%5B%201%20%5D%2C%0A%09%09y%20%3A%20match%5B%202%20%5D%2C%0A%09%09m%20%3A%20match%5B%203%20%5D%2C%0A%09%09d%20%3A%20match%5B%204%20%5D%2C%0A%09%09sex%20%3A%20match%5B%205%20%5D%20%25%202%0A%09%7D%20%3A%20null%3B%0A%7D%0A%E9%99%90%E5%88%B6%EF%BC%9A%0A%EF%81%AC%09%E8%BF%99%E9%87%8C%E5%8F%AA%E6%98%AF%E8%A7%A3%E6%9E%90%E5%87%BA%E4%BA%86%E5%9C%B0%E5%9D%80%E4%BB%A3%E7%A0%81%EF%BC%8C%E5%A6%82%E4%BD%95%E5%B0%86%E4%BB%A3%E7%A0%81%E8%BD%AC%E6%8D%A2%E4%B8%BA%E5%AE%9E%E9%99%85%E5%9C%B0%E5%9D%80%E8%AF%B7%E9%97%AE%E5%BA%A6%E5%A8%98%E3%80%82%0A%EF%81%AC%09%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1%E4%B8%AD%E7%9A%84sex%E4%B8%BA1%EF%BC%88%E7%94%B7%EF%BC%89%E6%88%960%EF%BC%88%E5%A5%B3%EF%BC%89%EF%BC%8C%E5%B9%B6%E6%9C%AA%E5%81%9A%E8%BD%AC%E6%8D%A2%EF%BC%8C%E5%A6%82%E6%9E%9C%E9%A1%B5%E9%9D%A2%E6%98%BE%E7%A4%BA%E9%9C%80%E8%A6%81%EF%BC%8C%E5%8F%AF%E4%BB%A5%E8%BF%99%E6%A0%B7%E8%BD%AC%E6%8D%A2%EF%BC%9Asex%20%3F%20%22%E7%94%B7%22%20%3A%20%22%E5%A5%B3%22%20%0A%E6%B5%8B%E8%AF%95%EF%BC%9A%0Aconsole.info(%20parseID(%20%22142327840821047%22%20)%20)%3B%0Aconsole.info(%20parseID(%22142327198408210470%22%20)%20)%3B%0A%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99%EF%BC%9A%0Ahttp%3A%2F%2Fbaike.baidu.com%2Fview%2F118340.htm%231" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配身份证&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>先说说网上流传的版本：&nbsp;&nbsp;</span></li><li><span>\d{15}|\d{18}&nbsp;&nbsp;</span></li><li><span>d{15}&nbsp;&nbsp;</span></li><li><span>\d{18}&nbsp;&nbsp;可以判断，但是有些粗糙&nbsp;&nbsp;&nbsp;</span></li><li><span>从身份证可以解析出地址、生日、性别等，因此特别说明一下：&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;身份证规则&nbsp;&nbsp;</span></li><li><span>中国的身份证为15位（一代）或18位（二代），区别在于二代证只是在一代证的第七位数字前加了19和在末尾加了一位验证码&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;将15位升级为18位，并解析18位号码构成（地址、生日、性别）&nbsp;&nbsp;</span></li><li><span>代码如下：&nbsp;&nbsp;</span></li><li><span><span class="keyword">function</span><span>&nbsp;parseID(ID)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;ID.length&nbsp;==&nbsp;15&nbsp;)&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;升级为18位</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ID&nbsp;=&nbsp;ID.substr(&nbsp;0,&nbsp;6&nbsp;)&nbsp;+&nbsp;<span class="string">"19"</span><span>&nbsp;+&nbsp;ID.substr(&nbsp;6&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;前17位对应的系数</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span><span>&nbsp;rank&nbsp;=&nbsp;[&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"7"</span><span>,&nbsp;</span><span class="string">"9"</span><span>,&nbsp;</span><span class="string">"10"</span><span>,&nbsp;</span><span class="string">"5"</span><span>,&nbsp;</span><span class="string">"8"</span><span>,&nbsp;</span><span class="string">"4"</span><span>,&nbsp;</span><span class="string">"2"</span><span>,&nbsp;</span><span class="string">"1"</span><span>,&nbsp;</span><span class="string">"6"</span><span>,&nbsp;</span><span class="string">"3"</span><span>,&nbsp;</span><span class="string">"7"</span><span>,&nbsp;</span><span class="string">"9"</span><span>,&nbsp;</span><span class="string">"10"</span><span>,&nbsp;</span><span class="string">"5"</span><span>,&nbsp;</span><span class="string">"8"</span><span>,&nbsp;</span><span class="string">"4"</span><span>,&nbsp;</span><span class="string">"2"</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;];&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;前17为加权除以17后的余数对应的最后一位身份证号码</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span><span>&nbsp;last&nbsp;=&nbsp;[&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"1"</span><span>,&nbsp;</span><span class="string">"0"</span><span>,&nbsp;</span><span class="string">"X"</span><span>,&nbsp;</span><span class="string">"9"</span><span>,&nbsp;</span><span class="string">"8"</span><span>,&nbsp;</span><span class="string">"7"</span><span>,&nbsp;</span><span class="string">"6"</span><span>,&nbsp;</span><span class="string">"5"</span><span>,&nbsp;</span><span class="string">"4"</span><span>,&nbsp;</span><span class="string">"3"</span><span>,&nbsp;</span><span class="string">"2"</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;];&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;加权和</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span><span>&nbsp;(&nbsp;</span><span class="keyword">var</span><span>&nbsp;i&nbsp;=&nbsp;0,&nbsp;sum&nbsp;=&nbsp;0,&nbsp;len&nbsp;=&nbsp;ID.length;&nbsp;i&nbsp;&lt;&nbsp;len;&nbsp;i++)&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sum&nbsp;+=&nbsp;ID[&nbsp;i&nbsp;]&nbsp;*&nbsp;rank[&nbsp;i&nbsp;];&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;加上最后一位</span><span>&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ID&nbsp;+=&nbsp;last[&nbsp;sum&nbsp;%&nbsp;11&nbsp;];&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(&nbsp;ID.length&nbsp;!=&nbsp;18&nbsp;)&nbsp;</span><span class="keyword">return</span><span>&nbsp;</span><span class="keyword">null</span><span>;&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">var</span><span>&nbsp;match&nbsp;=&nbsp;rid.exec(&nbsp;ID&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;match&nbsp;?&nbsp;{&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ID&nbsp;:&nbsp;ID,&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area&nbsp;:&nbsp;match[&nbsp;1&nbsp;],&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;:&nbsp;match[&nbsp;2&nbsp;],&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m&nbsp;:&nbsp;match[&nbsp;3&nbsp;],&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d&nbsp;:&nbsp;match[&nbsp;4&nbsp;],&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sex&nbsp;:&nbsp;match[&nbsp;5&nbsp;]&nbsp;%&nbsp;2&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;:&nbsp;<span class="keyword">null</span><span>;&nbsp;&nbsp;</span></span></li><li><span>}&nbsp;&nbsp;</span></li><li><span>限制：&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;这里只是解析出了地址代码，如何将代码转换为实际地址请问度娘。&nbsp;&nbsp;</span></li><li><span>&nbsp;&nbsp;&nbsp;返回对象中的sex为1（男）或0（女），并未做转换，如果页面显示需要，可以这样转换：sex&nbsp;?&nbsp;<span class="string">"男"</span><span>&nbsp;:&nbsp;</span><span class="string">"女"</span><span>&nbsp;&nbsp;&nbsp;</span></span></li><li><span>测试：&nbsp;&nbsp;</span></li><li><span>console.info(&nbsp;parseID(&nbsp;<span class="string">"142327840821047"</span><span>&nbsp;)&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>console.info(&nbsp;parseID(<span class="string">"142327198408210470"</span><span>&nbsp;)&nbsp;);&nbsp;&nbsp;</span></span></li><li><span>参考资料：&nbsp;&nbsp;</span></li><li><span>http:<span class="comment">//baike.baidu.com/view/118340.htm#1</span><span>&nbsp;&nbsp;</span></span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="14" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配身份证
+
+先说说网上流传的版本：
+\d{15}|\d{18}
+d{15}
+\d{18}	可以判断，但是有些粗糙 
+从身份证可以解析出地址、生日、性别等，因此特别说明一下：
+	身份证规则
+中国的身份证为15位（一代）或18位（二代），区别在于二代证只是在一代证的第七位数字前加了19和在末尾加了一位验证码
+	将15位升级为18位，并解析18位号码构成（地址、生日、性别）
+代码如下：
+function parseID(ID) {
+	if ( ID.length == 15 ) {
+		// 升级为18位
+		ID = ID.substr( 0, 6 ) + "19" + ID.substr( 6 );
+		// 前17位对应的系数
+		var rank = [
+				"7", "9", "10", "5", "8", "4", "2", "1", "6", "3", "7", "9", "10", "5", "8", "4", "2"
+		];
+		// 前17为加权除以17后的余数对应的最后一位身份证号码
+		var last = [
+				"1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"
+		];
+		// 加权和
+		for ( var i = 0, sum = 0, len = ID.length; i &lt; len; i++)
+			sum += ID[ i ] * rank[ i ];
+		// 加上最后一位
+		ID += last[ sum % 11 ];
+	}
+	if ( ID.length != 18 ) return null;
+
+	var match = rid.exec( ID );
+	return match ? {
+		ID : ID,
+		area : match[ 1 ],
+		y : match[ 2 ],
+		m : match[ 3 ],
+		d : match[ 4 ],
+		sex : match[ 5 ] % 2
+	} : null;
+}
+限制：
+	这里只是解析出了地址代码，如何将代码转换为实际地址请问度娘。
+	返回对象中的sex为1（男）或0（女），并未做转换，如果页面显示需要，可以这样转换：sex ? "男" : "女" 
+测试：
+console.info( parseID( "142327840821047" ) );
+console.info( parseID("142327198408210470" ) );
+参考资料：
+http://baike.baidu.com/view/118340.htm#1</pre>
+<div class="dp-highlighter" id=""><div class="bar"><div class="tools">Js代码 <embed wmode="transparent" src="/javascripts/syntaxhighlighter/clipboard_new.swf" width="14" height="15" flashvars="clipboard=%E5%8C%B9%E9%85%8DIP%E5%9C%B0%E5%9D%80%0A%0A%E5%85%88%E8%AF%B4%E8%AF%B4%E7%BD%91%E4%B8%8A%E6%B5%81%E4%BC%A0%E7%9A%84%E7%89%88%E6%9C%AC%EF%BC%9A%0A%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B%0A%5Cd%09%E6%95%B0%E5%AD%97%E6%B2%A1%E6%9C%89%E9%99%90%E5%88%B6%0A%E4%BF%AE%E6%AD%A3%E5%A6%82%E4%B8%8B%EF%BC%9A%0Avar%20rip%20%3D%20%2F%5E(%3F%3A(%3F%3A%5B01%5D%3F%5Cd%7B1%2C2%7D%7C2%5B0-4%5D%5Cd%7C25%5B0-5%5D)%5C.)%7B3%7D(%3F%3A%5B01%5D%3F%5Cd%7B1%2C2%7D%7C2%5B0-4%5D%5Cd%7C25%5B0-5%5D)%24%2F%3B%0Arip.test(%20%22192.168.1.1%22%20)%20%2F%2F%20true%0Arip.test(%20%220.0.0.0%22%20)%20%2F%2F%20true%0Arip.test(%20%22255.255.255.255%22%20)%20%2F%2F%20true%0Arip.test(%20%22256.255.255.255%22%20)%20%2F%2F%20false%0A%E8%BF%9B%E4%B8%80%E6%AD%A5%E5%A2%9E%E5%8A%A0%E5%88%86%E7%BB%84%EF%BC%9A%0Avar%20rip2%20%3D%20%2F%5E(%5B01%5D%3F%5Cd%7B1%2C2%7D%7C2%5B0-4%5D%5Cd%7C25%5B0-5%5D)%5C.(%5B01%5D%3F%5Cd%7B1%2C2%7D%7C2%5B0-4%5D%5Cd%7C25%5B0-5%5D)%5C.(%5B01%5D%3F%5Cd%7B1%2C2%7D%7C2%5B0-4%5D%5Cd%7C25%5B0-5%5D)%5C.(%5B01%5D%3F%5Cd%7B1%2C2%7D%7C2%5B0-4%5D%5Cd%7C25%5B0-5%5D)%24%2F%3B%0Arip2.exec(%20%22192.168.1.1%22%20)%20%2F%2F%20%5B%22192.168.1.1%22%2C%20%22192%22%2C%20%22168%22%2C%20%221%22%2C%20%221%22%5D%0Arip2.exec(%20%220.0.0.0%22%20)%20%2F%2F%20%5B%220.0.0.0%22%2C%20%220%22%2C%20%220%22%2C%20%220%22%2C%20%220%22%5D%0Arip2.exec(%20%22255.255.255.255%22%20)%20%2F%2F%20%5B%22255.255.255.255%22%2C%20%22255%22%2C%20%22255%22%2C%20%22255%22%2C%20%22255%22%5D%0Arip2.exec(%20%22256.255.255.255%22%20)%20%2F%2F%20null%0A" quality="high" allowscriptaccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer">&nbsp;<a href="javascript:void()" title="收藏这段代码" onclick="code_favorites_do_favorite(this);return false;"><img class="star" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_star.png" alt="收藏代码"><img class="spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner.gif" style="display:none"></a></div></div><ol start="1" class="dp-c"><li><span><span>匹配IP地址&nbsp;&nbsp;</span></span></li><li><span>&nbsp;&nbsp;</span></li><li><span>先说说网上流传的版本：&nbsp;&nbsp;</span></li><li><span>\d+\.\d+\.\d+\.\d+&nbsp;&nbsp;</span></li><li><span>\d&nbsp;&nbsp;数字没有限制&nbsp;&nbsp;</span></li><li><span>修正如下：&nbsp;&nbsp;</span></li><li><span><span class="keyword">var</span><span>&nbsp;rip&nbsp;=&nbsp;/^(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])$/;&nbsp;&nbsp;</span></span></li><li><span>rip.test(&nbsp;<span class="string">"192.168.1.1"</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;true</span><span>&nbsp;&nbsp;</span></span></li><li><span>rip.test(&nbsp;<span class="string">"0.0.0.0"</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;true</span><span>&nbsp;&nbsp;</span></span></li><li><span>rip.test(&nbsp;<span class="string">"255.255.255.255"</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;true</span><span>&nbsp;&nbsp;</span></span></li><li><span>rip.test(&nbsp;<span class="string">"256.255.255.255"</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;false</span><span>&nbsp;&nbsp;</span></span></li><li><span>进一步增加分组：&nbsp;&nbsp;</span></li><li><span><span class="keyword">var</span><span>&nbsp;rip2&nbsp;=&nbsp;/^([01]?\d{1,2}|2[0-4]\d|25[0-5])\.([01]?\d{1,2}|2[0-4]\d|25[0-5])\.([01]?\d{1,2}|2[0-4]\d|25[0-5])\.([01]?\d{1,2}|2[0-4]\d|25[0-5])$/;&nbsp;&nbsp;</span></span></li><li><span>rip2.exec(&nbsp;<span class="string">"192.168.1.1"</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;["192.168.1.1",&nbsp;"192",&nbsp;"168",&nbsp;"1",&nbsp;"1"]</span><span>&nbsp;&nbsp;</span></span></li><li><span>rip2.exec(&nbsp;<span class="string">"0.0.0.0"</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;["0.0.0.0",&nbsp;"0",&nbsp;"0",&nbsp;"0",&nbsp;"0"]</span><span>&nbsp;&nbsp;</span></span></li><li><span>rip2.exec(&nbsp;<span class="string">"255.255.255.255"</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;["255.255.255.255",&nbsp;"255",&nbsp;"255",&nbsp;"255",&nbsp;"255"]</span><span>&nbsp;&nbsp;</span></span></li><li><span>rip2.exec(&nbsp;<span class="string">"256.255.255.255"</span><span>&nbsp;)&nbsp;</span><span class="comment">//&nbsp;null</span><span>&nbsp;&nbsp;</span></span></li></ol></div><pre class="js" name="code" codeable_id="1217898" codeable_type="Blog" source_url="http://nuysoft.iteye.com/blog/1217898" pre_index="15" title="[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式" style="display: none;">匹配IP地址
+
+先说说网上流传的版本：
+\d+\.\d+\.\d+\.\d+
+\d	数字没有限制
+修正如下：
+var rip = /^(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])$/;
+rip.test( "192.168.1.1" ) // true
+rip.test( "0.0.0.0" ) // true
+rip.test( "255.255.255.255" ) // true
+rip.test( "256.255.255.255" ) // false
+进一步增加分组：
+var rip2 = /^([01]?\d{1,2}|2[0-4]\d|25[0-5])\.([01]?\d{1,2}|2[0-4]\d|25[0-5])\.([01]?\d{1,2}|2[0-4]\d|25[0-5])\.([01]?\d{1,2}|2[0-4]\d|25[0-5])$/;
+rip2.exec( "192.168.1.1" ) // ["192.168.1.1", "192", "168", "1", "1"]
+rip2.exec( "0.0.0.0" ) // ["0.0.0.0", "0", "0", "0", "0"]
+rip2.exec( "255.255.255.255" ) // ["255.255.255.255", "255", "255", "255", "255"]
+rip2.exec( "256.255.255.255" ) // null
+</pre>
+&nbsp;
+<p>&nbsp;</p>
+  </div>
+
+  
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/794.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1217898#" onclick="digg(&quot;blogs&quot;, 1217898, false);return false;"><div><strong>27</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1217898#" onclick="digg(&quot;blogs&quot;, 1217898, true);return false;"><div><strong>1</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1256338" class="next" title="[原创] jQuery源码分析-04 选择器-Sizzle-工作原理">[原创] jQuery源码分析-04 选择器-Sizzle- ...</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1217884" class="pre" title="[原创] jQuery源码分析-jQuery中的循环技巧">[原创] jQuery源码分析-jQuery中的循环技 ...</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-10-27 01:29</li>
+      <li>浏览 30852</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1217898#comments">评论(16)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-02%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F-RegExp-%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1217898" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-02%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F-RegExp-%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1217898&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/spinner(1).gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1217898" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    <div id="bc2356306">
+  <div class="comment_title">
+    16 楼
+    <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>
+    2014-08-15&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2356306);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">jquery 解析正则表达式及常见的Regex规则和表达式 - <br>http://www.suchso.com/UIweb/jquery-Regex.html</div>
+</div>
+
+<div id="bc2306527">
+  <div class="comment_title">
+    15 楼
+    <a href="http://www314599782.iteye.com/" target="_blank" title="www314599782">www314599782</a>
+    2013-04-05&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2306527);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">^[1-9]\d*|0$&nbsp;&nbsp;&nbsp; 匹配非负整数（正整数 + 0） <br>你这明显写错了&nbsp; t.test("d0");就为true<br>应该这样写&nbsp;&nbsp; /^(([1-9]\d*)|(0+))$/;<br>括号</div>
+</div>
+
+<div id="bc2304345">
+  <div class="comment_title">
+    14 楼
+    <a href="http://lpbottle-163-com.iteye.com/" target="_blank" title="pb瓶子">pb瓶子</a>
+    2013-03-18&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2304345);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">pb瓶子 写道</div><div class="quote_div">^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$&nbsp; 匹配正浮点数<br><br>这句正则表达式也可以匹配类似于 1.2.3.4.5 的带有多个点的数字，这个...应该不算浮点数吧？<br><br>改正后：/^(([1-9]\d*)|0)\.\d*$/<br></div><br>修正一下：/^(([1-9]\d*)|0)\.\d+$/（把末尾的星号(*)改成加号(+)，不然会匹配 0., 1. 等没有小数位的怪数字</div>
+</div>
+
+<div id="bc2304343">
+  <div class="comment_title">
+    13 楼
+    <a href="http://lpbottle-163-com.iteye.com/" target="_blank" title="pb瓶子">pb瓶子</a>
+    2013-03-18&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2304343);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">pb瓶子 写道</div><div class="quote_div">^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$&nbsp; 匹配正浮点数<br><br>这句正则表达式也可以匹配类似于 1.2.3.4.5 的带有多个点的数字，这个...应该不算浮点数吧？<br><br>改正后：/^(([1-9]\d*)|0)\.\d*$/<br></div><br><br>再补充一句：^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$ 这句正则表达式也可以匹配大于负一，小于零的负浮点数</div>
+</div>
+
+<div id="bc2304339">
+  <div class="comment_title">
+    12 楼
+    <a href="http://lpbottle-163-com.iteye.com/" target="_blank" title="pb瓶子">pb瓶子</a>
+    2013-03-18&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2304339);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$&nbsp; 匹配正浮点数<br><br>这句正则表达式也可以匹配类似于 1.2.3.4.5 的带有多个点的数字，这个...应该不算浮点数吧？<br><br>改正后：/^(([1-9]\d*)|0)\.\d*$/<br></div>
+</div>
+
+<div id="bc2300204">
+  <div class="comment_title">
+    11 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2013-02-05&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2300204);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">qq361933172 写道</div><div class="quote_div">楼主，你出书了吗？我想买一本，你的联系方式是？</div><br>已经完稿，出版日期未定。</div>
+</div>
+
+<div id="bc2299896">
+  <div class="comment_title">
+    10 楼
+    <a href="http://qq361933172.iteye.com/" target="_blank" title="qq361933172">qq361933172</a>
+    2013-02-01&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2299896);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">楼主，你出书了吗？我想买一本，你的联系方式是？</div>
+</div>
+
+<div id="bc2281994">
+  <div class="comment_title">
+    9 楼
+    <a href="http://nigelvon.iteye.com/" target="_blank" title="NigelVon">NigelVon</a>
+    2012-09-17&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2281994);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">电话号码那一个有点过时，现在不少地区的电话号码都是4位区号，8位号码。<br>比如长沙：0731-xxxxxxxx</div>
+</div>
+
+<div id="bc2272593">
+  <div class="comment_title">
+    8 楼
+    <a href="http://tstext.iteye.com/" target="_blank" title="tstext">tstext</a>
+    2012-07-27&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2272593);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">也不明白那个rid是什么</div>
+</div>
+
+<div id="bc2269745">
+  <div class="comment_title">
+    7 楼
+    <a href="http://jackface.iteye.com/" target="_blank" title="jacking124">jacking124</a>
+    2012-07-13&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2269745);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">嗯，不错的，支持你，继续努力</div>
+</div>
+
+<div id="bc2257002">
+  <div class="comment_title">
+    6 楼
+    <a href="http://jliker.iteye.com/" target="_blank" title="jliker">jliker</a>
+    2012-05-08&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2257002);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">这个分组后的URL 正则表达式会造成IE或Chrome下的 正则解析死循环<br><br>不信测试一下这个RUL 试试<br><br>http://store.taobao.com/shop/view_shop.htm?user_id=8e6e127dbb4ae8b084baccb0e35502ce&amp;ssid=r11</div>
+</div>
+
+<div id="bc2238763">
+  <div class="comment_title">
+    5 楼
+    <a href="http://aaronlong31.iteye.com/" target="_blank" title="Aaronlong31">Aaronlong31</a>
+    2012-01-05&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2238763);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">验证身份证号码的那段代码32行中的rid是什么？</div>
+</div>
+
+<div id="bc2235386">
+  <div class="comment_title">
+    4 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2011-12-14&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2235386);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">caniggia1986 写道</div><div class="quote_div">*?表示非贪婪匹配</div><br>致命的错误，谢谢。</div>
+</div>
+
+<div id="bc2235336">
+  <div class="comment_title">
+    3 楼
+    <a href="http://caniggia1986.iteye.com/" target="_blank" title="caniggia1986">caniggia1986</a>
+    2011-12-14&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2235336);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">*?表示非贪婪匹配</div>
+</div>
+
+<div id="bc2231451">
+  <div class="comment_title">
+    2 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2011-11-24&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2231451);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">filod 写道</div><div class="quote_div">不知道为什么归在了jQuery源码分析分类下....</div><br>计划是把jQuery中的正则系统的梳理一遍，写的时候搜索了下，发现了这篇古老的文档，就顺手收了，这是其中一节</div>
+</div>
+
+<div id="bc2230596">
+  <div class="comment_title">
+    1 楼
+    <a href="http://filod.iteye.com/" target="_blank" title="filod">filod</a>
+    2011-11-21&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1217898#" onclick="quote_comment(2230596);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">不知道为什么归在了jQuery源码分析分类下....</div>
+</div>
+
+
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_idea.gif"><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1217898', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1217898;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349110 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed?subscription%5Bsubscribed_user_name%5D=nuysoft" class="subscription" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式 - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

@@ -1,0 +1,845 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1172122 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="   属性操作主要介绍prop、attr、val三个接口的实现，相对于其他的接口，这三个的源码实现复杂，更容易让人混淆，一不小心就回使用错误的接口或返回错误的值，因此重点分析。     9.1	.prop() vs .attr()     9.1.1	概述     1.6.1相对1.5.x最大的改进，莫过于对属性.attr()的重写了。在1.6.1中，将.attr()一分为二： .attr()、.p ...">
+    <meta name="keywords" content="javascript, jqeury, attr, prop, web [原创] jQuery源码分析-09属性操作">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1172122#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-09属性操作</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jqeury">jqeury</a><a href="http://www.iteye.com/blogs/tag/attr">attr</a><a href="http://www.iteye.com/blogs/tag/prop">prop</a><a href="http://www.iteye.com/blogs/tag/web">web</a>&nbsp;</div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <p>&nbsp;</p>
+<p class="MsoNormal">属性操作主要介绍<span>prop</span>、<span>attr</span>、<span>val</span>三个接口的实现，相对于其他的接口，这三个的源码实现复杂，更容易让人混淆，一不小心就回使用错误的接口或返回错误的值，因此重点分析。</p>
+<p>&nbsp;</p>
+<p>9.1<span style="white-space: pre;">	</span>.prop() vs .attr()</p>
+<p>&nbsp;</p>
+<p>9.1.1<span style="white-space: pre;">	</span>概述</p>
+<p>&nbsp;</p>
+<p>1.6.1相对1.5.x最大的改进，莫过于对属性.attr()的重写了。在1.6.1中，将.attr()一分为二： .attr()、.prop()，这是一个令人困惑的变更，也是一个破坏性的升级，会直接影响到无数的网站和项目升级到1.6。</p>
+<p>简单的说，.attr()是通过setAttribute、getAttribute实现，.prop()则通过Element[ name ]实现：</p>
+<p>&nbsp;</p>
+<div>
+<table class="MsoTableLightGridAccent3" cellspacing="0" border="1" cellpadding="0" style="border-collapse: collapse; border: none;">
+<tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-family: Consolas;">jQuery.attr</span></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-family: Consolas;">setAttribute,
+  getAttribute</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-family: Consolas;">jQuery.removeAttr</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-family: Consolas;">removeAttribute,
+  removeAttributeNode(getAttributeNode )</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-family: Consolas;">jQuery.prop</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-family: Consolas;">Element[
+  name ]</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-family: Consolas;">jQuery.removeProp</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-family: Consolas;">delete Element[
+  name ]</span></p>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div><br></div>
+<div>
+<p class="MsoNormal"><span>事实上</span><span style="font-family: Consolas;">.attr()</span>和<span style="font-family: Consolas;">.prop()</span>的不同，是<span>HTML</span>属性（<span>HTML attributes</span>）和<span>DOM</span>属性（<span>DOM properties</span>）的不同。<span>HTML</span>属性解析的是<span>HTML</span>代码中的存在的属性，返回的总是字符串，而<span>DOM</span>属性解析的是<span>DOM</span>对象的属性，可能是字符串，也可能是一个对象，可能与<span>HTML</span>属性相同，也可能不同。</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">9.1.2<span style="white-space: pre;">	</span>测试</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">看个例子，让我们对HTML属性和DOM属性的区别有个直观的概念：</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal"><span>HTML</span>代码：</p>
+<p class="MsoNormal">&nbsp;</p>
+<table class="MsoTableGrid" cellspacing="0" border="1" cellpadding="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&lt;</span><span style="font-size: 10.0pt;">a</span><span style="font-size: 10.0pt;"> <span style="color: #7F007F;">href</span><span style="color: black;">=</span><em><span style="color: #2A00FF;">"abc.html"</span></em>
+  <span style="color: #7F007F;">class</span><span style="color: black;">=</span><em><span style="color: #2A00FF;">"csstest"</span></em> <span style="color: #7F007F;">style</span><span style="color: black;">=</span><em><span style="color: #2A00FF;">"font-size:
+  30px;"</span></em><span style="color: teal;">&gt;</span><span style="color: black;">link</span><span style="color: teal;">&lt;/</span><span style="color: #3F7F7F;">a</span><span style="color: teal;">&gt;</span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&lt;</span><span style="font-size: 10.0pt;">input</span><span style="font-size: 10.0pt;"> <span style="color: #7F007F;">type</span><span style="color: black;">=</span><em><span style="color: #2A00FF;">"text"</span></em>
+  <span style="color: #7F007F;">value</span><span style="color: black;">=</span><em><span style="color: #2A00FF;">"123"</span></em><span style="color: teal;">&gt;</span></span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">&lt;</span><span style="font-size: 10.0pt;">input</span><span style="font-size: 10.0pt;"> <span style="color: #7F007F;">type</span><span style="color: black;">=</span><em><span style="color: #2A00FF;">"checkbox"</span></em>
+  <span style="color: #7F007F;">checked</span><span style="color: black;">=</span><em><span style="color: #2A00FF;">"checked"</span></em><span style="color: teal;">&gt;</span></span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal"><span>JavaScript</span>代码：</p>
+<p class="MsoNormal">&nbsp;</p>
+<table class="MsoTableGrid" cellspacing="0" border="1" cellpadding="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><a name="OLE_LINK33"></a><a name="OLE_LINK32"><span><span style="font-size: 10.0pt;">console.info( $(</span></span></a><span><span><span style="font-size: 10.0pt;">'#a'</span></span></span><span><span><span style="font-size: 10.0pt;">).attr(</span></span></span><span><span><span style="font-size: 10.0pt;">'href'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// abc.html</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info( $(</span></span></span><span><span><span style="font-size: 10.0pt;">'#a'</span></span></span><span><span><span style="font-size: 10.0pt;">).prop(</span></span></span><span><span><span style="font-size: 10.0pt;">'href'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// file:///H:/open/ws-nuysoft/com.jquery/jquery/abc.html</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info( $(</span></span></span><span><span><span style="font-size: 10.0pt;">'#a'</span></span></span><span><span><span style="font-size: 10.0pt;">).attr(</span></span></span><span><span><span style="font-size: 10.0pt;">'class'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// csstest</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info( $(</span></span></span><span><span><span style="font-size: 10.0pt;">'#a'</span></span></span><span><span><span style="font-size: 10.0pt;">).prop(</span></span></span><span><span><span style="font-size: 10.0pt;">'class'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// csstest</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info(
+  document.getElementById(</span></span></span><span><span><span style="font-size: 10.0pt;">'a'</span></span></span><span><span><span style="font-size: 10.0pt;">).getAttribute(</span></span></span><span><span><span style="font-size: 10.0pt;">'class'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// csstest</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info(
+  document.getElementById(</span></span></span><span><span><span style="font-size: 10.0pt;">'a'</span></span></span><span><span><span style="font-size: 10.0pt;">).className ); </span></span></span><span><span><span style="font-size: 10.0pt;">// csstest</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info( $(</span></span></span><span><span><span style="font-size: 10.0pt;">'#a'</span></span></span><span><span><span style="font-size: 10.0pt;">).attr(</span></span></span><span><span><span style="font-size: 10.0pt;">'style'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// font-size: 30px;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info( $(</span></span></span><span><span><span style="font-size: 10.0pt;">'#a'</span></span></span><span><span><span style="font-size: 10.0pt;">).prop(</span></span></span><span><span><span style="font-size: 10.0pt;">'style'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// CSSStyleDeclaration { 0="font-size",
+  fontSize="30px", ...}</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info(
+  document.getElementById(</span></span></span><span><span><span style="font-size: 10.0pt;">'a'</span></span></span><span><span><span style="font-size: 10.0pt;">).getAttribute(</span></span></span><span><span><span style="font-size: 10.0pt;">'style'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// font-size:
+  30px;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info(
+  document.getElementById(</span></span></span><span><span><span style="font-size: 10.0pt;">'a'</span></span></span><span><span><span style="font-size: 10.0pt;">).style ); </span></span></span><span><span><span style="font-size: 10.0pt;">// CSSStyleDeclaration { 0="font-size",
+  fontSize="30px", ...}</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info( $(</span></span></span><span><span><span style="font-size: 10.0pt;">'#text'</span></span></span><span><span><span style="font-size: 10.0pt;">).attr(</span></span></span><span><span><span style="font-size: 10.0pt;">'value'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// 123</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info( <a name="OLE_LINK35"></a><a name="OLE_LINK34"><span>$(</span></a></span></span></span><span><span><span><span><span style="font-size: 10.0pt;">'#text'</span></span></span></span></span><span><span><span><span><span style="font-size: 10.0pt;">).prop(</span></span></span></span></span><span><span><span><span><span style="font-size: 10.0pt;">'value'</span></span></span></span></span><span><span><span><span><span style="font-size: 10.0pt;">)</span></span></span></span></span><span><span><span style="font-size: 10.0pt;"> ); </span></span></span><span><span><span style="font-size: 10.0pt;">// 123</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">&nbsp;</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info( $(</span></span></span><span><span><span style="font-size: 10.0pt;">'#checkbox'</span></span></span><span><span><span style="font-size: 10.0pt;">).attr(</span></span></span><span><span><span style="font-size: 10.0pt;">'checked'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// checked</span></span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span><span><span style="font-size: 10.0pt;">console.info( $(</span></span></span><span><span><span style="font-size: 10.0pt;">'#checkbox'</span></span></span><span><span><span style="font-size: 10.0pt;">).prop(</span></span></span><span><span><span style="font-size: 10.0pt;">'checked'</span></span></span><span><span><span style="font-size: 10.0pt;">) ); </span></span></span><span><span><span style="font-size: 10.0pt;">// true</span></span></span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">可以看到<span>HTML</span>属性和<span>DOM</span>属性在属性名、属性值上都诸多不同。</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">9.1.3<span style="white-space: pre;">	</span>区别</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">不同之处总结如下：</p>
+<p class="MsoNormal"><span style="white-space: pre;">	</span>属性名可能不同，尽管大部分的属性名还是相似或一致的</p>
+<p class="MsoNormal"><span style="white-space: pre;">	</span>HTML属性值总是返回字符串，DOM属性值则可能是整型、字符串、对象，可以获取更多的内容</p>
+<p class="MsoNormal"><span style="white-space: pre;">	</span>DOM属性总是返回当前的状态（值），而HTML属性（在大多数浏览）返回的初始化时的状态（值）</p>
+<p class="MsoNormal"><span style="white-space: pre;">	</span>DOM属性只能返回固定属性名的值，而HTML属性则可以返回在HTML代码中自定义的属性名的值</p>
+<p class="MsoNormal"><span style="white-space: pre;">	</span>相对于HTML属性的浏览器兼容问题，DOM属性名和属性值在浏览器之间的差异更小，并且DOM属性也有标准可依</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">9.1.4<span style="white-space: pre;">	</span>建议</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">下边让我们回到.attr()和.prop()，经过以上测试和分析，可以得出对.attr()和.prop()的使用建议如下</p>
+<p class="MsoNormal"><span style="white-space: pre;">	</span>优先使用.prop()，因为.prop()总是返回最新的状态（值）</p>
+<p class="MsoNormal"><span style="white-space: pre;">	</span>只有涉及到自定义HTML属性时使用.attr()，或者可以说，忘掉.attr()吧</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">9.1.5<span style="white-space: pre;">	</span>源码</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal"><span style="white-space: pre;">	</span>jQuery.attr</p>
+<div><br></div>
+<div>
+
+<table class="MsoTableGrid" cellspacing="0" border="1" cellpadding="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">设置或获取</span><span style="font-size: 10.0pt;">HTML</span><span style="font-size: 10.0pt; color: #3f7f5f;">属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">// http://stackoverflow.com/questions/5874652/prop-vs-attr</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">attr: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( elem,
+  name, value, pass ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> nType = elem.nodeType;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// don't
+  get/set attributes on text, comment and attribute nodes</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">忽略文本、注释、属性节点</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !elem || nType === 3 || nType === 8 ||
+  nType === 2 ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">遇到与方法同名的属性，则执行方法</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果遇到的是扩展或需要修正的属性，则执行相应的方法</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( pass &amp;&amp; name </span><strong><span style="font-size: 10.0pt;">in</span></strong><span style="font-size: 10.0pt;"> jQuery.attrFn )
+  {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> jQuery( elem )[ name ](
+  value );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  Fallback to prop when attributes are not supported</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果不支持</span><span style="font-size: 10.0pt;">getAttribute</span><span style="font-size: 10.0pt; color: #3f7f5f;">，则调用</span><span style="font-size: 10.0pt;">jQuery.prop</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">求助于</span><span style="font-size: 10.0pt;">prop</span><span style="font-size: 10.0pt; color: #3f7f5f;">？</span><span style="font-size: 10.0pt;">prop</span><span style="font-size: 10.0pt; color: #3f7f5f;">是从</span><span style="font-size: 10.0pt;">attr</span><span style="font-size: 10.0pt; color: #3f7f5f;">中分化出来的，居然要求助于</span><span style="font-size: 10.0pt;">prop</span><span style="font-size: 10.0pt; color: #3f7f5f;">，看来</span><span style="font-size: 10.0pt;">attr</span><span style="font-size: 10.0pt; color: #3f7f5f;">要被放弃了</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !(</span><span style="font-size: 10.0pt;">"getAttribute"</span><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">in</span></strong><span style="font-size: 10.0pt;"> elem) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> jQuery.prop( elem, name,
+  value );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> ret, hooks,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>notxml = nType !== 1 ||
+  !jQuery.isXMLDoc( elem );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  Normalize the name if needed</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">格式化</span><span style="font-size: 10.0pt;">name</span><span style="font-size: 10.0pt; color: #3f7f5f;">（修正</span><span style="font-size: 10.0pt;">tabindex &gt; tabIndex</span><span style="font-size: 10.0pt; color: #3f7f5f;">）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>name = notxml &amp;&amp; jQuery.attrFix[
+  name ] || name;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">属性钩子：</span><span style="font-size: 10.0pt;">type tabIndex</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>hooks = jQuery.attrHooks[ name ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果没有</span><span style="font-size: 10.0pt;">name</span><span style="font-size: 10.0pt; color: #3f7f5f;">对应的钩子</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !hooks ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Use boolHook for boolean attributes</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">使用</span><span style="font-size: 10.0pt;">boolean</span><span style="font-size: 10.0pt; color: #3f7f5f;">钩子处理</span><span style="font-size: 10.0pt;">boolean</span><span style="font-size: 10.0pt; color: #3f7f5f;">属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( rboolean.test( name ) &amp;&amp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(</span><strong><span style="font-size: 10.0pt;">typeof</span></strong><span style="font-size: 10.0pt;"> value === </span><span style="font-size: 10.0pt;">"boolean"</span><span style="font-size: 10.0pt;"> || value === </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> || value.toLowerCase() === name.toLowerCase()) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">使用</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt; color: #3f7f5f;">布尔钩子（静态方法对象）：</span><span style="font-size: 10.0pt;">set get</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>hooks = boolHook;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Use formHook for forms and if the name contains certain characters</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">使用表单钩子</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( formHook &amp;&amp; (jQuery.nodeName(
+  elem, </span><span style="font-size: 10.0pt;">"form"</span><span style="font-size: 10.0pt;"> ) || rinvalidChar.test( name )) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">使用</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt; color: #3f7f5f;">表单钩子（静态方法对象）：</span><span style="font-size: 10.0pt;">set get</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>hooks = formHook;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果</span><span style="font-size: 10.0pt;">value</span><span style="font-size: 10.0pt; color: #3f7f5f;">已定义，则设置或移除</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">设置</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( value !== </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// typeof null === 'object' // true</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// typeof undefined === 'undefined' // true</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// null == undefined true</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// null === undefined false</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// value</span><span style="font-size: 10.0pt; color: #3f7f5f;">为</span><span style="font-size: 10.0pt;">null</span><span style="font-size: 10.0pt; color: #3f7f5f;">，则移除</span><span style="font-size: 10.0pt;">name</span><span style="font-size: 10.0pt; color: #3f7f5f;">属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">注意这里用的都是恒等号</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( value === </span><strong><span style="font-size: 10.0pt;">null</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.removeAttr( elem, name );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">属性钩子、布尔钩子、表单钩子，如果有对应的钩子，则调用钩子的</span><span style="font-size: 10.0pt;">set</span><span style="font-size: 10.0pt; color: #3f7f5f;">方法</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( hooks &amp;&amp; </span><span style="font-size: 10.0pt;">"set"</span><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">in</span></strong><span style="font-size: 10.0pt;"> hooks &amp;&amp; notxml &amp;&amp; (ret = hooks.set( elem, value, name
+  )) !== </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> ret;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">最后的最后，还是调用</span><span style="font-size: 10.0pt;">setAttribute</span><span style="font-size: 10.0pt; color: #3f7f5f;">，前边的各种钩子，都是修正属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">强制将</span><span style="font-size: 10.0pt;">value</span><span style="font-size: 10.0pt; color: #3f7f5f;">转换为字符串</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>elem.setAttribute( name, </span><span style="font-size: 10.0pt;">""</span><span style="font-size: 10.0pt;"> + value
+  );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> value;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果</span><span style="font-size: 10.0pt;">value</span><span style="font-size: 10.0pt; color: #3f7f5f;">是</span><span style="font-size: 10.0pt;">undefined</span><span style="font-size: 10.0pt; color: #3f7f5f;">，说明是取属性值，如果对应的钩子的有</span><span style="font-size: 10.0pt;">get</span><span style="font-size: 10.0pt; color: #3f7f5f;">方法，则调用钩子的</span><span style="font-size: 10.0pt;">get</span><span style="font-size: 10.0pt; color: #3f7f5f;">方法</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( hooks &amp;&amp; </span><span style="font-size: 10.0pt;">"get"</span><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">in</span></strong><span style="font-size: 10.0pt;"> hooks &amp;&amp; notxml ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> hooks.get( elem, name );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">最后的最后：</span><span style="font-size: 10.0pt;">getAttribute</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>ret = elem.getAttribute( name );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Non-existent attributes return null, we normalize to undefined</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">不存在的属性返回</span><span style="font-size: 10.0pt;">null</span><span style="font-size: 10.0pt; color: #3f7f5f;">，格式化为</span><span style="font-size: 10.0pt;">undefined</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> ret === </span><strong><span style="font-size: 10.0pt;">null</span></strong><span style="font-size: 10.0pt;"> ?</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> :</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>ret;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">}</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph">&nbsp;</p>
+<p class="MsoListParagraph"><span><span style="white-space: pre;">	</span>jQuery.prop</span></p>
+<p class="MsoListParagraph">&nbsp;</p>
+<table class="MsoTableGrid" cellspacing="0" border="1" cellpadding="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">设置或获取</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">prop: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( elem,
+  name, value ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> nType = elem.nodeType;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// don't
+  get/set properties on text, comment and attribute nodes</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">忽略文本、注释、属性节点</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !elem || nType === 3 || nType === 8 ||
+  nType === 2 ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> ret, hooks,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>notxml = nType !== 1 ||
+  !jQuery.isXMLDoc( elem );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Try
+  to normalize/fix the name</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">属性名</span><span style="font-size: 10.0pt;">name</span><span style="font-size: 10.0pt; color: #3f7f5f;">修正</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>name = notxml &amp;&amp; jQuery.propFix[
+  name ] || name;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>hooks = jQuery.propHooks[ name ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">设置</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">看着</span><span style="font-size: 10.0pt;">prop</span><span style="font-size: 10.0pt; color: #3f7f5f;">的实现是不是很眼熟？嗯，和</span><span style="font-size: 10.0pt;">attr</span><span style="font-size: 10.0pt; color: #3f7f5f;">的思路类似！</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( value !== </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果钩子存在</span><span style="font-size: 10.0pt;">set</span><span style="font-size: 10.0pt; color: #3f7f5f;">方法，则调用钩子的</span><span style="font-size: 10.0pt;">set</span><span style="font-size: 10.0pt; color: #3f7f5f;">方法</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( hooks &amp;&amp; </span><span style="font-size: 10.0pt;">"set"</span><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">in</span></strong><span style="font-size: 10.0pt;"> hooks &amp;&amp; (ret = hooks.set( elem, value, name )) !== </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> ret;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> (elem[ name ] = value);</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">读取</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( hooks &amp;&amp; </span><span style="font-size: 10.0pt;">"get"</span><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">in</span></strong><span style="font-size: 10.0pt;"> hooks &amp;&amp; (ret = hooks.get( elem, name )) !== </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> ret;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> elem[ name ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">}</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph">&nbsp;</p>
+<p class="MsoListParagraph"><span><span style="white-space: pre;">	</span>jQuery.fn.attr</span>、<span>jQuery.fn.prop</span></p>
+<p class="MsoListParagraph" style="margin-left: 21.0pt; text-indent: 0cm;">内部通过<span style="font-family: Consolas;">jQuery.access</span>调用<span style="font-family: Consolas;">jQuery.attr</span><span>、</span><span style="font-family: Consolas;">jQuery.prop</span>实现</p>
+<p class="MsoListParagraph" style="margin-left: 21.0pt; text-indent: 0cm;">&nbsp;</p>
+<table class="MsoTableGrid" cellspacing="0" border="1" cellpadding="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">attr: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( name,
+  value ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> jQuery.access( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">, name, value, </span><strong><span style="font-size: 10.0pt;">true</span></strong><span style="font-size: 10.0pt;">, jQuery.attr );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">prop: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( name,
+  value ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> jQuery.access( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">, name, value, </span><strong><span style="font-size: 10.0pt;">true</span></strong><span style="font-size: 10.0pt;">, jQuery.prop );</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">}</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph">&nbsp;</p>
+<p class="MsoListParagraph"><span><span style="white-space: pre;">	</span>jQuery.access</span></p>
+<p class="MsoListParagraph">&nbsp;</p>
+<table class="MsoTableGrid" cellspacing="0" border="1" cellpadding="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">//
+  Mutifunctional method to get and set values to a collection</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">// The value/s
+  can be optionally by executed if its a function</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">多功能函数，读取或设置集合的属性值；值为函数时会被执行</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">// fn</span><span style="font-size: 10.0pt; color: #3f7f5f;">：</span><span style="font-size: 10.0pt;">jQuery.fn.css, jQuery.fn.attr, jQuery.fn.prop</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">access: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( elems,
+  key, value, exec, fn, pass ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> length = elems.length;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  Setting many attributes</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果有多个属性，则迭代</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">typeof</span></strong><span style="font-size: 10.0pt;"> key === </span><span style="font-size: 10.0pt;">"object"</span><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">for</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> k </span><strong><span style="font-size: 10.0pt;">in</span></strong><span style="font-size: 10.0pt;"> key ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.access( elems, k, key[k],
+  exec, fn, value );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> elems;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  Setting one attribute</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">只设置一个属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( value !== </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Optionally, function values get executed if exec is true</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>exec = !pass &amp;&amp; exec &amp;&amp;
+  jQuery.isFunction(value);</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">调用</span><span style="font-size: 10.0pt;">fn</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">for</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> i = 0; i &lt; length; i++ ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fn( elems[i], key, exec ?
+  value.call( elems[i], i, fn( elems[i], key ) ) : value, pass );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> elems;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  Getting an attribute</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">读取属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> length ? fn( elems[0], key )
+  : </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">}</span></p>
+</td>
+</tr></tbody></table>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</div>
+<p>&nbsp;</p>
+  </div>
+
+  
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/187.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1172122#" onclick="digg(&quot;blogs&quot;, 1172122, false);return false;"><div><strong>1</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1172122#" onclick="digg(&quot;blogs&quot;, 1172122, true);return false;"><div><strong>0</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1172137" class="next" title="[原创] jQuery源码分析-16动画分析和扩展 Effects">[原创] jQuery源码分析-16动画分析和扩展 ...</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/903266" class="pre" title="程序员的呓语---我编程我快乐">程序员的呓语---我编程我快乐</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-09-14 23:27</li>
+      <li>浏览 7075</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1172122#comments">评论(2)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-09%E5%B1%9E%E6%80%A7%E6%93%8D%E4%BD%9C&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1172122" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-09%E5%B1%9E%E6%80%A7%E6%93%8D%E4%BD%9C&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1172122&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/spinner.gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1172122" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    <div id="bc2231449">
+  <div class="comment_title">
+    2 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2011-11-24&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1172122#" onclick="quote_comment(2231449);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">晨曦的朝阳 写道</div><div class="quote_div">好像还说少了val()，不过这个方法跟attr,prop也是比较相似的，也是用了一些钩子什么的。</div><br>有时间补吧，写了这么多，多看几遍有基础了，剩下的看起来就容易了</div>
+</div>
+
+<div id="bc2229198">
+  <div class="comment_title">
+    1 楼
+    <a href="http://xiaofei85390656-163-com.iteye.com/" target="_blank" title="晨曦的朝阳">晨曦的朝阳</a>
+    2011-11-15&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1172122#" onclick="quote_comment(2229198);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">好像还说少了val()，不过这个方法跟attr,prop也是比较相似的，也是用了一些钩子什么的。</div>
+</div>
+
+
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_idea.gif"><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1172122', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1172122;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-09属性操作');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-09属性操作');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349117 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed/772224" class="subscription" onclick="if (confirm(&#39;你确定要取消这个关注？&#39;)) { var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;delete&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit(); };return false;">取消关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-09属性操作 - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

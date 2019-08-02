@@ -1,0 +1,1014 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1195313 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com  声明：本文为原创文章，如需转载，请注明来源并保留原文链接。      读读写写，不对的地方请告诉我，多多交流共同进步，本章的的PDF下载在最后。      7. 数据缓存 Cache    jQuery提供了jQuery.data()和jQuery.fn.data()，实现对缓存的操作。jQuery ...">
+    <meta name="keywords" content="javascript, jquery, 源码分析, 缓存, Cache [原创] jQuery源码分析-07数据缓存-Cache">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1195313#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-07数据缓存-Cache</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90">源码分析</a><a href="http://www.iteye.com/blogs/tag/%E7%BC%93%E5%AD%98">缓存</a><a href="http://www.iteye.com/blogs/tag/Cache">Cache</a>&nbsp;</div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <p>作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com</p>
+<p style="margin: 0px;">声明：本文为原创文章，如需转载，请注明来源并保留原文链接。&nbsp;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="padding: 0px; margin: 0px;">读读写写，不对的地方请告诉我，多多交流共同进步，本章的的PDF下载在最后。</p>
+<p>&nbsp;</p>
+<h1>
+<span><span>7.<span style=""> </span></span></span>数据缓存<span> Cache</span>
+</h1>
+<p class="MsoNormal"><span>jQuery</span>提供了<span style="font-family: Consolas;">jQuery.data()</span>和<span style="font-family: Consolas;">jQuery.fn.data()</span>，实现对缓存的操作。<span style="font-family: Consolas;">jQuery.fn.data()</span>内部通过<span style="font-family: Consolas;">jQuery.data()</span>实现。<span style="font-family: Consolas;">jQuery.data()</span>有三种用法：</p>
+<table border="1" cellpadding="0" class="MsoTableGrid" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td width="1041" style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">/**</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">jQuery.data(</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">elem,</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">key,</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">value</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">)</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt; color: #3f5fbf;">在指定元素上存储</span><span style="font-size: 10.0pt;">/</span><span style="font-size: 10.0pt; color: #3f5fbf;">添加任意的数据，处理了循环引用和内存泄漏问题</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">jQuery.data(</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">elem,</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">key</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">)</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt; color: #3f5fbf;">返回指定元素上</span><span style="font-size: 10.0pt;">name</span><span style="font-size: 10.0pt; color: #3f5fbf;">指定的值</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">jQuery.data(</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">elem</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">)</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt; color: #3f5fbf;">返回全部数据</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;"><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*/</span></p>
+</td>
+</tr></tbody></table>
+<h2>
+<span><span>7.1<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>实现思路</h2>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>写入（引用<span>jQuery.data()</span>接口的三个参数：<span>elem</span>，<span>key</span>，<span>value</span>）</p>
+<p class="MsoNormal" style="text-indent: 21.0pt;">在匹配的<span>DOM</span>元素（<span>elem</span>）上附加一个唯一<span>ID</span>，在<span>$.cache</span>中添加同样的<span>ID</span>属性，该<span>ID</span>属性的值是一个对象，其中存储了<span>key/value</span>映射。</p>
+<p class="MsoNormal" style="text-indent: 21.0pt;">其中有几个关键点：</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>所有数据都存储在全局变量<span>$.cache</span>中</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>唯一<span>ID</span>是一个整型值，初始为<span>0</span>，调用<span>data</span>接口时自动加一，生成新的唯一<span>ID</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>n<span style="">&nbsp; </span></span></span>唯一<span>ID</span>附加在以<span class="objectbox"><span>$.expando</span>命名的属性上，<span>$.expando</span>是动态生成的，类似于一个时间戳，以尽可能的避免与用户变量冲突</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>读取</p>
+<p class="MsoListParagraph" style="margin-left: 21.0pt; text-indent: 0cm;">从匹配的<span>DOM</span>元素（<span>elem</span>）上取到唯一<span>ID</span>，在<span>$.cache</span>中找到唯一<span>ID</span>对应的对象，再从对应的对象中找到<span>key</span>对应的值</p>
+<h2>
+<span><span>7.2<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>验证</h2>
+<p class="MsoNormal">下面用代码验证一下（在火狐中用<span>firebug</span>调试）：</p>
+<table border="1" cellpadding="0" class="MsoTableGrid" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td width="1041" style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">查看存储唯一</span><span style="font-size: 10.0pt;">ID</span><span style="font-size: 10.0pt; color: #3f7f5f;">的属性名</span></p>
+<p class="MsoNormal"><span class="objectbox"><span>$.expando // </span>返回
+  <span>"jQuery161013869011191548697"</span></span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">在</span><span style="font-size: 10.0pt;">body</span><span style="font-size: 10.0pt; color: #3f7f5f;">节点上写入数据</span><span class="objectbox"></span></p>
+<p class="MsoNormal"><span class="objectbox"><span>$('body').data(
+  'a', 1 )</span></span></p>
+<p class="MsoNormal"><span class="objectbox"><span>$('body').data(
+  'b', 2 )</span></span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">读取</span><span style="font-size: 10.0pt;">body</span><span style="font-size: 10.0pt; color: #3f7f5f;">节点的唯一</span><span style="font-size: 10.0pt;">ID</span></p>
+<p class="MsoNormal"><span class="objectbox"><span>$('body')[0][
+  $.expando ] // </span>返回<span>5</span></span></p>
+<p class="MsoNormal"><span class="objectbox"><span>$('body')[0][
+  "jQuery161013869011191548697" ] // </span>返回<span>5</span></span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">读取数据</span></p>
+<p class="MsoNormal"><span class="objectbox"><span>$.cache[5] // </span>返回
+  <span>Object { a=1, b=2}</span>，<span style="color: #00b050;">验证成功！</span></span></p>
+</td>
+</tr></tbody></table>
+<h2>
+<span><span>7.3<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>源码分析</h2>
+<h3>
+<span><span>7.3.1<span style="">&nbsp; </span></span></span><span>jQuery.data</span>
+</h3>
+<table border="1" cellpadding="0" class="MsoTableGrid" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td width="1041" style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">数据缓存</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> rbrace = </span><span style="font-size: 10.0pt;">/^(?:\{.*\}|\[.*\])$/</span><span style="font-size: 10.0pt;">, </span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">花括号或方括号</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>rmultiDash = </span><span style="font-size: 10.0pt;">/([a-z])([A-Z])/g</span><span style="font-size: 10.0pt;">; </span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">驼峰写法，大小写之间会被插入破折号</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">jQuery.extend({</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>cache: {},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  Please use with caution</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>uuid: 0, </span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">唯一</span><span style="font-size: 10.0pt;">id</span><span style="font-size: 10.0pt; color: #3f7f5f;">种子，</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素第一次调用</span><span style="font-size: 10.0pt;">data</span><span style="font-size: 10.0pt; color: #3f7f5f;">接口存储数据时，会用</span><span style="font-size: 10.0pt;">uuid++</span><span style="font-size: 10.0pt; color: #3f7f5f;">的方式，生成一个新的唯一</span><span style="font-size: 10.0pt;">id</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  Unique for each copy of jQuery on the page</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  Non-digits removed to match rinlinejQuery</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">页面上</span><span style="font-size: 10.0pt;">jQuery</span><span style="font-size: 10.0pt; color: #3f7f5f;">副本的唯一标识</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">非数字符号被移除以匹配</span><span style="font-size: 10.0pt;">rinlinejQuery</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>expando: </span><span style="font-size: 10.0pt;">"jQuery"</span><span style="font-size: 10.0pt;"> + (
+  jQuery.fn.jquery + Math.random() ).replace( </span><span style="font-size: 10.0pt;">/\D/g</span><span style="font-size: 10.0pt;">, </span><span style="font-size: 10.0pt;">""</span><span style="font-size: 10.0pt;"> ),</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// The
+  following elements throw uncatchable exceptions if you</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  attempt to add expando properties to them.</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// YunG:</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果尝试在</span><span style="font-size: 10.0pt;">embed</span><span style="font-size: 10.0pt; color: #3f7f5f;">、</span><span style="font-size: 10.0pt;">object</span><span style="font-size: 10.0pt; color: #3f7f5f;">、</span><span style="font-size: 10.0pt;">applet</span><span style="font-size: 10.0pt; color: #3f7f5f;">上附加属性值，将会抛出未捕获的异常</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// embed</span><span style="font-size: 10.0pt; color: #3f7f5f;">：</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// embed</span><span style="font-size: 10.0pt; color: #3f7f5f;">标签用于播放一个多媒体对象，包括</span><span style="font-size: 10.0pt;">Flash</span><span style="font-size: 10.0pt; color: #3f7f5f;">、音频、视频等</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  http://221.199.150.103/jsj/html/page/book/xhtml/m_embed.htm</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// object</span><span style="font-size: 10.0pt; color: #3f7f5f;">：</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  object</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素用于向页面添加多媒体对象，包括</span><span style="font-size: 10.0pt;">Flash</span><span style="font-size: 10.0pt; color: #3f7f5f;">、音频、视频等。它规定了对象的数据和参数，以及可用来显示和操作数据的代码。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  &lt;object&gt;</span><span style="font-size: 10.0pt; color: #3f7f5f;">与</span><span style="font-size: 10.0pt;">&lt;/object&gt;</span><span style="font-size: 10.0pt; color: #3f7f5f;">之间的文本是替换文本，如果用户的浏览器不支持此标签会显示这些文本。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  object</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素中一般会包含</span><span style="font-size: 10.0pt;">&lt;param&gt;</span><span style="font-size: 10.0pt; color: #3f7f5f;">标签，</span><span style="font-size: 10.0pt;">&lt;param&gt;</span><span style="font-size: 10.0pt; color: #3f7f5f;">标签可用来定义播放参数。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  http://221.199.150.103/jsj/html/page/book/xhtml/m_object.htm?F=14,L=1</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  &lt;embed&gt;</span><span style="font-size: 10.0pt; color: #3f7f5f;">和</span><span style="font-size: 10.0pt;">&lt;object&gt;</span><span style="font-size: 10.0pt; color: #3f7f5f;">标签的区别：两者都是用来播放多媒体文件的对象，</span><span style="font-size: 10.0pt;">object</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素用于</span><span style="font-size: 10.0pt;">IE</span><span style="font-size: 10.0pt; color: #3f7f5f;">浏览器，</span><span style="font-size: 10.0pt;">embed</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素用于非</span><span style="font-size: 10.0pt;">IE</span><span style="font-size: 10.0pt; color: #3f7f5f;">浏览器，为了保证兼容性，通常我们同时使用两个元素，浏览器会自动忽略它不支持的标签。同时使用两个元素时，应该把</span><span style="font-size: 10.0pt;">&lt;embed&gt;</span><span style="font-size: 10.0pt; color: #3f7f5f;">标签放在</span><span style="font-size: 10.0pt;">&lt;object&gt;</span><span style="font-size: 10.0pt; color: #3f7f5f;">标签的内部。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">//
+  applet</span><span style="font-size: 10.0pt; color: #3f7f5f;">：</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">不赞成使用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>noData: {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">"embed"</span><span style="font-size: 10.0pt;">: </span><strong><span style="font-size: 10.0pt;">true</span></strong><span style="font-size: 10.0pt;">,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Ban all objects except for Flash (which handle expandos)</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">"object"</span><span style="font-size: 10.0pt;">: </span><span style="font-size: 10.0pt;">"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"</span><span style="font-size: 10.0pt;">,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">"applet"</span><span style="font-size: 10.0pt;">: </span><strong><span style="font-size: 10.0pt;">true</span></strong></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">判断一个元素是否有与之关联的数据（通过</span><span style="font-size: 10.0pt;">jQuery.data</span><span style="font-size: 10.0pt; color: #3f7f5f;">设置），用在事件处理中</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>hasData: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( elem ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素，则从</span><span style="font-size: 10.0pt;">jQuery.cache</span><span style="font-size: 10.0pt; color: #3f7f5f;">中读取，关联</span><span style="font-size: 10.0pt;">jQuery.cache</span><span style="font-size: 10.0pt; color: #3f7f5f;">和</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素的</span><span style="font-size: 10.0pt;">id</span><span style="font-size: 10.0pt; color: #3f7f5f;">存储在属性</span><span style="font-size: 10.0pt;">jQuery.expando</span><span style="font-size: 10.0pt; color: #3f7f5f;">中</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果是非</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素，则直接从</span><span style="font-size: 10.0pt;">elem</span><span style="font-size: 10.0pt; color: #3f7f5f;">上取，数据存储在</span><span style="font-size: 10.0pt;"> jQuery.expando </span><span style="font-size: 10.0pt; color: #3f7f5f;">属性中</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// elem</span><span style="font-size: 10.0pt; color: #3f7f5f;">的属性</span><span style="font-size: 10.0pt;">jQuery.expando</span><span style="font-size: 10.0pt; color: #3f7f5f;">，要么值是</span><span style="font-size: 10.0pt;">id</span><span style="font-size: 10.0pt; color: #3f7f5f;">，要么值是要存储的数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// elem</span><span style="font-size: 10.0pt; color: #3f7f5f;">被替换为所存储的数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>elem = elem.nodeType ? jQuery.cache[
+  elem[jQuery.expando] ] : elem[ jQuery.expando ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> !!elem &amp;&amp;
+  !isEmptyDataObject( elem );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">/**</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">jQuery.data(</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">elem,</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">key,</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">value</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">)</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt; color: #3f5fbf;">在指定元素上存储</span><span style="font-size: 10.0pt;">/</span><span style="font-size: 10.0pt; color: #3f5fbf;">添加任意的数据，处理了循环引用和内存泄漏问题</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">jQuery.data(</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">elem,</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">key</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">)</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt; color: #3f5fbf;">返回指定元素上</span><span style="font-size: 10.0pt;">name</span><span style="font-size: 10.0pt; color: #3f5fbf;">指定的值</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">jQuery.data(</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">elem</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">)</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt; color: #3f5fbf;">返回全部数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*/</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">/**</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt;">pvt</span><span style="font-size: 10.0pt;"> </span><span style="font-size: 10.0pt; color: #3f5fbf;">私有的，是否是内部使用的独立对象，</span><span style="font-size: 10.0pt;">pvt</span><span style="font-size: 10.0pt; color: #3f5fbf;">为</span><span style="font-size: 10.0pt;">true</span><span style="font-size: 10.0pt; color: #3f5fbf;">时用于事件处理</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;</span></span><span style="font-size: 10.0pt;">*/</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>data: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( elem, name, data, pvt </span><span style="font-size: 10.0pt;">/* Internal Use Only */</span><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">是否可以附加数据，不可以则直接返回</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !jQuery.acceptData( elem ) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> internalKey = jQuery.expando, </span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">内部</span><span style="font-size: 10.0pt;">key</span><span style="font-size: 10.0pt; color: #3f7f5f;">？</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>getByName = </span><strong><span style="font-size: 10.0pt;">typeof</span></strong><span style="font-size: 10.0pt;"> name === </span><span style="font-size: 10.0pt;">"string"</span><span style="font-size: 10.0pt;">, </span><span style="font-size: 10.0pt;">// name</span><span style="font-size: 10.0pt; color: #3f7f5f;">必须是字符串？</span><span style="font-size: 10.0pt;"> </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>thisCache,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// We have to handle DOM nodes and JS objects differently because IE6-7</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// can't GC object references properly across the DOM-JS boundary</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">必须区分处理</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素和</span><span style="font-size: 10.0pt;">JS</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象，因为</span><span style="font-size: 10.0pt;">IE6-7</span><span style="font-size: 10.0pt; color: #3f7f5f;">不能垃圾回收对象跨</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象和</span><span style="font-size: 10.0pt;">JS</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象进行的引用属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>isNode = elem.nodeType,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Only DOM nodes need the global jQuery cache; JS object data is</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// attached directly to the object so GC can occur automatically</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素，则使用全局的</span><span style="font-size: 10.0pt;">jQuery.cache</span><span style="font-size: 10.0pt; color: #3f7f5f;">（为什么？</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素不能存储非字符串？无法垃圾回收？）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 10.0pt;">JS</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象，则直接附加到对象上</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache = isNode ? jQuery.cache :
+  elem,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Only defining an ID for JS objects if its cache already exists allows</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// the code to shortcut on the same path as a DOM node with no cache</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果</span><span style="font-size: 10.0pt;">JS</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象的</span><span style="font-size: 10.0pt;">cache</span><span style="font-size: 10.0pt; color: #3f7f5f;">已经存在，则需要为</span><span style="font-size: 10.0pt;">JS</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象定义一个</span><span style="font-size: 10.0pt;">ID</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素，则直接取</span><span style="font-size: 10.0pt;">elem[ jQuery.expando ]</span><span style="font-size: 10.0pt; color: #3f7f5f;">，返回</span><span style="font-size: 10.0pt;">id</span><span style="font-size: 10.0pt; color: #3f7f5f;">（有可能是</span><span style="font-size: 10.0pt;">undefined</span><span style="font-size: 10.0pt; color: #3f7f5f;">）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 10.0pt;">JS</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象，且</span><span style="font-size: 10.0pt;">JS</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象的属性</span><span style="font-size: 10.0pt;">jQuery.expando</span><span style="font-size: 10.0pt; color: #3f7f5f;">存在，返回</span><span style="font-size: 10.0pt;">jQuery.expando</span><span style="font-size: 10.0pt; color: #3f7f5f;">（有可能是</span><span style="font-size: 10.0pt;"> undefined</span><span style="font-size: 10.0pt; color: #3f7f5f;">）</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>id = isNode ? elem[ jQuery.expando
+  ] : elem[ jQuery.expando ] &amp;&amp; jQuery.expando;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Avoid doing any more work than we need to when trying to get data on
+  an</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// object that has no data at all</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">避免做更多的不必要工作，当尝试在一个没有任何数据的对象上获取数据时</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// name</span><span style="font-size: 10.0pt; color: #3f7f5f;">是字符串，</span><span style="font-size: 10.0pt;">data</span><span style="font-size: 10.0pt; color: #3f7f5f;">未定义，说明是在取数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">但是对象没有任何数据，直接返回</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">？</span><span style="font-size: 10.0pt;">id</span><span style="font-size: 10.0pt; color: #3f7f5f;">不存在，说明没有数据；或者，</span><span style="font-size: 10.0pt;">id</span><span style="font-size: 10.0pt; color: #3f7f5f;">存在，但是属性</span><span style="font-size: 10.0pt;">internalKey</span><span style="font-size: 10.0pt; color: #3f7f5f;">不存在，也说明没有数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">？</span><span style="font-size: 10.0pt;">internalKey</span><span style="font-size: 10.0pt; color: #3f7f5f;">到底是干什么用的？</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( (!id || (pvt &amp;&amp; id &amp;&amp;
+  !cache[ id ][ internalKey ])) </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>&amp;&amp; getByName &amp;&amp;
+  data === </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// id</span><span style="font-size: 10.0pt; color: #3f7f5f;">不存在的话就生成一个</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !id ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Only DOM nodes need a new unique ID for each element since their data</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// ends up in the global cache</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">只有</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素需要一个唯一</span><span style="font-size: 10.0pt;">ID</span><span style="font-size: 10.0pt; color: #3f7f5f;">，因为</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素的数据是存储在全局</span><span style="font-size: 10.0pt;">cache</span><span style="font-size: 10.0pt; color: #3f7f5f;">中的。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">用</span><span style="font-size: 10.0pt;">uuid</span><span style="font-size: 10.0pt; color: #3f7f5f;">种子递增分配唯一</span><span style="font-size: 10.0pt;">ID</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( isNode ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>elem[ jQuery.expando ] = id =
+  ++jQuery.uuid;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// JS</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象则直接使用</span><span style="font-size: 10.0pt;">jQuery.expando</span><span style="font-size: 10.0pt; color: #3f7f5f;">，既然是直接附加到对象上，又何必要</span><span style="font-size: 10.0pt;">id</span><span style="font-size: 10.0pt; color: #3f7f5f;">呢？</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">避免与其他属性冲突！</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>id = jQuery.expando;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">数据存储在一个映射对象中</span><span style="font-size: 10.0pt;">({})</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !cache[ id ] ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache[ id ] = {}; </span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">初始化存储对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">这是什么东东？既然是一个</span><span style="font-size: 10.0pt;">“</span><span style="font-size: 10.0pt; color: #3f7f5f;">恶作剧</span><span style="font-size: 10.0pt;">”</span><span style="font-size: 10.0pt; color: #3f7f5f;">，那就就忽略它，不深究。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><strong><span style="font-size: 10.0pt;">TODO</span></strong><span style="font-size: 10.0pt;">: This is a hack for 1.5 ONLY. Avoids exposing jQuery</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// metadata on plain JS objects when the object is serialized using</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// JSON.stringify</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !isNode ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache[ id ].toJSON =
+  jQuery.noop;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// An object can be passed to jQuery.data instead of a key/value pair;
+  this gets</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// shallow copied over onto the existing cache</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// data</span><span style="font-size: 10.0pt; color: #3f7f5f;">接口接收对象和函数，浅拷贝</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">typeof</span></strong><span style="font-size: 10.0pt;"> name === </span><span style="font-size: 10.0pt;">"object"</span><span style="font-size: 10.0pt;"> || </span><strong><span style="font-size: 10.0pt;">typeof</span></strong><span style="font-size: 10.0pt;"> name === </span><span style="font-size: 10.0pt;">"function"</span><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">私有数据，存储在</span><span style="font-size: 10.0pt;">cache[ id ][ internalKey ]</span><span style="font-size: 10.0pt; color: #3f7f5f;">中</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">什么类型的数据算私有数据呢？事件处理函数，还有么？</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( pvt ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache[ id ][ internalKey ] =
+  jQuery.extend(cache[ id ][ internalKey ], name);</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache[ id ] =
+  jQuery.extend(cache[ id ], name);</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">存储对象，存放了所有数据的映射对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>thisCache = cache[ id ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Internal jQuery data is stored in a separate object inside the
+  object's data</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// cache in order to avoid key collisions between internal data and
+  user-defined</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// data</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// jQuery</span><span style="font-size: 10.0pt; color: #3f7f5f;">内部数据存在一个独立的对象（</span><span style="font-size: 10.0pt;">thisCache[ internalKey ]</span><span style="font-size: 10.0pt; color: #3f7f5f;">）上，为了避免内部数据和用户定义数据冲突</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果是私有数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( pvt ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">存放私有数据的对象不存在，则创建一个</span><span style="font-size: 10.0pt;">{}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !thisCache[ internalKey ] ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>thisCache[ internalKey ] = {};</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">使用私有数据对象替换</span><span style="font-size: 10.0pt;">thisCache</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>thisCache = thisCache[ internalKey
+  ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果</span><span style="font-size: 10.0pt;">data</span><span style="font-size: 10.0pt; color: #3f7f5f;">不是</span><span style="font-size: 10.0pt;">undefined</span><span style="font-size: 10.0pt; color: #3f7f5f;">，表示传入了</span><span style="font-size: 10.0pt;">data</span><span style="font-size: 10.0pt; color: #3f7f5f;">参数，则存储</span><span style="font-size: 10.0pt;">data</span><span style="font-size: 10.0pt; color: #3f7f5f;">到</span><span style="font-size: 10.0pt;">name</span><span style="font-size: 10.0pt; color: #3f7f5f;">属性上</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">这里为什么要统一为驼峰写法呢？</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">这里的问题是：如果传入的是</span><span style="font-size: 10.0pt;">object/function</span><span style="font-size: 10.0pt; color: #3f7f5f;">，不做转换，只有传入的</span><span style="font-size: 10.0pt;">name</span><span style="font-size: 10.0pt; color: #3f7f5f;">是字符串才会转换。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( data !== </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>thisCache[ jQuery.camelCase( name )
+  ] = data;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">又是一个</span><span style="font-size: 10.0pt;">hack</span><span style="font-size: 10.0pt; color: #3f7f5f;">，忽略它，不研究</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><strong><span style="font-size: 10.0pt;">TODO</span></strong><span style="font-size: 10.0pt;">: This is a hack for 1.5 ONLY. It will be removed in 1.6. Users should</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// not attempt to inspect the internal events object using jQuery.data,
+  as this</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// internal data object is undocumented and subject to change.</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( name === </span><span style="font-size: 10.0pt;">"events"</span><span style="font-size: 10.0pt;"> &amp;&amp;
+  !thisCache[name] ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> thisCache[ internalKey ]
+  &amp;&amp; thisCache[ internalKey ].events;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果</span><span style="font-size: 10.0pt;">name</span><span style="font-size: 10.0pt; color: #3f7f5f;">是字符串，则返回</span><span style="font-size: 10.0pt;">data</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果不是，则返回整个存储对象</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> getByName ? thisCache[
+  jQuery.camelCase( name ) ] : thisCache;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">在指定元素上移除存放的数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>removeData: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( elem, name, pvt </span><span style="font-size: 10.0pt;">/* Internal Use Only */</span><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !jQuery.acceptData( elem ) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> internalKey = jQuery.expando, isNode =
+  elem.nodeType,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// See jQuery.data for more information</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache = isNode ? jQuery.cache :
+  elem,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// See jQuery.data for more information</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>id = isNode ? elem[ jQuery.expando
+  ] : jQuery.expando;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// If there is already no cache entry for this object, there is no</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// purpose in continuing</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !cache[ id ] ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( name ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> thisCache = pvt ? cache[ id ][ internalKey
+  ] : cache[ id ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( thisCache ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">delete</span></strong><span style="font-size: 10.0pt;"> thisCache[ name ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// If there is no data left in the cache, we want to continue</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// and let the cache object itself get destroyed</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !isEmptyDataObject(thisCache) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// See jQuery.data for more information</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( pvt ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">delete</span></strong><span style="font-size: 10.0pt;"> cache[ id ][ internalKey ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Don't destroy the parent cache unless the internal data object</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// had been the only thing left in it</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !isEmptyDataObject(cache[ id ]) ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> internalCache = cache[ id ][ internalKey
+  ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Browsers that fail expando deletion also refuse to delete expandos on</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// the window, but it will allow it on all other JS objects; other
+  browsers</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// don't care</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果不支持在</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素上</span><span style="font-size: 10.0pt;">delete</span><span style="font-size: 10.0pt; color: #3f7f5f;">，设置为</span><span style="font-size: 10.0pt;">null</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( jQuery.support.deleteExpando || cache !=
+  window ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">delete</span></strong><span style="font-size: 10.0pt;"> cache[ id ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache[ id ] = </span><strong><span style="font-size: 10.0pt;">null</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// We destroyed the entire user cache at once because it's faster than</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// iterating through each key, but we need to continue to persist internal</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// data if it existed</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// // </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果还有数据，就清空一次再设置，增加性能</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( internalCache ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache[ id ] = {};</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><strong><span style="font-size: 10.0pt;">TODO</span></strong><span style="font-size: 10.0pt;">: This is a hack for 1.5 ONLY. Avoids exposing jQuery</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// metadata on plain JS objects when the object is serialized using</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// JSON.stringify</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( !isNode ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache[ id ].toJSON =
+  jQuery.noop;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>cache[ id ][ internalKey ] =
+  internalCache;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Otherwise, we need to eliminate the expando on the node to avoid</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// false lookups in the cache for entries that no longer exist</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">已经没有任何数据了，就全部删除</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( isNode ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// IE does not allow us to delete expando properties from nodes,</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// nor does it have a removeAttribute function on Document nodes;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// we must handle all of these cases</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果支持</span><span style="font-size: 10.0pt;">delete</span><span style="font-size: 10.0pt; color: #3f7f5f;">，就删除。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// IE</span><span style="font-size: 10.0pt; color: #3f7f5f;">使用</span><span style="font-size: 10.0pt;">removeAttribute</span><span style="font-size: 10.0pt; color: #3f7f5f;">，所以尝试一次。再失败就只能设置为</span><span style="font-size: 10.0pt;">null</span><span style="font-size: 10.0pt; color: #3f7f5f;">了。</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( jQuery.support.deleteExpando ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">delete</span></strong><span style="font-size: 10.0pt;"> elem[ jQuery.expando ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( elem.removeAttribute ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>elem.removeAttribute(
+  jQuery.expando );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>elem[ jQuery.expando ] = </span><strong><span style="font-size: 10.0pt;">null</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// For
+  internal use only.</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">内部使用</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>_data: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( elem, name, data ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> jQuery.data( elem, name,
+  data, </span><strong><span style="font-size: 10.0pt;">true</span></strong><span style="font-size: 10.0pt;"> );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// A
+  method for determining if a DOM node can handle the data expando</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// YunG:</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">判断一个</span><span style="font-size: 10.0pt;">DOM</span><span style="font-size: 10.0pt; color: #3f7f5f;">元素是否可以附加数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>acceptData: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( elem ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( elem.nodeName ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// embed object applet</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> match = jQuery.noData[
+  elem.nodeName.toLowerCase() ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( match ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// return match === true</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// return elem.getAttribute("classid") !== match</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> !(match === </span><strong><span style="font-size: 10.0pt;">true</span></strong><span style="font-size: 10.0pt;"> || elem.getAttribute(</span><span style="font-size: 10.0pt;">"classid"</span><span style="font-size: 10.0pt;">) !== match);</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">true</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">});</span></p>
+</td>
+</tr></tbody></table>
+<h3>
+<span><span>7.3.2<span style="">&nbsp; </span></span></span><span>jQuery.fn.data</span>
+</h3>
+<table border="1" cellpadding="0" class="MsoTableGrid" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td width="1041" style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">jQuery.fn.extend({</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">在匹配的元素上存储任意数据，解决了循环引用和内存泄漏（</span><strong><span style="font-size: 10.0pt;">TODO</span></strong><span style="font-size: 10.0pt; color: #3f7f5f;">）？</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">支持</span><span style="font-size: 10.0pt;">HTML5 data-Attributes</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// data(
+  key, value ) data( object )</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">返回</span><span style="font-size: 10.0pt;">jQuery</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象中指定</span><span style="font-size: 10.0pt;">key</span><span style="font-size: 10.0pt; color: #3f7f5f;">的值，或者返回含有全部数据的结合</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// data(
+  key ) data( )</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// HTML5</span><span style="font-size: 10.0pt; color: #3f7f5f;">？</span><span style="font-size: 10.0pt;"> http://api.jquery.com/data/</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>data: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( key, value ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> data = </span><strong><span style="font-size: 10.0pt;">null</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">守护方法，用于处理特殊的</span><span style="font-size: 10.0pt;">key</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// key</span><span style="font-size: 10.0pt; color: #3f7f5f;">是</span><span style="font-size: 10.0pt;">undefined</span><span style="font-size: 10.0pt; color: #3f7f5f;">，则认为是取当前</span><span style="font-size: 10.0pt;">jQuery</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象中第一个元素的全部数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">typeof</span></strong><span style="font-size: 10.0pt;"> key === </span><span style="font-size: 10.0pt;">"undefined"</span><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">.length ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data = jQuery.data( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">[0] );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 10.0pt;">Element</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">[0].nodeType === 1 ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> attr = </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">[0].attributes, name;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">for</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> i = 0, l = attr.length; i &lt; l; i++ ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>name = attr[i].name;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( name.indexOf( </span><span style="font-size: 10.0pt;">"data-"</span><span style="font-size: 10.0pt;"> ) === 0 ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>name = jQuery.camelCase(
+  name.substring(5) );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>dataAttr( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">[0], name, data[
+  name ] );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> data;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// key</span><span style="font-size: 10.0pt; color: #3f7f5f;">是对象，则对当前</span><span style="font-size: 10.0pt;">jQuery</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象迭代调用</span><span style="font-size: 10.0pt;">$.fn.each</span><span style="font-size: 10.0pt; color: #3f7f5f;">，</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">在每一个匹配的元素上存储数据</span><span style="font-size: 10.0pt;">key</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">typeof</span></strong><span style="font-size: 10.0pt;"> key === </span><span style="font-size: 10.0pt;">"object"</span><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">.each(</span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">() {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.data( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">, key );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">到这列，</span><span style="font-size: 10.0pt;">key</span><span style="font-size: 10.0pt; color: #3f7f5f;">是字符串</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> parts = key.split(</span><span style="font-size: 10.0pt;">"."</span><span style="font-size: 10.0pt;">);</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>parts[1] = parts[1] ? </span><span style="font-size: 10.0pt;">"."</span><span style="font-size: 10.0pt;"> +
+  parts[1] : </span><span style="font-size: 10.0pt;">""</span><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果</span><span style="font-size: 10.0pt;">value</span><span style="font-size: 10.0pt; color: #3f7f5f;">为</span><span style="font-size: 10.0pt;">undefined</span><span style="font-size: 10.0pt; color: #3f7f5f;">，则任务是取当前</span><span style="font-size: 10.0pt;">jQuery</span><span style="font-size: 10.0pt; color: #3f7f5f;">对象中第一个元素指定名称的数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( value === </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data = </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">.triggerHandler(</span><span style="font-size: 10.0pt;">"getData"</span><span style="font-size: 10.0pt;"> + parts[1] + </span><span style="font-size: 10.0pt;">"!"</span><span style="font-size: 10.0pt;">, [parts[0]]);</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Try to fetch any internally stored data first</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">优先取内部数据</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( data === </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> &amp;&amp; </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">.length ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data = jQuery.data( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">[0], key );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">读取</span><span style="font-size: 10.0pt;">HTML5</span><span style="font-size: 10.0pt; color: #3f7f5f;">的</span><span style="font-size: 10.0pt;">data</span><span style="font-size: 10.0pt; color: #3f7f5f;">属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data = dataAttr( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">[0], key, data );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> data === </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;">
+  &amp;&amp; parts[1] ?</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">.data( parts[0] ) :</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// key</span><span style="font-size: 10.0pt; color: #3f7f5f;">是字符串，</span><span style="font-size: 10.0pt;">value</span><span style="font-size: 10.0pt; color: #3f7f5f;">不是</span><span style="font-size: 10.0pt;">undefined</span><span style="font-size: 10.0pt; color: #3f7f5f;">，则存储</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">.each(</span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">() {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> $this = jQuery( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;"> ),</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>args = [ parts[0], value ];</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">触发事件</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>$this.triggerHandler( </span><span style="font-size: 10.0pt;">"setData"</span><span style="font-size: 10.0pt;"> + parts[1] + </span><span style="font-size: 10.0pt;">"!"</span><span style="font-size: 10.0pt;">, args );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.data( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">, key, value );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>$this.triggerHandler( </span><span style="font-size: 10.0pt;">"changeData"</span><span style="font-size: 10.0pt;"> + parts[1] + </span><span style="font-size: 10.0pt;">"!"</span><span style="font-size: 10.0pt;">, args );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>removeData: </span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">( key ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">.each(</span><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;">() {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.removeData( </span><strong><span style="font-size: 10.0pt;">this</span></strong><span style="font-size: 10.0pt;">, key );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">});</span></p>
+</td>
+</tr></tbody></table>
+<h3>
+<span><span>7.3.3<span style="">&nbsp; </span></span></span>支持<span>HTML5</span>的<span>data- </span>属性</h3>
+<table border="1" cellpadding="0" class="MsoTableGrid" cellspacing="0" style="border-collapse: collapse; border: none;"><tbody><tr>
+<td width="1041" style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">// HTML 5 data-
+  Attributes http://ejohn.org/blog/html-5-data-attributes/</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">// </span><span style="font-size: 10.0pt; color: #3f7f5f;">如果在指定元素</span><span style="font-size: 10.0pt;">elem</span><span style="font-size: 10.0pt; color: #3f7f5f;">没有找到</span><span style="font-size: 10.0pt;">key</span><span style="font-size: 10.0pt; color: #3f7f5f;">对应的数据</span><span style="font-size: 10.0pt;">data</span><span style="font-size: 10.0pt; color: #3f7f5f;">，就尝试读取</span><span style="font-size: 10.0pt;">HTML5</span><span style="font-size: 10.0pt; color: #3f7f5f;">的</span><span style="font-size: 10.0pt;">data</span><span style="font-size: 10.0pt; color: #3f7f5f;">属性</span></p>
+<p class="MsoNormal" style="text-align: left;"><strong><span style="font-size: 10.0pt;">function</span></strong><span style="font-size: 10.0pt;"> dataAttr( elem, key, data ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// If
+  nothing was found internally, try to fetch any</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// data
+  from the HTML5 data-* attribute</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( data === </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;"> &amp;&amp; elem.nodeType ===
+  1 ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">var</span></strong><span style="font-size: 10.0pt;"> name = </span><span style="font-size: 10.0pt;">"data-"</span><span style="font-size: 10.0pt;"> + key.replace(
+  rmultiDash, </span><span style="font-size: 10.0pt;">"$1-$2"</span><span style="font-size: 10.0pt;"> ).toLowerCase();</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data = elem.getAttribute( name );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">if</span></strong><span style="font-size: 10.0pt;"> ( </span><strong><span style="font-size: 10.0pt;">typeof</span></strong><span style="font-size: 10.0pt;"> data === </span><span style="font-size: 10.0pt;">"string"</span><span style="font-size: 10.0pt;"> ) {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">try</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data = data === </span><span style="font-size: 10.0pt;">"true"</span><span style="font-size: 10.0pt;"> ? </span><strong><span style="font-size: 10.0pt;">true</span></strong><span style="font-size: 10.0pt;"> :</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data === </span><span style="font-size: 10.0pt;">"false"</span><span style="font-size: 10.0pt;"> ? </span><strong><span style="font-size: 10.0pt;">false</span></strong><span style="font-size: 10.0pt;"> :</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data === </span><span style="font-size: 10.0pt;">"null"</span><span style="font-size: 10.0pt;"> ? </span><strong><span style="font-size: 10.0pt;">null</span></strong><span style="font-size: 10.0pt;"> :</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>!jQuery.isNaN( data )
+  ? parseFloat( data ) :</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>rbrace.test( data
+  ) ? jQuery.parseJSON( data ) :</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">catch</span></strong><span style="font-size: 10.0pt;">( e ) {}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 10.0pt;">// Make sure we set the data so it isn't changed later</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.data( elem, key, data );</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 10.0pt;">else</span></strong><span style="font-size: 10.0pt;"> {</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data = </span><strong><span style="font-size: 10.0pt;">undefined</span></strong><span style="font-size: 10.0pt;">;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;">&nbsp;</span></p>
+<p class="MsoNormal" style="text-align: left;"><span style="font-size: 10.0pt;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 10.0pt;">return</span></strong><span style="font-size: 10.0pt;"> data;</span></p>
+<p class="MsoNormal"><span style="font-size: 10.0pt;">}</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal"><span>&nbsp;</span></p>
+  </div>
+
+  
+  <div class="attachments">
+    
+      
+        <ul>
+          <li><a href="http://dl.iteye.com/topics/download/4414ad99-0b9c-3b93-b2ea-3e72844a9cf7">_原创__jQuery源码分析-07数据缓存-Cache.pdf</a> (423.7 KB)</li>
+          
+          <li>下载次数: 109</li>
+        </ul>
+      
+    
+    
+  </div>
+
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/794.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1195313#" onclick="digg(&quot;blogs&quot;, 1195313, false);return false;"><div><strong>3</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1195313#" onclick="digg(&quot;blogs&quot;, 1195313, true);return false;"><div><strong>1</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1198058" class="next" title="[原创] jQuery源码分析-10事件处理-Event-源码结构">[原创] jQuery源码分析-10事件处理-Event ...</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1195296" class="pre" title="[原创] jQuery源码分析-06浏览器测试-Support">[原创] jQuery源码分析-06浏览器测试-Sup ...</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-10-13 19:55</li>
+      <li>浏览 8500</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1195313#comments">评论(0)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-07%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98-Cache&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1195313" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-07%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98-Cache&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1195313&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/spinner.gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1195313" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_biggrin.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_eek.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_idea.gif"><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1195313', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1195313;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-07数据缓存-Cache');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-07数据缓存-Cache');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349115 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed/772224" class="subscription" onclick="if (confirm(&#39;你确定要取消这个关注？&#39;)) { var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;delete&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit(); };return false;">取消关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-07数据缓存-Cache - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>

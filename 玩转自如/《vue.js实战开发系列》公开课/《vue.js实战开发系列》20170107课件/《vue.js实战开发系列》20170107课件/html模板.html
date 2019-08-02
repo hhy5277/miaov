@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="./vue.js"></script>
+
+</head>
+<body>
+    <!--模板-->
+    <div id="demo" :custom="abc">
+       {{ true ? "yes" : "no" }}
+        <div v-html="html"></div>
+    </div>
+    <script>
+        //数据
+        let obj = {
+            html:"<div>hello,miaov</div>",
+            abc:1
+        }
+
+        var vm = new Vue({
+            el:"#demo",
+            data:obj
+        });
+
+    </script>
+</body>
+
+
+</html>

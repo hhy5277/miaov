@@ -1,0 +1,1079 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0037)http://nuysoft.iteye.com/blog/1189156 -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站</title>
+    <meta name="description" content="    作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com  声明：本文为原创文章，如需转载，请注明来源并保留原文链接。      读读写写，不对的地方请 ...">
+    <meta name="keywords" content="javascript, jquery, 源码分析, 队列, queue [原创] jQuery源码分析-08队列 Queue">
+    <link rel="shortcut icon" href="http://nuysoft.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://nuysoft.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://nuysoft.iteye.com/rss" rel="alternate" title="nuysoft" type="application/rss+xml">
+    <link href="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/black.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" async="" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/ga.js"></script><script type="text/javascript" async="" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/ga.js"></script><script src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', 'iteye.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+      <link href="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/hotkey.js" type="text/javascript"></script>
+  <script src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/code_favorites.js" type="text/javascript"></script>
+<script src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/weiboshare.js" type="text/javascript"></script>
+  <link href="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/magazines">精华</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/blogs/subjects">专栏</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="http://nuysoft.iteye.com/blog/1189156#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a target="_blank" href="http://job.iteye.com/iteye">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+
+      <div id="user_nav">
+  
+        <a href="http://hhy5277.iteye.com/" title="查看我的博客首页" class="welcome">欢迎hhy5277</a>
+    <a id="notifications_count" href="http://my.iteye.com/notifications" class="" title="没有未读消息">0</a>
+    
+      <a href="http://my.iteye.com/messages" title="你有新的站内短信"><img alt="Newpm" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/newpm.gif">收件箱(2)</a>
+    
+    <a href="http://my.iteye.com/" title="我的应用首页">我的应用</a>
+    <div class="quick_menu" style="display:none;">
+      <a href="http://my.iteye.com/feed" title="我关注的好友动态消息">我的关注</a>
+      <a href="http://my.iteye.com/mygroup" title="我加入的群组最新话题">我的群组</a>
+      <a href="http://my.iteye.com/myresume" title="我的个人简历">我的简历</a>
+      <a href="http://my.iteye.com/admin/album" title="我的个人简历">我的相册</a>
+      <a href="http://my.iteye.com/admin/link" title="我收藏的网络资源链接">我的收藏</a>
+      <a href="http://my.iteye.com/admin/code" title="我收藏的代码">我的代码</a>
+      <a href="http://my.iteye.com/admin/weibo" title="用微博发表简短的话题">我的微博</a>
+    </div>
+    <a href="http://hhy5277.iteye.com/admin" title="管理我的博客">我的博客</a>
+    <a href="http://my.iteye.com/profile" title="修改我的个人设置">设置</a>
+    <a href="http://nuysoft.iteye.com/logout" class="nobg" onclick="var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;put&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit();return false;">退出</a>
+  </div>
+
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name">
+          <h1><a href="http://nuysoft.iteye.com/">nuysoft</a></h1>
+        </div>
+        <div id="fd"></div>
+        <div id="blog_navbar">
+          <ul>
+            <li class="blog_navbar_for"><a href="http://nuysoft.iteye.com/"><strong>博客</strong></a></li>
+            <li><a href="http://nuysoft.iteye.com/weibo">微博</a></li>
+            <li><a href="http://nuysoft.iteye.com/album">相册</a></li>
+            <li><a href="http://nuysoft.iteye.com/link">收藏</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/guest_book">留言</a></li>
+            <li><a href="http://nuysoft.iteye.com/blog/profile">关于我</a></li>
+          </ul>
+    
+          <div class="search">
+            <form action="http://nuysoft.iteye.com/blog/search" method="get">
+              <input class="search_text" id="query" name="query" style="margin-left: 10px;width: 110px;" type="text" value="">
+              <input class="submit_search" type="submit" value="">
+            </form>
+          </div> 
+          <div id="fd"></div>         
+        </div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+
+          
+
+
+<div class="h-entry" style="display:none">
+  <a href="http://nuysoft.iteye.com/" class="p-author" target="_blank">nuysoft</a>
+</div>
+
+
+<div class="blog_main">
+  <div class="blog_title">
+    <h3>
+      <a href="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站.html">[原创] jQuery源码分析-08队列 Queue</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://nuysoft.iteye.com/category/140986">jQuery</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/javascript">javascript</a><a href="http://www.iteye.com/blogs/tag/jquery">jquery</a><a href="http://www.iteye.com/blogs/tag/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90">源码分析</a><a href="http://www.iteye.com/blogs/tag/%E9%98%9F%E5%88%97">队列</a><a href="http://www.iteye.com/blogs/tag/queue">queue</a>&nbsp;</div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <p><span style="font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25px;">
+</span></p>
+<p style="padding: 0px; margin: 0px;">作者：nuysoft/高云　QQ：47214707　EMail：nuysoft@gmail.com</p>
+<p style="padding: 0px; margin: 0px;">声明：本文为原创文章，如需转载，请注明来源并保留原文链接。<span style="font-family: Helvetica, Tahoma, Arial, sans-serif; font-size: 14px; line-height: 25px;">&nbsp;</span></p>
+<p style="padding: 0px; margin: 0px;">&nbsp;</p>
+<p style="padding: 0px; margin: 0px;">读读写写，不对的地方请告诉我，多多交流共同进步，本章的的PDF下载在最后。</p>
+<p style="padding: 0px; margin: 0px;">&nbsp;</p>
+<p style="padding: 0px; margin: 0px;">前记：</p>
+<p style="padding: 0px; margin: 0px;">国庆给自己放了个安静的长假，日游杭州大小景点，夜宿西湖边上，于大街小巷中遍尝美味小吃，没有电脑没有网络，这样的日子真是是好日子啊；回京开始工作了，编程是我的兴趣，虽然变成了工作，但是享受的心态要继续保持下去。</p>
+<p style="padding: 0px; margin: 0px;">白天工作，不管忙不忙，jQuery源码分析系列只能放在晚上写，经常看的朋友兴许也注意到更新时间一般是凌晨，经常觉的挺累的，想今天算了吧上床睡觉明天再说吧，但还是坚持下来了，我会尽量要求自己1-2天发布一篇。刚开始写的时候，有些担心写出来的东西会幼稚肤浅或讲不清楚，有些地方也确实是这样，这个假期让我想明白了很多事，以后的文章欢迎各位道友拍各种砖和石头，用力点，不要停。</p>
+<p>&nbsp;</p>
+<h1>
+<span><span>8.<span style=""> </span></span></span>队列
+<span>Queue</span>
+</h1>
+<h2>
+<span><span>8.1<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>概述</h2>
+<p class="MsoNormal">队列是一种特殊的线性表，只允许在表的前端（队头）进行删除操作（出队），在表的后端（队尾）进行插入操作（入队）。队列的特点是先进先出（<span>FIFO-first in first out</span>），即最先插入的元素最先被删除。</p>
+<p class="MsoNormal"><span>jQuery</span>提供了<span>jQuery.queue/dequeue</span>和<span>jQuery.fn.queue/dequeue</span>，实现对队列的入队、出队操作。不同于队列定义的是，<span>jQuery.queue</span>和<span>jQuery.fn.queue</span>不仅执行出队操作，返回队头元素，还会自动执行返回的队头元素。</p>
+<h2>
+<span><span>8.2<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>用途</h2>
+<p class="MsoNormal">在<span>jQuery</span>源码中，仅用于动画模块，这里入队的函数的功能是：</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>遍历要动画的属性，修正要执行的动画动作，修正<span>/</span>备份属性</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>遍历要动画的属性，为每一个属性创建<span>jQuery.fx</span>对象，计算起始值和结束值，调用<span>fx</span>对象的<span>custom</span>开始动画</p>
+<p class="MsoNormal">看看源码：</p>
+<table border="1" style="border-collapse: collapse; border: none;" cellpadding="0" class="MsoTableGrid" cellspacing="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">/**</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">.animate(</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">properties,</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">[duration],</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">[easing],</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">[complete]</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">)</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">.animate(</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">properties,</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">options</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">)</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">animate</span><span style="font-size: 11.0pt; color: #3f5fbf;">做了三件事：</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">1.</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">jQuery.speed</span><span style="font-size: 11.0pt; color: #3f5fbf;">修正传入的参数（时间、算法、回调函数）</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">2.</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">遍历要动画的属性，修正要执行的动画动作，修正</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">/</span><span style="font-size: 11.0pt; color: #3f5fbf;">备份属性</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">3.</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><span style="font-size: 11.0pt; color: #3f5fbf;">遍历要动画的属性，为每一个属性创建</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">jQuery.fx</span><span style="font-size: 11.0pt; color: #3f5fbf;">对象，计算起始值和结束值，调用</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">fx</span></span><span style="font-size: 11.0pt; color: #3f5fbf;">对象的</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">custom</span><span style="font-size: 11.0pt; color: #3f5fbf;">开始动画</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;</span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f5fbf;">*/</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">animate: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( prop, speed,
+  easing, callback ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> optall = jQuery.speed(speed, easing,
+  callback); </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">修正参数</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果是空对象，则直接运行</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">callback</span></span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( jQuery.isEmptyObject( prop ) ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.each( optall.complete, [ </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">false</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ] );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Do not
+  change referenced properties as per-property easing will be lost</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">复制一份</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">prop</span><span style="font-size: 11.0pt; color: #3f7f5f;">，不改变原有的属性</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>prop = jQuery.extend( {}, prop );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// queue</span><span style="font-size: 11.0pt; color: #3f7f5f;">为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">false</span><span style="font-size: 11.0pt; color: #3f7f5f;">，动画立即开始，否则则放入动画队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">[ optall.queue === </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">false</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ? </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"each"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> : </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"queue"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ](</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">() {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f9fbf;">XXX</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> 'this' does not always have a nodeName when running the</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// test suite</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( optall.queue === </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">false</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery._mark( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> opt = jQuery.extend( {}, optall ), </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">复制一份</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>isElement = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.nodeType === 1,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>hidden = isElement &amp;&amp;
+  jQuery(</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">).is(</span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">":hidden"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">), </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">是否隐藏</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>name, val, p,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>display, e,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>parts, start, end, unit;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// will store per property easing and be used to determine when an
+  animation is complete</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">已完成的属性</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>opt.animatedProperties = {};</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">遍历每一个属性，本次遍历仅仅是修正和记录属性值，为后边的动画做准备</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">for</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( p </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">in</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> prop ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// property name normalization</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// property</span><span style="font-size: 11.0pt; color: #3f7f5f;">格式化，转换为驼峰式，因为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">style</span><span style="font-size: 11.0pt; color: #3f7f5f;">的属性名是驼峰式</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>name = jQuery.camelCase( p );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( p !== name ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>prop[ name ] = prop[ p ];</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">delete</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> prop[ p ];</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>val = prop[ name ];</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// easing resolution: per property &gt; opt.specialEasing &gt;
+  opt.easing &gt; 'swing' (default)</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">样式值允许以数组的方式，数组第一个表示动画是否完成，第二个表示动画的值，这样做有两点好处：</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// 1. </span><span style="font-size: 11.0pt; color: #3f7f5f;">允许在某些属性还未完成时就执行回调函数、执行下一个动画</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// 2. </span><span style="font-size: 11.0pt; color: #3f7f5f;">允许为默写属性指定算法</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( jQuery.isArray( val ) ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>opt.animatedProperties[ name ] =
+  val[ 1 ]; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>val = prop[ name ] = val[ 0 ];</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">对指定属性设置动画算法</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>opt.animatedProperties[ name ] =
+  opt.specialEasing &amp;&amp; opt.specialEasing[ name ] || opt.easing || </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">'swing'</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果属性值是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">hide</span><span style="font-size: 11.0pt; color: #3f7f5f;">，并且已经隐藏，则直接调用回调函数；</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">show</span><span style="font-size: 11.0pt; color: #3f7f5f;">同理</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( val === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"hide"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> &amp;&amp; hidden ||
+  val === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"show"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> &amp;&amp; !hidden ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> opt.complete.call( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">width/height</span><span style="font-size: 11.0pt; color: #3f7f5f;">，修正它的：</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// overflow</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// display</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( isElement &amp;&amp; ( name === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"height"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> || name === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"width"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Make sure that nothing sneaks out</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Record all 3 overflow attributes because IE does not</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// change the overflow attribute when overflowX and</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// overflowY are set to the same value</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>opt.overflow = [ </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.style.overflow, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.style.overflowX, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.style.overflowY ];</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Set display property to <span style="text-decoration: underline;">inline</span>-block for height/width</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// animations on <span style="text-decoration: underline;">inline</span> elements that are having width/height</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// animated</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( jQuery.css( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"display"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"inline"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> &amp;&amp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.css( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"float"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"none"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( !jQuery.support.inlineBlockNeedsLayout )
+  {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.style.display = </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"inline-block"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>display = defaultDisplay(
+  </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.nodeName );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// <span style="text-decoration: underline;">inline</span>-level elements accept <span style="text-decoration: underline;">inline</span>-block;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// block-level elements need to be <span style="text-decoration: underline;">inline</span> with layout</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( display === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"inline"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.style.display = </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"inline-block"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.style.display = </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"inline"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.style.zoom = 1;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">width/height</span><span style="font-size: 11.0pt; color: #3f7f5f;">，先设置为超出部分隐藏</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( opt.overflow != </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">null</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.style.overflow = </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"hidden"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">遍历每一个属性，</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">for</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( p </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">in</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> prop ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>e = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">new</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery.fx( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, opt, p ); </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">构造动画</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fx</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">对象</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>val = prop[ p ];</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">toggle/show/hide</span><span style="font-size: 11.0pt; color: #3f7f5f;">，</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( rfxtypes.test(val) ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">toggle</span><span style="font-size: 11.0pt; color: #3f7f5f;">，则判断当前是否</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">hidden</span><span style="font-size: 11.0pt; color: #3f7f5f;">，如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">hidden</span><span style="font-size: 11.0pt; color: #3f7f5f;">则</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">show</span><span style="font-size: 11.0pt; color: #3f7f5f;">，否则</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">hide</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果不是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">toggle</span><span style="font-size: 11.0pt; color: #3f7f5f;">，说明</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">val</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">是</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">hide/show</span><span style="font-size: 11.0pt; color: #3f7f5f;">之一</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>e[ val === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"toggle"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ? hidden ? </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"show"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> : </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"hide"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> : val ]();</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>parts = rfxnum.exec( val ); </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">数值型，</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">1+=/-=</span><span style="font-size: 11.0pt; color: #3f7f5f;">，</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">2</span><span style="font-size: 11.0pt; color: #3f7f5f;">数值，</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">3</span><span style="font-size: 11.0pt; color: #3f7f5f;">单位</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>start = e.cur(); </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">取出当前值</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果是数值型</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( parts ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>end = parseFloat( parts[2]
+  ); </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">包括了正负号</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>unit = parts[3] || (
+  jQuery.cssNumber[ p ] ? </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">""</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> : </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"px"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ); </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// jQuery.cssNumber</span><span style="font-size: 11.0pt; color: #3f7f5f;">中包含的是无单位的数值型属性，比如</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">zIndex/zoom</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// We need to compute starting value</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">计算开始值</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( unit !== </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"px"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.style( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, p, (end || 1) +
+  unit);</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>start = ((end || 1) /
+  e.cur()) * start;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.style( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, p, start + unit);</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// If a +=/-= token was provided, we're doing a relative animation</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果以</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">+=/-=</span><span style="font-size: 11.0pt; color: #3f7f5f;">开头，则做相对动画</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( parts[1] ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">计算出相对值</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>end = ( (parts[ 1 ] === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"-="</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ? -1 : 1) *
+  end ) + start;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">开始执行动画</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>e.custom( start, end, unit
+  );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">不是数值型</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">开始执行动画</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>e.custom( start, val, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">""</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// For JS strict compliance</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">严格遵守？</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">}</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal"><span>&nbsp;</span></p>
+<h2>
+<span><span>8.3<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>实现思路</h2>
+<p class="MsoNormal"><span>jQuery</span>队列的实现依赖于<span>jQuery.data</span>，用数组实现，作为私有数据存储在<span>jQuery</span>的全局变量<span>jQuery.cache</span>中。</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>调用<span>jQuery.queue</span>入队时，如果不传入队列名，则默认为<span>fx</span>（标准动画）</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>&nbsp; &nbsp; n<span style="">&nbsp; </span></span></span>队列用数组实现，入队直接调用数组对象的方法<span>push</span></p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>&nbsp; &nbsp; n<span style="">&nbsp; </span></span></span>入队的元素必须是函数，或由函数构成的数组</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>&nbsp; &nbsp; n<span style="">&nbsp; </span></span></span>所有队列名会自动加上<span>queue</span>后缀，表示这是一个队列</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>如果传入的是数组，则覆盖现有的队列</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>如果不是数组，则直接入队</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;"><span>l<span style="">&nbsp; </span></span></span>调用<span>jQuery. dequeue</span>出队时，会先调用<span>jQuery.queue</span>取得整个队列，因为队列用数组实现，可以调用数组的<span>shift</span>方法取出第一个元素并执行</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>执行第一个元素时采用<span>function.call( context, args )</span>，由此可以看出<span>jQuery</span>队列只支持函数（这么说不完全准确，<span>fx</span>动画是个特例，会在队列头端插入哨兵<span>inprogress</span>，类型为字符串）</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>出队的元素会自动执行，无论这个元素是不是函数，如果不是函数此时就会抛出异常（这个异常并没有处理）</p>
+<p class="MsoListParagraph"><span style="font-family: Wingdings;">&nbsp; &nbsp;&nbsp;<span>n<span style="">&nbsp; </span></span></span>如果队列变成空队列，则用关键<span>delete</span>删除<span>jQuery.cache</span>中<span>type</span>对应的属性</p>
+<h2>
+<span><span>8.4<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>验证（<span>firefox+firebug</span>）</h2>
+<p class="MsoNormal">我们验证一下上面的思路：</p>
+<p class="MsoListParagraph"><span><span>1.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>先入队<span>3</span>个弹窗函数，分别弹出<span>1</span>、<span>2</span>、<span>3</span></p>
+<table border="1" style="border-collapse: collapse; border: none;" cellpadding="0" class="MsoTableGrid" cellspacing="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal"><span class="objectbox"><span style="font-family: Consolas;">$('body').queue( 'test', function(){ alert(1); } )</span></span></p>
+<p class="MsoNormal"><span class="objectbox"><span style="font-family: Consolas;">$('body').queue( 'test', function(){ alert(2); } )</span></span></p>
+<p class="MsoNormal"><span style="font-family: Consolas;">$('body').queue(
+  'test', function(){ alert(3); } )</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoListParagraph"><span><span>2.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>查看<span>jQuery.data</span>为<span>body</span>分配的唯一<span>id</span>（为什么要查看<span>body</span>的唯一<span>id</span>，请参考数据缓存的解析）</p>
+<table border="1" style="border-collapse: collapse; border: none;" cellpadding="0" class="MsoTableGrid" cellspacing="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p style="text-align: left;" class="MsoNormal"><span>&gt;&gt;&gt; $.expando</span></p>
+<p style="text-align: left;" class="MsoNormal"><span>"jQuery161017518149125935123"</span></p>
+<p style="text-align: left;" class="MsoNormal"><span>command: &gt;&gt;&gt;
+  $('body')[0][$.expando]</span></p>
+<p style="text-align: left;" class="MsoNormal"><span>5</span></p>
+<p style="text-align: left;" class="MsoNormal"><span>&gt;&gt;&gt; $('body')[0]["jQuery161017518149125935123"]</span></p>
+<p style="text-align: left;" class="MsoNormal"><span>5</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal"><span>$.expando</span>有三部分构成：字符串<span>"jQuery"
++ </span>版本号<span>jQuery.fn.jquery + </span>随机数<span>Math.random()</span>，因此每次加载页面后都不相同。</p>
+<p class="MsoListParagraph"><span><span>3.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>查看<span>jQuery.cache</span>对属性<span>5</span>对应的数据，格式化如下：</p>
+<table border="1" style="border-collapse: collapse; border: none;" cellpadding="0" class="MsoTableGrid" cellspacing="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p class="MsoNormal"><span>{ </span></p>
+<p class="MsoNormal"><span><span>&nbsp;
+  </span>"1" : { ... },</span></p>
+<p class="MsoNormal"><span><span>&nbsp;
+  </span>"2" : { ... },</span></p>
+<p class="MsoNormal"><span><span>&nbsp;
+  </span>"3" : { ... },</span></p>
+<p class="MsoNormal"><span><span>&nbsp;
+  </span>"4" : { ... },</span></p>
+<p style="text-indent: 10.5pt;" class="MsoNormal"><span>"5" : {</span></p>
+<p style="text-indent: 21.0pt;" class="MsoNormal"><span>"jQuery161017518149125935123" : {</span></p>
+<p style="text-indent: 21.0pt;" class="MsoNormal"><span><span>&nbsp; </span>"testqueue" :
+  [</span></p>
+<p style="text-indent: 21.0pt;" class="MsoNormal"><span><span>&nbsp;&nbsp;&nbsp; </span>(function ()
+  {alert(1);}),</span></p>
+<p style="text-indent: 21.0pt;" class="MsoNormal"><span><span>&nbsp;&nbsp;&nbsp; </span>(function ()
+  {alert(2);}),</span></p>
+<p style="text-indent: 21.0pt;" class="MsoNormal"><span><span>&nbsp;&nbsp;&nbsp; </span>(function ()
+  {alert(3);})</span></p>
+<p style="text-indent: 31.5pt;" class="MsoNormal"><span>]</span></p>
+<p style="text-indent: 21.0pt;" class="MsoNormal"><span>}</span></p>
+<p style="text-indent: 10.5pt;" class="MsoNormal"><span>}<span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p class="MsoNormal"><span>}</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal">内部数据存储在<span>$.expando</span>属性（<span>"jQuery161017518149125935123"</span><span>）</span>中，这点区别于普通数据</p>
+<p class="MsoListParagraph"><span><span>4.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>外事具备，我们出队试试，连续<span>3</span>次调用出队<span style="font-family: Consolas; color: #0070c0;">$('body').dequeue( 'test'
+)</span>，每次调用<span>dequeue</span>后用<span>$('body').queue('test').length</span><span>检查队列长度</span></p>
+<table border="1" style="border-collapse: collapse; border: none;" cellpadding="0" class="MsoTableGrid" cellspacing="0">
+<tbody><tr>
+<td style="padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">控制台命令</p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center;" class="MsoNormal"><span style="font-family: Consolas; color: #0070c0;">$('body').dequeue( 'test' )</span></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center;" class="MsoNormal"><span style="font-family: Consolas; color: #0070c0;">$('body').dequeue( 'test' )</span></p>
+</td>
+<td style="border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center;" class="MsoNormal"><span style="font-family: Consolas; color: #0070c0;">$('body').dequeue( 'test' )</span></p>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal">浏览器截图</p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<span style="font-family: Consolas; color: #0070c0;">见附件PDF</span>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<span style="color: #0070c0; font-family: Consolas;">见附件PDF</span>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<span style="color: #0070c0; font-family: Consolas;">见附件PDF</span>
+</td>
+</tr>
+<tr>
+<td style="border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p class="MsoNormal"><span>队列长度</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center;" class="MsoNormal"><span style="font-family: Consolas;">2</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center;" class="MsoNormal"><span style="font-family: Consolas;">1</span></p>
+</td>
+<td style="border-top: none; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;">
+<p style="text-align: center;" class="MsoNormal"><span style="font-family: Consolas;">0</span></p>
+</td>
+</tr>
+</tbody></table>
+<p class="MsoNormal">果不其然，调用出队函数<span>dequeue</span>后，入队的函数按照先进先出的顺序，依次被执行</p>
+<p class="MsoListParagraph"><span><span>5.<span style="">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>最后看看全部出队后，<span>jQuery.cache</span>中的状态</p>
+<table border="1" style="border-collapse: collapse; border: none;" cellpadding="0" class="MsoTableGrid" cellspacing="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p style="text-align: left;" class="MsoNormal"><span>&gt;&gt;&gt; $.cache[5][$.expando]['testqueue']</span></p>
+<p style="text-align: left;" class="MsoNormal"><span>undefined</span></p>
+</td>
+</tr></tbody></table>
+<p class="MsoNormal">可以看到，<span>testqueue</span>属性已经从<span>body</span>的缓存中移除</p>
+<h2>
+<span><span>8.5<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>源码分析</h2>
+<table border="1" style="border-collapse: collapse; border: none;" cellpadding="0" class="MsoTableGrid" cellspacing="0"><tbody><tr>
+<td style="width: 780.7pt; padding: 0cm 5.4pt 0cm 5.4pt;" width="1041">
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.extend({</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">计数器，用在动画</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">animate</span><span style="font-size: 11.0pt; color: #3f7f5f;">中</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>_mark: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( elem, type ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( elem ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = (type || </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">) + </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"mark"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">取出数据加</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">1</span><span style="font-size: 11.0pt; color: #3f7f5f;">，存储在内部对象上</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.data( elem, type, (jQuery.data(elem,type,</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">,</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">) || 0) + 1, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">用在动画</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">animate</span><span style="font-size: 11.0pt; color: #3f7f5f;">中</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>_unmark: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( force, elem, type ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( force !== </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = elem;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>elem = force;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>force = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">false</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( elem ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = type || </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> key = type + </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"mark"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">减</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">1</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>count = force ? 0 : (
+  (jQuery.data( elem, key, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">) || 1 ) - 1 );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( count ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.data( elem, key, count, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.removeData( elem, key, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>handleQueueMarkDefer( elem,
+  type, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"mark"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">//
+  jQuery.queue( element, [queueName] )</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">返回在指定的元素</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">element</span><span style="font-size: 11.0pt; color: #3f7f5f;">上将要执行的函数队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">//
+  jQuery.queue( element, queueName, newQueue or <span style="text-decoration: underline;">callback</span> )</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">修改在指定的元素</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">element</span><span style="font-size: 11.0pt; color: #3f7f5f;">上将要执行的函数队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">使用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.queue</span><span style="font-size: 11.0pt; color: #3f7f5f;">添加函数后，最后要调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.dequeue()</span><span style="font-size: 11.0pt; color: #3f7f5f;">，使得下一个函数能线性执行</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.data</span><span style="font-size: 11.0pt; color: #3f7f5f;">，存储为内部数据（</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">pvt</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">为</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">true</span><span style="font-size: 11.0pt; color: #3f7f5f;">）</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>queue: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( elem, type, data ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// <span style="text-decoration: underline;">elem</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">必须存在，否则没有意义</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( elem ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = (type || </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">) + </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"queue"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">改名，每个都要加上</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">queue</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">取出队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> q = jQuery.data( elem, type, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Speed up dequeue by getting out quickly if this is just a lookup</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">data</span><span style="font-size: 11.0pt; color: #3f7f5f;">存在，才会进行后边转换数组、入队等操作，可以加速取出整个队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( data ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果队列不存在，或者</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">data</span><span style="font-size: 11.0pt; color: #3f7f5f;">是数组，则调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">makeArray</span><span style="font-size: 11.0pt; color: #3f7f5f;">转换为数组，并覆盖队列（入队）</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( !q || jQuery.isArray(data) ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">用数组实现队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>q = jQuery.data( elem, type,
+  jQuery.makeArray(data), </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>} </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">else</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">队列存在的话，且</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">data</span><span style="font-size: 11.0pt; color: #3f7f5f;">不是数组，直接入队</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">这里并没有判断</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">data</span><span style="font-size: 11.0pt; color: #3f7f5f;">的类型，不管</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">data</span><span style="font-size: 11.0pt; color: #3f7f5f;">是不是函数</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>q.push( data );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">返回队列（即入队的同时，返回整个队列）</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">简洁实用的避免空引用的技巧</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> q || [];</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">出队并执行</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.queue</span><span style="font-size: 11.0pt; color: #3f7f5f;">取得整个队列，在调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">shift</span><span style="font-size: 11.0pt; color: #3f7f5f;">取出第一个元素</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>dequeue: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( elem, type ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = type || </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">; </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">默认</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fx</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">，但是入队时不是被改为</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fxqueue</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">了么，别着急！</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> queue = jQuery.queue( elem, type ), </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">取出队列，调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">queue</span><span style="font-size: 11.0pt; color: #3f7f5f;">时</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">type</span><span style="font-size: 11.0pt; color: #3f7f5f;">变成了</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">type+<span style="text-decoration: underline;">quque</span></span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fn = queue.shift(), </span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">取出第一个</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>defer;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// If the <span style="text-decoration: underline;">fx</span> queue is dequeued, always remove the progress
+  sentinel</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果取出的</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fn</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">是一个正在执行中标准动画</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fx</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">，抛弃执行哨兵（</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">inprogress</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">），再取一个</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( fn === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"inprogress"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fn = queue.shift();</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( fn ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Add a progress sentinel to prevent the <span style="text-decoration: underline;">fx</span> queue from being</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// automatically dequeued</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果是标准动画，则在队列头部增加处理中哨兵属性，阻止</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fx</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">自动处理</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( type === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">在队列头部增加哨兵</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">inprogress</span></span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>queue.unshift(</span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"inprogress"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">);</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">执行取出的</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fn</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">，并传入回调函数</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.dequeue</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">可以看到</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fn</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">必须是函数，否则会出错</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fn.call(elem, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">() {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">但是这个回调函数不会自动执行</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.dequeue(elem, type);</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果执行完毕，则调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.removeData</span><span style="font-size: 11.0pt; color: #3f7f5f;">移除</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">type</span><span style="font-size: 11.0pt; color: #3f7f5f;">指定的队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">此时的队列成为空队列，实质是一个空数组，</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.removeData</span><span style="font-size: 11.0pt; color: #3f7f5f;">内部使用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">delete</span><span style="font-size: 11.0pt; color: #3f7f5f;">关键字删除</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">type</span><span style="font-size: 11.0pt; color: #3f7f5f;">对应的空数组</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( !queue.length ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.removeData( elem, type + </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"queue"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>handleQueueMarkDefer( elem, type, </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"queue"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">});</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">jQuery.fn.extend({</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// queue( [
+  queueName ] )</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">返回在指定的元素</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">element</span><span style="font-size: 11.0pt; color: #3f7f5f;">上将要执行的函数队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// queue( [
+  queueName ], newQueue or <span style="text-decoration: underline;">callback</span> )</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">修改在指定的元素</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">element</span><span style="font-size: 11.0pt; color: #3f7f5f;">上将要执行的函数队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>queue: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( type, data ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">修正参数：只传了一个非字符串的参数，则默认为动画</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">fx</span></span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">typeof</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> type !== </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"string"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>data = type;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">data</span><span style="font-size: 11.0pt; color: #3f7f5f;">等于</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">undefined</span><span style="font-size: 11.0pt; color: #3f7f5f;">，则认为是取队列</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( data === </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> jQuery.queue( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">[0], type );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果传入了</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">data</span><span style="font-size: 11.0pt; color: #3f7f5f;">参数，则在每一个匹配的元素上执行入队操作</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">在</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery</span><span style="font-size: 11.0pt; color: #3f7f5f;">中，使用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">each</span><span style="font-size: 11.0pt; color: #3f7f5f;">遍历匹配的元素，是一种安全的惯例做法</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.each(</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">() {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> queue = jQuery.queue( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, type, data );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">如果动画执行完毕（即不是</span><span style="text-decoration: underline;"><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">inprogress</span></span><span style="font-size: 11.0pt; color: #3f7f5f;">），则从队列头部移除</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( type === </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> &amp;&amp; queue[0]
+  !== </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"inprogress"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.dequeue( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, type );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">调用</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">jQuery.dequeue</span><span style="font-size: 11.0pt; color: #3f7f5f;">出队</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>dequeue: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( type ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.each(</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">() {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.dequeue( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, type );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Based off
+  of the <span style="text-decoration: underline;">plugin</span> by <span style="text-decoration: underline;">Clint</span> <span style="text-decoration: underline;">Helfers</span>, with permission.</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">//
+  http://blindsignals.com/index.php/2009/07/jquery-delay/</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">延迟执行队列中未执行的函数，通过在队列中插入一个延时</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;"> </span><span style="font-size: 11.0pt; color: #3f7f5f;">出队的函数来实现</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>delay: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( time, type ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>time = jQuery.fx ?
+  jQuery.fx.speeds[time] || time : time;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = type || </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas;">&nbsp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.queue( type, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">() {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> elem = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>setTimeout(</span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">() {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.dequeue( elem, type );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}, time );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>});</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">清空队列，通过将第二参数设置为空数组</span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">[]</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>clearQueue: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( type ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">.queue( type || </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, [] );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>},</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// Get a
+  promise resolved when queues of a certain type</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// are
+  emptied (<span style="text-decoration: underline;">fx</span> is the type by default)</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span></span><span style="font-size: 11.0pt; font-family: Consolas; color: #3f7f5f;">// </span><span style="font-size: 11.0pt; color: #3f7f5f;">返回一个只读视图，当队列中指定类型的函数执行完毕后</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>promise: </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( type, object ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">typeof</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> type !== </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"string"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>object = type;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>type = type || </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"fx"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">var</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> defer = jQuery.Deferred(),</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>elements = </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">this</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>i = elements.length,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>count = 1,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>deferDataKey = type + </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"defer"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>queueDataKey = type + </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"queue"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>markDataKey = type + </span><span style="font-size: 11.0pt; font-family: Consolas; color: #2a00ff;">"mark"</span><span style="font-size: 11.0pt; font-family: Consolas; color: black;">,</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>tmp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">function</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> resolve() {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ( !( --count ) ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>defer.resolveWith( elements, [
+  elements ] );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">while</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">( i-- ) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">if</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> (( tmp = jQuery.data( elements[ i ],
+  deferDataKey, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) ||</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>( jQuery.data( elements[ i
+  ], queueDataKey, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) ||</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.data( elements[ i
+  ], markDataKey, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">undefined</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;">, </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) ) &amp;&amp;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>jQuery.data( elements[ i ],
+  deferDataKey, jQuery._Deferred(), </span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">true</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> ) )) {</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>count++;</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>tmp.done( resolve );</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>resolve();</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><strong><span style="font-size: 11.0pt; font-family: Consolas; color: #7f0055;">return</span></strong><span style="font-size: 11.0pt; font-family: Consolas; color: black;"> defer.promise();</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;"><span>&nbsp;&nbsp;&nbsp; </span>}</span></p>
+<p style="text-align: left;" class="MsoNormal"><span style="font-size: 11.0pt; font-family: Consolas; color: black;">});</span></p>
+</td>
+</tr></tbody></table>
+<h2>
+<span><span>8.6<span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>总结
+</h2>
+<p class="MsoNormal"><span>jQuery</span>队列的实现并不复杂，它的核心思路是：</p>
+<p class="MsoNormal">在传统队列的实现上增加了出队自动执行，执行完成后再次自动出队。</p>
+<p class="MsoNormal">详见小节：8.3 实现思路</p>
+<p class="MsoNormal">&nbsp;</p>
+  </div>
+
+  
+  <div class="attachments">
+    
+      
+        <ul>
+          <li><a href="http://dl.iteye.com/topics/download/10fbd9a9-e69a-3332-80e1-5e297c779fbd">_原创__jQuery源码分析-08队列-Queue.pdf</a> (396.5 KB)</li>
+          
+          <li>下载次数: 326</li>
+        </ul>
+      
+    
+    
+  </div>
+
+
+  
+  
+  <iframe src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/794.html" scrolling="no" width="468" height="60" frameborder="0"></iframe>
+  
+  <div id="bottoms" class="clearfix">
+    <div id="digg_bottom" class="clearfix"><a href="http://nuysoft.iteye.com/blog/1189156#" onclick="digg(&quot;blogs&quot;, 1189156, false);return false;"><div><strong>3</strong> <br>顶</div></a><a href="http://nuysoft.iteye.com/blog/1189156#" onclick="digg(&quot;blogs&quot;, 1189156, true);return false;"><div><strong>0</strong> <br>踩</div></a></div>
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/sina.jpg"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/tec.jpg"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://nuysoft.iteye.com/blog/1190189" class="next" title="[原创] jQuery源码分析-10事件处理-Event-概述和基础知识">[原创] jQuery源码分析-10事件处理-Event ...</a>
+      |
+      <a href="http://nuysoft.iteye.com/blog/1183554" class="pre" title="[原创] jQuery源码分析-03构造jQuery对象-工具函数">[原创] jQuery源码分析-03构造jQuery对象 ...</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>2011-10-10 23:48</li>
+      <li>浏览 7313</li>
+      <li><a href="http://nuysoft.iteye.com/blog/1189156#comments">评论(4)</a></li>
+      
+      
+        <li><a href="http://nuysoft.iteye.com/admin/link?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-08%E9%98%9F%E5%88%97+Queue&user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1189156" target="_blank" class="favorite" onclick="$$(&#39;.favorite_form_spinner&#39;)[0].show();new Ajax.Request(&#39;/admin/link/new_xhr?user_favorite%5Btitle%5D=%5B%E5%8E%9F%E5%88%9B%5D+jQuery%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-08%E9%98%9F%E5%88%97+Queue&amp;user_favorite%5Burl%5D=http%3A%2F%2Fnuysoft.iteye.com%2Fblog%2F1189156&#39;, {method: &#39;get&#39;, onSuccess: function(response){$(document.getElementsByTagName(&#39;body&#39;)[0]).insert({bottom:response.responseText});$$(&#39;.favorite_form_spinner&#39;)[0].hide();}});return false;">收藏</a><img alt="Spinner" class="favorite_form_spinner" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/spinner.gif" style="vertical-align:bottom;margin-left:7px;display:none;"></li>
+      
+      <li>分类:<a href="http://www.iteye.com/blogs/category/web">Web前端</a></li>      
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/1189156" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    <div id="bc2298021">
+  <div class="comment_title">
+    4 楼
+    <a href="http://nuysoft.iteye.com/" target="_blank" title="nuysoft">nuysoft</a>
+    2013-01-17&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1189156#" onclick="quote_comment(2298021);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content"><div class="quote_title">zhumq1982 写道</div><div class="quote_div">我想知道 为什么queue 必须原来选择器，如果脱离了选择器 直接 $.queue为什么就不支持了呢<br>其实我只希望能做一个任务队列，和DOM完全没毛关系~~~</div><br>1. jQuery 的 Queue 模块依赖于 Data 模块实现。<br>2. 简单的任务队列可以通过数组实现，push() 入队，shift() 出队。</div>
+</div>
+
+<div id="bc2297966">
+  <div class="comment_title">
+    3 楼
+    <a href="http://mitchellzhu.iteye.com/" target="_blank" title="zhumq1982">zhumq1982</a>
+    2013-01-17&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1189156#" onclick="quote_comment(2297966);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">我想知道 为什么queue 必须原来选择器，如果脱离了选择器 直接 $.queue为什么就不支持了呢<br>其实我只希望能做一个任务队列，和DOM完全没毛关系~~~</div>
+</div>
+
+<div id="bc2242052">
+  <div class="comment_title">
+    2 楼
+    <a href="http://abcity.iteye.com/" target="_blank" title="abCity">abCity</a>
+    2012-02-07&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1189156#" onclick="quote_comment(2242052);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">太棒了...!!!<img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_eek.gif"> </div>
+</div>
+
+<div id="bc2236282">
+  <div class="comment_title">
+    1 楼
+    <a href="http://rambolovepanda.iteye.com/" target="_blank" title="rambolovepanda">rambolovepanda</a>
+    2011-12-20&nbsp;&nbsp;
+    <a href="http://nuysoft.iteye.com/blog/1189156#" onclick="quote_comment(2236282);return false;">引用</a>
+    
+  </div>
+  <div class="comment_content">thank you very much！<img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_biggrin.gif"> </div>
+</div>
+
+
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站.html" id="comment_form" method="post" onsubmit="return false;"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk="></div>          
+
+
+  <input type="hidden" id="editor_bbcode_flag" value="true">
+
+
+
+<div id="editor_main"><div id="editor_wrapper" class="clearfix"><div id="bbcode_emotions"><h5>表情图标</h5><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_biggrin(1).gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_smile.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_sad.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_surprised.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_eek(1).gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_confused.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_cool.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_lol.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_mad.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_razz.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_redface.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_cry.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_evil.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_twisted.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_rolleyes.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_wink.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_exclaim.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_question.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_idea.gif"><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_arrow.gif"></div><div id="bbcode_controllers"><div id="bbcode_toolbar"><input type="button" value="B" id="button_bold"><input type="button" value="I" id="button_italic"><input type="button" value="U" id="button_underline"><input type="button" value="Quote"><input type="button" value="Code"><input type="button" value="List"><input type="button" value="Img"><input type="button" value="URL"><input type="button" value="Flash"><input type="button" value="Table"><br>字体颜色: <select id="select_color"><option value="black" style="color: black;">标准</option><option value="darkred" style="color: darkred;">深红</option><option value="red" style="color: red;">红色</option><option value="orange" style="color: orange;">橙色</option><option value="brown" style="color: brown;">棕色</option><option value="yellow" style="color: yellow;">黄色</option><option value="green" style="color: green;">绿色</option><option value="olive" style="color: olive;">橄榄</option><option value="cyan" style="color: cyan;">青色</option><option value="blue" style="color: blue;">蓝色</option><option value="darkblue" style="color: darkblue;">深蓝</option><option value="indigo" style="color: indigo;">靛蓝</option><option value="violet" style="color: violet;">紫色</option><option value="gray" style="color: gray;">灰色</option><option value="white" style="color: white;">白色</option><option value="black" style="color: black;">黑色</option></select>&nbsp;字体大小: <select id="select_font"><option value="0">标准</option><option value="xx-small">1 (xx-small)</option><option value="x-small">2 (x-small)</option><option value="small">3 (small)</option><option value="medium">4 (medium)</option><option value="large">5 (large)</option><option value="x-large">6 (x-large)</option><option value="xx-large">7 (xx-large)</option></select>&nbsp;对齐: <select id="select_align"><option value="0">标准</option><option value="left">居左</option><option value="center">居中</option><option value="right">居右</option></select></div><div id="bbcode_tooltip">提示：选择您需要装饰的文字, 按上列按钮即可添加上相应的标签</div><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div></div></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+
+          <p style="text-align:right;margin-right:30px;">(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" type="submit" value="提交"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+            if(result) {
+              new Ajax.Request('/blog/create_comment/1189156', {
+                onFailure:function(response){
+                  $('comments').insert({after:response.responseText})
+                  form.spinner.hide();
+                  Element.scrollTo($('comments'));
+                },
+                onSuccess:function(response){
+                  Element.scrollTo($('comments'));
+                  var new_comment = new Element('div', {}).update(response.responseText).firstChild;
+                  var comment_id = new_comment.readAttribute('id');
+
+                  $('comments').insert({after:response.responseText});
+                  $('editor_body').value = "";
+
+                  var css_rules = '#' + comment_id + ' pre';
+                  highlightNewAddContent(css_rules);
+                  processComment();
+                  code_favorites_init(css_rules);
+                  
+                  form.spinner.hide();
+                }, parameters:Form.serialize(form)
+              });
+            }
+        }});
+        </script>
+        </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 1189156;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '[原创] jQuery源码分析-08队列 Queue');
+  });
+
+  fix_image_size($$('div.blog_content img'), 700);
+
+  function processComment() {
+    $$('#main .blog_comment > div').each(function(comment){// comment
+      var post_id = comment.id.substr(2);
+      $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+        var location = window.location;
+        source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+        source_url += "#" + comment.id;
+        pre.writeAttribute('codeable_id', post_id);
+        pre.writeAttribute('codeable_type', "BlogComment");
+        pre.writeAttribute('source_url', source_url);
+        pre.writeAttribute('pre_index', index);
+        pre.writeAttribute('title', '[原创] jQuery源码分析-08队列 Queue');
+      });
+    });
+  }
+
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  code_favorites_init();
+  processComment();
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+  <div id="blog_owner_logo"><a href="http://nuysoft.iteye.com/"><img alt="nuysoft的博客" class="logo" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/d6b532d5-b30d-3a42-8336-611f8b83dfd6.jpg" title="nuysoft的博客: nuysoft" width=""></a></div>
+  <div id="blog_owner_name">nuysoft</div>
+</div>
+
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 349116 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 北京</li>
+              <li><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/offline.gif"></li>
+              
+                <li>
+                  <a href="http://my.iteye.com/messages/new?message%5Breceiver_name%5D=nuysoft" class="message" title="发送站内短信">发短消息</a>
+                  
+                    <a href="http://my.iteye.com/feed/772224" class="subscription" onclick="if (confirm(&#39;你确定要取消这个关注？&#39;)) { var f = document.createElement(&#39;form&#39;); f.style.display = &#39;none&#39;; this.parentNode.appendChild(f); f.method = &#39;POST&#39;; f.action = this.href;var m = document.createElement(&#39;input&#39;); m.setAttribute(&#39;type&#39;, &#39;hidden&#39;); m.setAttribute(&#39;name&#39;, &#39;_method&#39;); m.setAttribute(&#39;value&#39;, &#39;delete&#39;); f.appendChild(m);var s = document.createElement(&#39;input&#39;); s.setAttribute(&#39;type&#39;, &#39;hidden&#39;); s.setAttribute(&#39;name&#39;, &#39;authenticity_token&#39;); s.setAttribute(&#39;value&#39;, &#39;foncspGUjo88KbEH23TBNwmOVJHI8suaVg9RqM0afpk=&#39;); f.appendChild(s);f.submit(); };return false;">取消关注</a>
+                  
+                </li>
+              
+            </ul>
+          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://nuysoft.iteye.com/blog/user_visits">更多访客&gt;&gt;</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hhy5277.iteye.com/" target="_blank"><img alt="hhy5277的博客" class="logo" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="hhy5277的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hhy5277.iteye.com/" target="_blank" title="hhy5277">hhy5277</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://dylinshi126.iteye.com/" target="_blank"><img alt="dylinshi126的博客" class="logo" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/user-logo-thumb.gif" title="dylinshi126的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://dylinshi126.iteye.com/" target="_blank" title="dylinshi126">dylinshi126</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank"><img alt="诚信天下hxl的博客" class="logo" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/f7552907-3258-3880-858e-5631bb20d923-thumb.jpg" title="诚信天下hxl的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://hxlhuangxiaolong-yahoo-cn.iteye.com/" target="_blank" title="诚信天下hxl">诚信天下hxl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://wyxzhsh.iteye.com/" target="_blank"><img alt="wyxzhsh的博客" class="logo" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/531e8f8d-4594-33e3-aacb-68bcbca9fa06-thumb.jpg" title="wyxzhsh的博客: " width="48px"></a></div>
+                <div class="left"><a href="http://wyxzhsh.iteye.com/" target="_blank" title="wyxzhsh">wyxzhsh</a></div>
+              </div>
+            
+          </div>
+
+          
+            <div>
+              <h5>博客专栏</h5>
+              
+
+  
+  <dl class="series" style="padding-bottom:5px;">
+    <dt>
+      <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank"><img alt="91bd5d30-bd1e-3b00-9210-87db1cca0016" src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/91bd5d30-bd1e-3b00-9210-87db1cca0016.png"></a>
+    </dt>
+    <dd>
+    <a href="http://www.iteye.com/blogs/subjects/jquery" target="_blank" title="jQuery技术内幕">jQuery技术内幕</a><br>
+      <span class="visited">浏览量：136964</span>
+    </dd>
+  </dl>
+  
+
+
+            </div>
+          
+
+                      <div id="blog_menu">
+              <h5>文章分类</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/">全部博客 (36)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/99537">天天向上 (10)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116143">项目管理 (2)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/116144">Java (1)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/136360">读书笔记 (0)</a></li>
+                
+                  <li><a href="http://nuysoft.iteye.com/category/140986">jQuery (24)</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>社区版块</h5>
+              <ul>
+                <li><a href="http://nuysoft.iteye.com/blog/news">我的资讯</a> (0)</li>
+                <li>
+                  <a href="http://nuysoft.iteye.com/blog/post">我的论坛</a> (1)
+                </li>
+                <li><a href="http://nuysoft.iteye.com/blog/answered_problems">我的问答</a> (0)</li>
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档分类</h5>
+              <ul>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-11">2011-11</a> (3)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-10">2011-10</a> (11)</li>
+                
+                  <li><a href="http://nuysoft.iteye.com/blog/monthblog/2011-09">2011-09</a> (14)</li>
+                
+                <li><a href="http://nuysoft.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+
+            <div id="guest_books">
+              <h5>最新评论</h5>
+              <ul>
+                
+                <li>
+                  <a href="http://niuqiang2008.iteye.com/" target="_blank" title="niuqiang2008">niuqiang2008</a>： 
+                   学习学习&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                  <a href="http://nuysoft.iteye.com/blog/1256338#bc2362322">[原创] jQuery源码分析-04 选择器-Sizzle-工作原理</a>
+                </li>
+                
+                <li>
+                  <a href="http://liuweihug.iteye.com/" target="_blank" title="liuweihug">liuweihug</a>： 
+                  jquery 解析正则表达式及常见的Regex规则和表达式 - ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1217898#bc2356306">[原创] jQuery源码分析-02正则表达式-RegExp-常用正则表达式</a>
+                </li>
+                
+                <li>
+                  <a href="http://liang8768.iteye.com/" target="_blank" title="liang8768">liang8768</a>： 
+                  mark!!!<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177459#bc2352219">[原创] jQuery源码分析-00前言开光</a>
+                </li>
+                
+                <li>
+                  <a href="http://levinqdl.iteye.com/" target="_blank" title="levinqdl">levinqdl</a>： 
+                  viewsoft 写道“// fail”均调用不到fn tes ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2351119">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+                <li>
+                  <a href="http://perwarz.iteye.com/" target="_blank" title="perwarz">perwarz</a>： 
+                  为什么$("")返回的会是一个数组？搞了好 ...<br>
+                  <a href="http://nuysoft.iteye.com/blog/1177451#bc2337964">[原创] jQuery源码分析-01总体架构</a>
+                </li>
+                
+              </ul>
+            </div>
+
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2015 ITeye.com.   All rights reserved.  [ 京ICP证110151号  京公网安备110105010620 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=317070' width='0' height='0' />");
+</script><img src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/saved_resource" width="0" height="0">
+
+<script src="./[原创] jQuery源码分析-08队列 Queue - nuysoft - ITeye技术网站_files/tracking.js" type="text/javascript"></script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20906367-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+      
+    
+  
+
+</body></html>
