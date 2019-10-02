@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{ margin:0; padding:0;}
+#body1{ width:100%; height:100%;}
+#div1{ width:300px; height:300px; margin:100px auto; position:relative;}
+#tips{ width:300px; height:150px; border:1px #000000 solid; overflow:hidden; line-height:150px; text-align:center; display:none;}
+
+#progressBox { display: none; width: 100%; height: 40px; border: 1px solid #C8C8C8; background: white; position:relative; }
+#progressBar { position: absolute; left: 0; top: 0; z-index: 2; height: 40px; width: 100%; line-height: 40px; color: white; text-align: center; font-size: 20px; font-weight: bold; font-family: Georgia; clip:rect(0px, 0px, 40px, 0px); }
+#progressText { position: absolute; left: 0; top: 0; z-index: 1; width: 100%; height: 40px; line-height: 40px; color: black; text-align: center; font-size: 20px; font-weight: bold; font-family: Georgia; }
+.pgr_bg1 { background: #FAAC01; }
+.pgr_bg2 { background: #7DD54A; }
+.pgr_bg3 { background: #00A1F5; }
+
+</style>
+<script>
+window.onload = function(){
+	var doc = document;
+	var oTips = doc.getElementById('tips');
+	var oProgressBox = document.getElementById('progressBox');
+	var oProgressBar = document.getElementById('progressBar');
+	var oProgressText = document.getElementById('progressText');
+	var oUl = document.getElementById('ul1');
+	var iUcount = 0;
+	
+	var css = function(obj, attr) {
+		if (obj.currentStyle) {
+			return obj.currentStyle[attr];
+		} else {
+			return getComputedStyle(obj)[attr];
+		}
+	}
+	
+	var iprogressBoxWidth = 0;
+	
+	doc.addEventListener('dragenter',function(e){
+	
+		e.stopPropagation();
+		e.preventDefault();
+		
+		oTips.style.display = 'block';
+		
+	},false);
+	
+	doc.addEventListener('dragover',function(e){
+		
+		e.stopPropagation();
+		e.preventDefault();
+		
+	},false);
+	
+	oTips.addEventListener('dragenter',function(e){
+		
+		var a = e.currentTarget, b = e.relatedTarget;
+		if(!elContains(a,b) && a!=b){
+		
+			oTips.innerHTML = '释放鼠标';
+			
+		}
+		
+	},false);
+	
+	oTips.addEventListener('dragleave', function(e){
+		
+		var a = e.currentTarget, b = e.relatedTarget;
+		if(!elContains(a,b) && a!=b){
+		
+			oTips.innerHTML = '请拖到此区域';
+			
+		}
+		
+	}, false);
+	
+	oTips.addEventListener('dragover', function(e){
+		e.stopPropagation();
+		e.preventDefault();
+		
+	}, false);
+	
+	oTips.addEventListener('drop', function(e){
+
+		dropUpload(e);
+	
+	}, false);
+	
+	
+	function dropUpload(e){
+		e.stopPropagation();
+		e.preventDefault();
+		
+		var fileList = e.dataTransfer.files;
+		var fileType = fileList[0].type;
+		var reader = new FileReader();
+		
+		reader.onload = function(){
+			oTips.style.display = 'none';
+			oProgressBox.style.display = 'block';
+			iprogressBoxWidth = parseInt(css(oProgressBox, 'width'));
+			ajaxUpload('upload_ajax.php',this.result,function(e){
+				var per = Math.round((e.position / e.total) * 100);
+				var iprogressBarWidth = parseInt(iprogressBoxWidth * per / 100);
+				oProgressText.innerHTML = per + '%';
+				oProgressBar.innerHTML = per + '%';
+				oProgressBar.style.clip = 'rect(0px, '+ iprogressBarWidth +'px, 40px, 0px)';
+				console.log(iprogressBarWidth);
+          		//oDiv2.innerHTML = per + '%';
+				console.log(per + '%');
+			},function(e){
+				console.log(e);
+				//oProgressText.innerHTML = '完成';
+			});
+		}
+
+		reader.onprogress = function(e) {
+			//console.log(e.loaded);
+		}
+		
+		for (var i=0; i<fileList.length; i++)
+		{
+			reader.readAsDataURL(fileList[i]);
+		}
+	}
+	
+	function elContains(a, b){
+		try{
+			return a.contains ? a != b && a.contains(b) : !!(a.compareDocumentPosition(b) & 16);
+		}catch(e){}	
+	}
+	
+	function ajaxUpload(sUrl,files,progress,success){
+		var xhr = new XMLHttpRequest();
+		var boundary = '-----------------------' + new Date().getTime();
+		xhr.open("post", sUrl, true);
+		//xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
+		//xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+		
+		var formData = new FormData();
+		formData.append('file', files);
+		
+		
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4) {
+				if (xhr.status == 200) {
+					oProgressText.innerHTML = '100%';
+					oProgressBar.innerHTML = '100%';
+					oProgressBar.style.clip = 'rect(0px, '+ iprogressBoxWidth +'px, 40px, 0px)';
+					oProgressBox.style.display = 'none';
+					iUcount++;
+					var oLi = document.createElement('li');
+					oLi.innerHTML = iUcount + ' : <a href="'+xhr.responseText+'" target="_blank">查看文件</a>';
+					var aLi = oUl.getElementsByTagName('li');
+					if (!aLi.length) {
+						oUl.appendChild(oLi);
+					} else {
+						oUl.insertBefore(oLi, aLi[0]);
+					}
+				} else {
+					//document.getElementById('div3').innerHTML = '状态：'.xhr.status;
+				}
+			}
+		}
+		
+		xhr.upload.addEventListener('progress',progress,false);
+		xhr.upload.addEventListener('load',success,false);
+		xhr.send(formData);
+	}
+};
+</script>
+</head>
+
+<body id="body1">
+<div id="div1">
+	<input type="file" />
+	<div id="tips">请拖到此区域</div>
+    <div id="progressBox">
+        <div id="progressBar" class="pgr_bg3">0%</div>
+        <div id="progressText">0%</div>
+    </div>
+    <div id="ul1"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{ margin:0; padding:0; font-size:12px;}
+#div1{ margin:20px; position:absolute; top:25px; left:10px; display:none;}
+#nowTime{ width:330px; float:left;}
+#nextTime { width:330px; float:left; margin:0 0 0 10px;}
+.title{ width:100%; height:30px; background:#17a4eb; color:#FFFFFF; position:relative;}
+.title .c{ text-align:center; line-height:30px;}
+.title .l{ position:absolute; top:6px; left:5px;}
+.title .r{ position:absolute; top:6px; right:5px;}
+table{ width:100%; background:#dee3e9; color:#9ea7ac;}
+table tr{ background:#f9fafc;}
+table th{ width:46px; padding:5px;}
+table td{ padding:5px; text-align:center;}
+.red{ color:#FF0000;}
+.blue{ color:#0000FF;}
+table td p{ color:#FF0000;}
+
+input{ margin:20px;}
+</style>
+<script type="text/javascript" src="new_ajax.js"></script>
+<script>
+window.onload = function(){
+	var aInput = document.getElementsByTagName('input');
+	var oDiv = document.getElementById('div1');
+	var oNowTime = document.getElementById('nowTime');
+	var oNextTime = document.getElementById('nextTime');
+	var aTd = oDiv.getElementsByTagName('td');
+	var aNowSpan = oNowTime.getElementsByTagName('span');
+	var aNextSpan = oNextTime.getElementsByTagName('span');
+	
+	var bBtn = true;
+	
+	aInput[2].onclick = function(){
+		var oDate = new Date();
+		if(bBtn){
+			oDiv.style.display = 'block';
+			
+			if(oDate.getMonth()+1==12){
+				showDate(oNowTime,oDate.getFullYear(),oDate.getMonth()+1,true);
+				showDate(oNextTime,oDate.getFullYear()+1,1);
+			}
+			else{
+			showDate(oNowTime,oDate.getFullYear(),oDate.getMonth()+1,true);
+			showDate(oNextTime,oDate.getFullYear(),oDate.getMonth()+2);
+			}
+			
+			showColor(oDate.getDate());
+			showBtn();
+			showClick();
+			hideLastTr();
+			
+		}
+		else{
+			oDiv.style.display = 'none';
+		}
+		
+		bBtn = !bBtn;
+		
+	};
+	
+	function showDate(obj,year,month,bBtn){
+	
+		var oDate = new Date();
+		var dayNum = 0;
+	
+		if(!obj.bBtn){
+			obj.oTitle = document.createElement('div');
+			obj.oTitle.className = 'title';
+			obj.appendChild(obj.oTitle);
+			
+			var oTable = document.createElement('table');
+			var oThead = document.createElement('tHead');
+			var oTr = document.createElement('tr');
+			var arr = ['周一','周二','周三','周四','周五','周六','周日'];
+			for(var i=0;i<7;i++){
+				var oTh = document.createElement('th');
+				oTh.innerHTML = arr[i];
+				if(i==5 || i==6){
+					oTh.className = 'red';
+				}
+				oTr.appendChild(oTh);
+			}
+			oThead.appendChild(oTr);
+			oTable.appendChild(oThead);
+			
+			var oTbody = document.createElement('tBody');
+			for(var i=0;i<6;i++){
+				var oTr = document.createElement('tr');
+				for(var j=0;j<7;j++){
+					var oTd = document.createElement('td');
+					oTr.appendChild(oTd);
+				}
+				oTbody.appendChild(oTr);
+			}
+			oTable.appendChild(oTbody);
+			obj.appendChild(oTable);
+			
+			
+			obj.bBtn = true;
+		}
+		
+		obj.oTitle.innerHTML = ( bBtn ? '<div class="l"><span>'+(month-1)+'</span>月</div>' : '<div class="r"><span>'+(month+1)+'</span>月</div>')+'<div class="c"><span>'+year+'</span>年<span>'+month+'</span>月</div>';
+		
+		var aTd = obj.getElementsByTagName('td');
+		for(var i=0;i<aTd.length;i++){
+			aTd[i].innerHTML = '';
+		}
+		
+		if(month==1 || month==3 || month==5 || month==7 || month==8 || month==10 || month==12){
+			dayNum = 31;
+		}
+		else if(month==4 || month==6 || month==9 || month==11){
+			dayNum = 30;
+		}
+		else if(month==2 && isLeapYear(year)){
+			dayNum = 29;
+		}
+		else{
+			dayNum = 28;
+		}
+		
+		oDate.setFullYear(year);
+		oDate.setMonth(month-1);
+		oDate.setDate(1);
+		
+		switch(oDate.getDay()){
+			case 0:
+				for(var i=0;i<dayNum;i++){
+					aTd[i+6].innerHTML = i+1;
+				}
+			break;
+			case 1:
+				for(var i=0;i<dayNum;i++){
+					aTd[i].innerHTML = i+1;
+				}
+			break;
+			case 2:
+				for(var i=0;i<dayNum;i++){
+					aTd[i+1].innerHTML = i+1;
+				}
+			break;
+			case 3:
+				for(var i=0;i<dayNum;i++){
+					aTd[i+2].innerHTML = i+1;
+				}
+			break;
+			case 4:
+				for(var i=0;i<dayNum;i++){
+					aTd[i+3].innerHTML = i+1;
+				}
+			break;
+			case 5:
+				for(var i=0;i<dayNum;i++){
+					aTd[i+4].innerHTML = i+1;
+				}
+			break;
+			case 6:
+				for(var i=0;i<dayNum;i++){
+					aTd[i+5].innerHTML = i+1;
+				}
+			break;
+			
+		}
+		
+		
+		ajax('data.js?'+Math.random(),function(str){
+			var j = eval('('+str+')');
+			var now = 0;
+			
+			for(var i=0;i<aTd.length;i++){
+				if(aTd[i].innerHTML == 1){
+					now = i;
+				}
+			}
+			
+			if(j.code){
+				for(var i=0;i<j.list.length;i++){
+					if(j.list[i]){
+						var oP = document.createElement('p');
+						oP.innerHTML = j.list[i]+'元';
+						aTd[i+now].appendChild(oP);
+					}
+				}
+			}
+			
+		});
+		
+		
+		if(month==1 && bBtn){
+			obj.oTitle.getElementsByTagName('span')[0].innerHTML = 12;
+		}
+		else if(month==12 && !bBtn){
+			obj.oTitle.getElementsByTagName('span')[0].innerHTML = 1;
+		}
+		
+	}
+	
+	function isLeapYear(year){
+		if(year%4==0 && year%100!=0){
+			return true;
+		}
+		else{
+			if(year%400==0){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+	}
+	
+	function showColor(date){
+		var result = [];
+		var oDate = new Date();
+		var re = new RegExp(''+date+'(<p>)*');
+		var bBtn = true;
+		var index = 0;
+		
+		for(var i=0;i<aTd.length;i++){
+			if(aTd[i].innerHTML!=''){
+				result.push(aTd[i]);
+			}
+		}
+		
+		if(aNowSpan[1].innerHTML == oDate.getFullYear() && aNowSpan[2].innerHTML == oDate.getMonth()+1){
+			
+			for(var i=0;i<result.length;i++){
+				if(re.test(result[i].innerHTML) && bBtn){
+					result[i].className = 'red';
+					index = i;
+					bBtn = false;
+				}
+			}
+			
+			for(len=index+11;index+1<len;index++){
+				result[index+1].className = 'blue';
+			}
+			
+		}
+		else{
+			for(var i=0;i<result.length;i++){
+				result[i].className = '';
+			}
+		}
+		
+	}
+	
+	function showBtn(){
+		
+		var leftMonth = parseInt(aNowSpan[0].innerHTML);
+		var leftYear = parseInt(aNowSpan[1].innerHTML);
+		var rightMonth = parseInt(aNextSpan[0].innerHTML);
+		var rightYear = parseInt(aNextSpan[1].innerHTML);
+		
+		
+		aNowSpan[0].parentNode.onclick = function(){
+		
+			if(leftMonth == 12){
+				showDate(oNowTime,leftYear-1,leftMonth,true);
+				showDate(oNextTime,leftYear,1);
+			}
+			else{
+				showDate(oNowTime,leftYear,leftMonth,true);
+				showDate(oNextTime,leftYear,leftMonth+1);
+			}
+			
+			showBtn();
+			showColor(new Date().getDate());
+			hideLastTr();
+			
+		};
+		
+		aNextSpan[0].parentNode.onclick = function(){
+			
+			if(rightMonth == 1){
+				showDate(oNowTime,rightYear,12,true);
+				showDate(oNextTime,rightYear+1,rightMonth);
+			}
+			else{
+				showDate(oNowTime,rightYear,rightMonth-1,true);
+				showDate(oNextTime,rightYear,rightMonth);
+			}
+			
+			showBtn();
+			showColor(new Date().getDate());
+			hideLastTr();
+			
+		};
+		
+	}
+	
+	function showClick(){
+	
+		var re = /(\d+)((<p>)*)/;
+		var oDate = new Date();
+	
+		for(var i=0;i<aTd.length;i++){
+			aTd[i].index = i;
+			aTd[i].onclick = function(){
+				if(this.className == 'blue' || this.className=='red'){
+					
+					if(this.index>aTd.length/2){
+					
+						if((oDate.getMonth()+2)==1){
+							this.innerHTML.replace(re,function($0,$1){
+							
+								aInput[0].value = oDate.getFullYear()+1 +'-' + (oDate.getMonth()+2) + '-' +  $1;
+							
+							});
+
+						}
+						else{
+							this.innerHTML.replace(re,function($0,$1){
+							
+								aInput[0].value = oDate.getFullYear() +'-' + (oDate.getMonth()+2) + '-' +  $1;
+							
+							});
+						}
+					}
+					else{
+						this.innerHTML.replace(re,function($0,$1){
+						
+							aInput[0].value = oDate.getFullYear() +'-' + (oDate.getMonth()+1) + '-' +  $1;
+						
+						});
+					}
+					
+					if(this.getElementsByTagName('p')[0]){
+						aInput[1].value = this.getElementsByTagName('p')[0].innerHTML;
+					}
+					else{
+						aInput[1].value = '';
+					}
+					
+					oDiv.style.display = 'none';
+					bBtn = true;
+				}
+			};
+		}
+	
+	}
+	
+	
+	function hideLastTr(){
+		var bBtn = true;
+		var bBtn2 = true;
+		
+		for(var i=35;i<42;i++){
+			if(aTd[i].innerHTML!=''){
+				bBtn = false;
+			}
+		}
+		
+		if(bBtn){
+			for(var i=35;i<42;i++){
+				aTd[i].style.display = 'none';
+			}
+		}
+		else{
+			for(var i=35;i<42;i++){
+				aTd[i].style.display = '';
+			}
+		}
+		
+		for(var i=77;i<84;i++){
+			if(aTd[i].innerHTML!=''){
+				bBtn2 = false;
+			}
+		}
+		
+		if(bBtn2){
+			for(var i=77;i<84;i++){
+				aTd[i].style.display = 'none';
+			}
+		}
+		else{
+			for(var i=77;i<84;i++){
+				aTd[i].style.display = '';
+			}
+		}
+		
+	}
+	
+};
+</script>
+</head>
+
+<body>
+<input type="text" /><input type="text" /><input type="button" value="确定" />
+<div id="div1">
+	<div id="nowTime">
+    	<!--<div class="title">
+        	<div class="l"><span>3</span>月</div>
+            <div class="c"><span>2000</span>年<span>3</span>月</div>
+        </div>
+        <table>
+        	<thead>
+            	<tr>
+                	<th>周一</th>
+                    <th>周二</th>
+                    <th>周三</th>
+                    <th>周四</th>
+                    <th>周五</th>
+                    <th class="red">周六</th>
+                    <th class="red">周日</th>
+                </tr>
+            </thead>
+        	<tbody>
+           		<tr>
+                	<td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                	<td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>
+                    	1
+                    	<p>200元</p>
+                    </td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+            </tbody>
+        </table>-->
+    </div>
+    <div id="nextTime">
+    	<!--<div class="title">
+        	<div class="r"><span>3</span>月</div>
+            <div class="c"><span>2000</span>年<span>3</span>月</div>
+        </div>
+        <table>
+        	<thead>
+            	<tr>
+                	<th>周一</th>
+                    <th>周二</th>
+                    <th>周三</th>
+                    <th>周四</th>
+                    <th>周五</th>
+                    <th class="red">周六</th>
+                    <th class="red">周日</th>
+                </tr>
+            </thead>
+        	<tbody>
+           		<tr>
+                	<td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                	<td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>
+                    	1
+                    	<p>200元</p>
+                    </td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+            </tbody>
+        </table>-->
+    </div>
+</div>
+</body>
+</html>

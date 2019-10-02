@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style type="text/css">
+    * {
+        padding: 0;
+        margin: 0;
+    }
+    li {
+        list-style: none;
+    }
+    #div1 {
+        min-width: 1000px;
+        height: 396px;
+        position: relative;
+        overflow: hidden;
+    }
+    #div1 ul {
+        position: absolute;
+        left: 0;
+    }
+    #div1 ul li {
+        float: left;
+    }
+    #div1 ul li img {
+        position: relative;
+        left: 0;
+    }
+    #btn {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        bottom: 0;
+    }
+    #btn a {
+        cursor: pointer;
+        display: inline-block;
+        width: 11px;
+        height: 11px;
+        background: #666;
+    }
+    #btn a.active {
+        background: #fff;
+    }
+    #btn a:hover {
+        background: #fff;
+    }
+    *html .ie6_out {
+        margin-left: 1000px;
+        zoom: 1;
+    }
+    *html .ie6_in {
+        position: relative;
+        float: left;
+        margin-left: -1000px;
+    }
+    </style>
+    <script type="text/javascript" src="startMove.js"></script>
+    <script type="text/javascript">
+    //无缝切换 ：1.复制元素 2.改变元素定位（可视区只有一个元素的时候）
+    window.onload = function() {
+        var oDiv = document.getElementById('div1');
+        var oUl = oDiv.getElementsByTagName('ul')[0];
+        var aLi = oUl.getElementsByTagName('li');
+        var aImg = oUl.getElementsByTagName('img');
+
+        var oBtn = document.getElementById('btn');
+        var aA = oBtn.getElementsByTagName('a');
+
+        var imgWidth = 1920;
+        var iNow = 0;
+        var iNow2 = 0;
+
+        oUl.style.width = aImg.length * imgWidth + 'px';
+
+
+        function toResize() {
+            var viewWidth = document.documentElement.clientWidth;
+
+            if (viewWidth > 1000) {
+                for (var i = 0; i < aImg.length; i++) {
+                    aImg[i].style.left = -(imgWidth - viewWidth) / 2 + 'px';
+                }
+            }
+        }
+        toResize();
+
+        window.onresize = function() {
+            toResize();
+        }
+
+        for (var i = 0; i < aA.length; i++) {
+            aA[i].index = i;
+            aA[i].onclick = function() {
+
+                for (var i = 0; i < aA.length; i++) {
+                    aA[i].className = '';
+                }
+                this.className = 'active';
+
+                startMove(oUl, {
+                    left: -this.index * imgWidth
+                });
+            }
+        }
+
+        setInterval(toRun, 3000);
+
+        function toRun() {
+
+            if (iNow == aLi.length - 1) {
+                aLi[0].style.position = 'relative';
+                aLi[0].style.left = aLi.length * imgWidth + 'px';
+                iNow = 0;
+            } else {
+                iNow++;
+
+            }
+            iNow2++;
+            for (var i = 0; i < aA.length; i++) {
+                aA[i].className = '';
+            }
+
+            aA[iNow].className = 'active';
+
+            startMove(oUl, {
+                left: -iNow2 * imgWidth
+            }, function() {
+                if (iNow == 0) {
+                    aLi[0].style.position = 'static';
+                    oUl.style.left = 0;
+                    iNow2 = 0;
+                }
+            });
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <!--[if lte IE 6]>
+<div class = "ie6_out">
+<div class = "ie6_in">
+<![endif]-->
+    <div id="div1">
+        <ul>
+            <li>
+                <img src="1.jpg" alt="">
+            </li>
+            <li>
+                <img src="2.jpg" alt="">
+            </li>
+            <li>
+                <img src="3.jpg" alt="">
+            </li>
+        </ul>
+        <div id="btn">
+            <a href="javascript:;" class="active"></a>
+            <a href="javascript:;"></a>
+            <a href="javascript:;"></a>
+        </div>
+    </div>
+
+
+    <!--[if lte IE 6]>
+<div class = "ie6_out">
+<div class = "ie6_in">
+<![endif]-->
+</body>
+
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{ margin:0; padding:0;}
+#progressBox{ width:300px; height:40px; border:1px solid #C8C8C8; background:white; position:relative; margin:200px auto;}
+#progressBar{ position:absolute; left:0; top:0; z-index:2; height:40px; width:100%; line-height:40px; color:white; text-align:center; font-size:20px; font-weight:bold; font-family:Georgia; clip:rect(0px, 0, 40px, 0px); background:#00A1F5;}
+#progressText { position:absolute; left:0; top:0; z-index:1; width:100%; height:40px; line-height:40px; color:black; text-align:center; font-size:20px; font-weight:bold; font-family:Georgia;}
+</style>
+
+</head>
+
+<body>
+<div id="progressBox">
+    <div id="progressBar">0%</div>
+    <div id="progressText">0%</div>
+</div>
+<div id="div2" style="display:none;">
+	<img src="http://www.wallcoo.com/nature/da_ps_landscape_01/wallpapers/1680x1050/%5Bwallcoo_com%5D_April_23rd.jpg" />
+    <img src="http://xingzuo.365yongnian.com/up_files/image/2006-3-21/6/0.jpg" />
+    <img src="http://img.bz1111.com/d3/2010-10/2010103021073576056.jpg" />
+    <img src="http://www.pp3.cn/uploads/20120627gj/bz_gj_05.jpg" />
+    <img src="http://www.onegreen.net/Article/UploadFiles/200811/2008111874946653.jpg" />
+    <img src="http://lib.nit.net.cn/dlib/resource/jpg/1889.jpg" />
+    <img src="http://www.lwdx.cn/UploadFiles/Photo/2009/2/bizhi/stzw20081005/stzw20081005_001.jpg" />
+   
+</div>
+<script>
+
+var oDiv2 = document.getElementById('div2');
+var aImg = oDiv2.getElementsByTagName('img');
+var oDiv1 = document.getElementById('progressBox');
+var iNow = 0;
+
+for(var i=0;i<aImg.length;i++){
+	(function(i){
+		var yImg = new Image();
+		
+		yImg.onload = function(){
+			iNow++;
+			
+			progressFn(parseInt(iNow/aImg.length * 100));
+			
+			if(iNow==aImg.length){
+				oDiv2.style.display = 'block';
+				oDiv1.style.display = 'none';
+			}
+		};
+		
+		yImg.src = aImg[i].src;
+	})(i);
+}
+
+function progressFn(cent){
+		
+	var oDiv1 = document.getElementById('progressBox');
+	var oDiv2 = document.getElementById('progressBar');
+	var oDiv3 = document.getElementById('progressText');
+	
+	var allWidth = parseInt(getStyle(oDiv1,'width'));
+	
+	oDiv2.innerHTML = cent + '%';
+	oDiv3.innerHTML = cent + '%';
+	oDiv2.style.clip = 'rect(0px, '+ cent * (allWidth/100) +'px, 40px, 0px)';
+	
+	function getStyle(obj,attr){
+		if(obj.currentStyle){
+			return obj.currentStyle[attr];
+		} 
+		else{
+			return getComputedStyle(obj)[attr];
+		}
+	}
+	
+}
+	
+
+</script>
+</body>
+</html>

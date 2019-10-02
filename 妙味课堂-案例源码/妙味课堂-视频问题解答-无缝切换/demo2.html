@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script>
+
+//复制节点：cloneNode(): 如果参数是true,就一起复制里面的子节点，如果参数是false,就不会复制里面的子节点
+
+window.onload = function(){
+	var aUl = document.getElementsByTagName('ul');
+	
+	//aUl[1].appendChild(aUl[0].children[0]);
+	
+	var oLi = aUl[0].children[0].cloneNode(true);
+	aUl[1].appendChild(oLi);
+	
+};
+</script>
+</head>
+
+<body>
+<ul>
+	<li>aaaaaaaaa</li>
+</ul>
+<hr />
+<ul>
+	
+</ul>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{ margin:0; padding:0;}
+li{ list-style:none;}
+#div1{ width:350px; height:60px; border:1px #000000 solid; position:relative; margin:0 auto; overflow:hidden;}
+#div1 ul{ position:absolute; left:0;}
+#div1 ul li{ width:80px; height:60px; margin-right:10px; float:left;}
+</style>
+<script type="text/javascript" src="move.js"></script>
+<script>
+window.onload = function(){
+	var oInput = document.getElementById('input1');
+	var oUl = document.getElementById('ul1');
+	var aLi = oUl.getElementsByTagName('li');
+	
+	var oneSize = aLi[0].offsetWidth + 10;
+	var iNum = 4;
+	var bBtn = true;
+	
+	function getWidth(){
+		oUl.style.width = aLi.length * oneSize + 'px';
+	}
+	getWidth();
+	
+	oInput.onclick = function(){
+		
+		if(bBtn){
+			bBtn = false;
+			for(var i=0;i<iNum;i++){
+				var oLi = aLi[i].cloneNode(true);
+				oUl.appendChild(oLi);
+				getWidth();
+			}
+			
+			startMove(oUl,{left : - iNum * oneSize},function(){
+			
+				for(var i=0;i<iNum;i++){
+					oUl.removeChild(aLi[0]);
+					oUl.style.left = 0;
+				}
+				
+				bBtn = true;
+			
+			});
+		}
+
+	};
+	
+};
+</script>
+</head>
+
+<body>
+<input type="button" value="切换" id="input1" />
+<div id="div1">
+	<ul id="ul1">
+    	<li><img src="img/1.jpg" /></li>
+        <li><img src="img/2.jpg" /></li>
+        <li><img src="img/3.jpg" /></li>
+        <li><img src="img/4.jpg" /></li>
+        <li><img src="img/5.jpg" /></li>
+    </ul>
+</div>
+</body>
+</html>

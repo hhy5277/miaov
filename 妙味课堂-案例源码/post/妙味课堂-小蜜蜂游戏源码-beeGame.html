@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Insert title here!</title>
+    <style>
+        *{margin:0;padding:0}
+        #container{
+            width:1024px;height: 550px;background-color: black;margin:50px auto 0;position:relative;
+        }
+        #score{position: absolute;top:0;left:0;color:white;}
+        #startGame{
+            width: 80px;height: 40px;background-color: gray;line-height: 40px; text-align: center;margin:0 auto;
+            position:relative;top:250px;cursor:pointer;
+        }
+        #bee{
+            position:absolute; top:25px;
+        }
+        #bee li{ float:left;list-style-type: none ; margin:1px;}
+        .e1{background-color: green;width: 20px;height: 20px}
+        .e2{background-color: yellow;width: 20px;height: 20px}
+        .e3{background-color: red;width: 20px;height: 20px}
+        #plane{background-color: blue;height: 5px;width:80px; position:absolute ; }
+        .bullet{width:1px;height: 5px;position:absolute;background-color: white}
+        #gameOver{position: absolute;z-index: 2009;left:450px;top:250px ; padding:20px; background-color: yellow ;display: none}
+        #gameOver button{margin: 10px 30px}
+    </style>
+    <script>
+        window.onload=function(){
+            var container = document.getElementById("container");
+            var startGame = document.getElementById("startGame");
+            startGame.onclick = function(){
+                this.style.display = "none";
+                beeGame.init("container");
+            }
+            var beeGame;
+            beeGame = {
+                enemy: {e1: {name: "e1", style: "e1", blood: 1, speed: 2,score:1},
+                    e2: {name: "e2", style: "e2", blood: 2, speed: 3,score:2},
+                    e3: {name: "e3", style: "e3", blood: 3, speed: 5,score:3}},
+                levelInfo: [
+                    {times:3000,speed: 1, count: 10, enemy: eval("[" + new Array(11).join("'e2',") + new Array(10).join("'e1',") + "'e1'" + "]")},
+                    {times:2000,speed: 2, count: 10, enemy: eval("[" + new Array(21).join("'e2',") + new Array(40).join("'e1',") + "'e1'" + "]")},
+                    {times:1500,speed: 3, count: 10, enemy: eval("[" + new Array(31).join("'e2',") + new Array(30).join("'e1',") + "'e1'" + "]")}
+                ],
+                level: 0,
+                lis: [],
+                arr:[],
+                score:0,
+                init: function (parentId) {
+                    this.parentDocument = document.getElementById(parentId);
+                    this.createEnemy();
+                    this.createPlane();
+                },
+                createEnemy: function () {
+                    var ul = document.createElement("ul");
+                    ul.id = "bee";
+                    for (var i = 0; i < this.levelInfo[this.level].enemy.length; i++) {
+                        var li = document.createElement("li");
+                        li.className = this.levelInfo[this.level].enemy[i];
+                        li.blood = this.enemy[this.levelInfo[this.level].enemy[i]].blood;
+                        li.score = this.enemy[this.levelInfo[this.level].enemy[i]].score;
+                        li.speed = this.enemy[this.levelInfo[this.level].enemy[i]].speed;
+                        ul.appendChild(li);
+                    }
+                    this.parentDocument.appendChild(ul);
+
+                    ul.style.width = (li.offsetWidth + 2) * this.levelInfo[this.level].count + 'px';
+                    ul.style.left = (this.parentDocument.offsetWidth - ul.offsetWidth) / 2 + 'px';
+                    this.lis=ul.getElementsByTagName("li");
+                    for(var i = 0 ; i < this.lis.length;i++){
+                        this.arr.push([this.lis[i].offsetLeft,this.lis[i].offsetTop]);
+                    }
+
+                    for(var i = 0 ; i < this.lis.length;i++){
+                        this.lis[i].style.position = 'absolute';
+                        this.lis[i].style.left = this.arr[i][0] + 'px';
+                        this.lis[i].style.top = this.arr[i][1] + 'px';
+                    }
+                    this.moveBee(ul);
+                    var This = this;
+                    this.ul = ul;
+                    this.ul.timer2 = setInterval(function(){
+                        This.oneMove();
+                    },this.levelInfo[this.level].times);
+
+                },
+                moveBee: function (ul) {
+                    var This = this;
+                    ul.timer = setInterval(function () {
+                        ul.style.left = This.levelInfo[This.level].speed + ul.offsetLeft + 'px';
+                        if (ul.offsetLeft + ul.offsetWidth > This.parentDocument.offsetWidth || ul.offsetLeft <= 0) {
+                            ul.style.top = ul.offsetTop + This.lis[0].offsetHeight + 'px';
+                            This.levelInfo[This.level].speed = 0 - This.levelInfo[This.level].speed;
+                        }
+                    }, 30);
+                },
+                oneMove:function(){
+                    var index = Math.floor(Math.random()*this.lis.length)
+                    var nowBee = this.lis[index];
+                    var This = this;
+                    this.lis[index].timer = setInterval(function(){
+                        var a = (This.plane.offsetLeft + This.plane.offsetWidth/2) - (nowBee.offsetLeft + nowBee.offsetWidth/2 + nowBee.parentNode.offsetLeft);
+                        var b = (This.plane.offsetTop + This.plane.offsetHeight/2) - (nowBee.offsetTop + nowBee.offsetHeight/2 + nowBee.parentNode.offsetTop);
+                        var c = Math.sqrt(a*a + b*b);
+                        var speedX = nowBee.speed * a/c;
+                        var speedY = nowBee.speed * b/c;
+
+                        nowBee.style.left = nowBee.offsetLeft + speedX + 'px';
+                        nowBee.style.top = nowBee.offsetTop + speedY + 'px';
+
+                        if((nowBee.offsetTop + nowBee.offsetHeight + nowBee.parentNode.offsetTop)>=(This.parentDocument.offsetHeight - This.plane.offsetHeight)){
+                            This.gameOver();
+                        }
+                    },30);
+                },
+                createPlane: function () {
+                    var This = this;
+                    this.plane = document.createElement("div");
+                    this.plane.id = 'plane';
+                    this.parentDocument.appendChild(this.plane);
+                    this.plane.style.left = (this.parentDocument.offsetWidth - this.plane.offsetWidth) / 2 + 'px';
+                    this.plane.style.top = this.parentDocument.offsetHeight - this.plane.offsetHeight + 'px';
+                    this.bindPlane();
+                },
+                bindPlane:function(){
+                    var This = this;
+                    document.onkeydown = function (e) {
+                        if (!This.plane.timer) {
+                            if (e.keyCode == '37') {
+                                This.plane.timer = setInterval(function () {
+                                    if (This.plane.offsetLeft >= 10) {
+                                        This.plane.style.left = This.plane.offsetLeft - 10 + 'px';
+                                    }
+                                }, 30);
+                            } else if (e.keyCode == '39') {
+                                This.plane.timer = setInterval(function () {
+                                    if (This.plane.offsetLeft + This.plane.offsetWidth <= This.parentDocument.offsetWidth - 10) {
+                                        This.plane.style.left = This.plane.offsetLeft + 10 + 'px';
+                                    }
+                                }, 30);
+                            }
+                        }
+                    }
+                    document.onkeyup = function (e) {
+                        clearInterval(This.plane.timer);
+                        This.plane.timer = null;
+                        if (e.keyCode == '32') {
+                            This.createBuulet();
+                        }
+                    }
+                },
+                createBuulet: function () {
+                    var This = this;
+                    var bullet = document.createElement("div");
+                    bullet.className = "bullet";
+                    this.parentDocument.appendChild(bullet);
+                    bullet.style.top = this.plane.offsetTop - bullet.offsetHeight + 'px';
+                    bullet.style.left = this.plane.offsetLeft + this.plane.offsetWidth / 2 + 'px';
+                    bullet.name="bullet";
+                    This.runBullet(bullet);
+
+                },
+                runBullet:function(bullet){
+                    var This = this;
+                    bullet.timer = setInterval(function () {
+                        bullet.style.top = bullet.offsetTop - 10 + 'px';
+                        if (bullet.offsetTop <= 0) {
+                            clearInterval(bullet.timer);
+                            This.parentDocument.removeChild(bullet);
+                        } else {
+                            for (var i = 0; i < This.lis.length; i++) {
+                                var bee = This.lis[i];
+                                if (This.checkCrash(bullet, bee)) {
+                                    bee.blood--;
+                                    if(bee.blood ==0){
+                                        clearInterval(bee.timer);
+                                        This.ul.removeChild(bee);
+                                        This.score += bee.score;
+                                        document.getElementsByTagName("span")[0].innerHTML = This.score;
+                                    }
+                                    clearInterval(bullet.timer);
+                                    This.parentDocument.removeChild(bullet);
+                                    if(This.lis.length == 0){
+                                        This.nextLevel();
+                                    }
+
+                                }
+                            }
+                        }
+
+
+                    }, 30);
+                },
+                checkCrash: function (bullet, bee) {
+                    var l1 = bullet.offsetLeft;
+                    var r1 = bullet.offsetLeft + bullet.offsetWidth;
+                    var t1 = bullet.offsetTop;
+                    var b1 = bullet.offsetTop + bullet.offsetHeight;
+                    var l2 = bee.offsetLeft + bee.parentNode.offsetLeft;
+                    var r2 = bee.offsetLeft + bee.offsetWidth + bee.parentNode.offsetLeft;
+                    var t2 = bee.offsetTop + bee.parentNode.offsetTop;
+                    var b2 = bee.offsetTop + bee.offsetHeight + bee.parentNode.offsetTop;
+                    if (r1 < l2 || l1>r2 || t1 > b2 || b1 < t2) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                },
+                gameOver:function(){
+                    clearInterval(this.ul.timer2);
+                    clearInterval(this.ul.timer);
+                    for(var i = 0 ; i < this.lis.length ;i ++){
+                        var li = this.lis[i];
+                        clearInterval(li.timer);
+                    }
+                    var bullets = document.getElementsByClassName("bullet");
+                    for(var i = 0 ;i< bullets.length ; i ++){
+                        clearInterval((bullets[i].timer));
+                    }
+                    document.getElementById("gameOver").style.display="block";
+                    document.onkeydown = function(){
+
+                    };
+                    document.onkeyup = function(){
+
+                    }
+                   // window.location.reload();
+               },
+                nextLevel:function(){
+                    this.level ++;
+                    this.createEnemy();
+                }
+            };
+        }
+        function restart(){
+            window.location.reload();
+        }
+    </script>
+</head>
+<body>
+<div id="container">
+    <div id="score">积分：<span>0</span></div>
+    <div id="startGame">Start game!</div>
+    <div id = "gameOver">
+        <div>Game over !!!!</div>
+        <button value="OK" onclick="restart()">restart</button>
+    </div>
+</div>
+</body>
+</html>

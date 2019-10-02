@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+body{ font-size:12px;}
+#div1{ width:400px; margin:20px auto;}
+#div1 p{ float:right; margin:0;}
+#div1 textarea{ width:400px; height:100px;}
+#div1 a{ width:50px; height:30px; font-size:16px; line-height:30px; text-align:center; float:right; background:#00FF00; color:#FFFFFF;}
+#div1 a.dis{ background:#CCCCCC; color:#666666;}
+</style>
+
+<script>
+
+//onchange : 当光标消失的时候，只能触发一次
+
+//ie : onpropertychange : 输入连续触发
+//标准：oninput : 也是连续触发
+
+window.onload = function(){
+	var oDiv = document.getElementById('div1');
+	var oP = oDiv.getElementsByTagName('p')[0];
+	var oT = oDiv.getElementsByTagName('textarea')[0];
+	var oA = oDiv.getElementsByTagName('a')[0];
+	
+	var ie = !-[1,];
+	var bBtn = true;
+	var timer = null;
+	var iNum = 0;
+	
+	oT.onfocus = function(){
+		
+		if(bBtn){
+			oP.innerHTML = '打击虚假消息，建设文明微博，还可以输入<span>140</span>字';
+			bBtn = false;
+		}
+		
+	};
+	
+	oT.onblur = function(){
+		
+		if(oT.value==''){
+			oP.innerHTML = '《新浪微博社区公约(征求意见稿)》意见征求';
+			bBtn = true;
+		}
+		
+	};
+	
+	if(ie){
+		oT.onpropertychange = toChange;
+	}
+	else{
+		oT.oninput = toChange;
+	}
+	
+	function toChange(){
+		
+		var num = Math.ceil(getLength(oT.value)/2);
+		var oSpan = oDiv.getElementsByTagName('span')[0];
+		
+		if(!oSpan){return}
+		
+		if(num<=140){
+			oSpan.innerHTML = 140 - num;
+			oSpan.style.color = '';
+		}
+		else{
+			oSpan.innerHTML = num - 140;
+			oSpan.style.color = 'red';
+		}
+		
+		if(oT.value=='' || num>140){
+			oA.className = 'dis';
+		}
+		else{
+			oA.className = '';
+		}
+		
+	}
+	
+	
+	function getLength(str){
+		return String(str).replace(/[^\x00-\xff]/g,'aa').length;
+	}
+	
+	oA.onclick = function(){
+		
+		if(this.className == 'dis'){
+			
+			clearInterval(timer);
+			timer = setInterval(function(){
+			
+				if(iNum==5){
+					clearInterval(timer);
+					iNum = 0;
+				}
+				else{
+					iNum++;
+				}
+				
+				if(iNum%2){
+					oT.style.background = 'red';	
+				}
+				else{
+					oT.style.background = '';	
+				}
+				
+			
+			},100);
+			
+		}
+		else{
+			alert('发布成功！');
+		}
+		
+	};
+	
+};
+
+</script>
+</head>
+
+<body>
+<div id="div1">
+	<p>《新浪微博社区公约(征求意见稿)》意见征求</p>
+    <textarea></textarea>
+    <a class="dis" href="javascript:;">发布</a>
+</div>
+</body>
+</html>

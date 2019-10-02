@@ -1,0 +1,269 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>index</title>
+    <meta charset="utf-8">
+    <meta name="Author" content="海牙">
+    <link rel="stylesheet" href="css/AjaxPaging.css">
+    <script src="http://cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+
+</head>
+<body>
+<div class="wrap flex_column">
+    <div class="content flex_column">
+       
+    </div>
+    <div class="page">
+        <ul class="flex_row">
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+            <li>4</li>
+            <li>5</li>
+            <li>6</li>
+        </ul>
+    </div>
+</div>
+</body>
+
+<script>
+		/*	
+			数组
+			javaScript java
+			
+			基于原型的动态解释性脚本语言
+
+				原型 词法作用域 上下文
+
+			前端
+			ele.style.opacity = x;
+			ele.style.display = 'block'
+			1. 响应用户的操作 鼠标事件 键盘事件
+			2. 操作dom元素 增删改查 style属性样式
+			3. 数据交互 ajax json jsonp 正则表达式
+			4. 造轮子 mv* angular vue react nodeJS
+
+			需求分析
+				1. ajax获取数据
+					1.创建ajax对象
+					2.打开数据通道
+						设置参数 
+							1.url地址
+							2. data数据 
+					3. open打开数据通道
+					4. 发送数据 send
+					5. 获取数据
+						1. onreadystatechange监听数据通道状态码
+						2. 状态验证
+						3. 数据获取response
+						4. 数据格式转换 JSON.parse 
+						把str类型的类json数据转换为json格式
+						5 封装请求函数
+				2. 数据渲染到DOM页面之上
+					1. 数据模板是什么
+					2. 数据绑定 函数功能 数据输入  => dom渲染	
+					3.	模板字符串添加到页面上
+						1.获取content
+						2. innerHTML方法 字符串dom渲染
+				3. 分页以及缓存业务模型处理
+					1. 事件代理 模块接口
+					2. 缓存 cache json
+						如果数据页码在cache中存在 从cache获取数据
+						如果不存在 走 getJson
+						
+		*/
+
+		var url = 'https://route.showapi.com/181-1';
+		var page = 1; //初始化页码 
+		var oCon = document.querySelector('.content');//h5 选择器api
+		var oWrap = document.querySelector('.wrap');
+		var cache = {};//缓存池子
+		pageList();
+		function pageList(){//事件代理/委托
+			oWrap.addEventListener('click',function(e){
+				//e是event对象
+				if(e.target.tagName === 'LI'){
+					page =  e.target.innerText;
+					if(page in cache){
+						console.log('数据已缓存 页码:'+page);
+						showPage(cache[page]);//如果存调用缓存数据
+					}else{
+						getJson();
+					}
+				}
+			})
+		}
+		getJson();
+
+		function getJson(){
+			console.time('数据拉取');
+			var xmlHttp  = new XMLHttpRequest(); //创建ajax实例对象
+			var params = [];//参数数组
+			var sendData = { //json格式数据
+				showapi_appid:'30603',
+				showapi_sign:'98960666afeb4992ae91971d13494090',
+				page:page,
+				num:8,
+			}
+			//console.log(sendData.num , sendData['num'])
+			for(var key in sendData){
+				//键: key  值:sendData[key]
+				params.push(key + '=' + sendData[key]);
+			}
+			var postData = params.join('&');
+			//console.log(postData)
+			//json => 数组 => 字符串
+			
+			xmlHttp.open('GET',url+'?'+ postData,true); //数据设置
+
+			xmlHttp.send(null); //发送请求
+
+			xmlHttp.onreadystatechange = function(){
+				if(xmlHttp.readyState == 4 && xmlHttp.status == 200){
+					var dataList = JSON.parse(xmlHttp.response).showapi_res_body.newslist;	
+					cache[page] = dataList;//存储数据
+					console.timeEnd('数据拉取');
+					showPage(dataList);
+				}
+			}
+		}
+
+		function showPage(dataList){ //数据渲染模块 数据入口 dom出口
+			var str = ''; //文本模板渲染
+			var length = dataList.length; //多少条数据
+			for(var i=0;i<length;i++){
+				//循环嵌套模板
+				str += `
+					<a href="${dataList[i].url}" class="items flex_row">
+						<div class="img"><img src="http://www.tanzhouphp.com/tanzhoue/images/newsList/${1+i}.jpg" alt=""></div>
+				 <div class="bd">
+                 <p class="label">${dataList[i].title}</p>
+				</div>
+			 <div class="ft">&GT;</div>
+					</a>
+				`
+			}
+			oCon.innerHTML = str;	
+		}
+
+
+			
+		function forEach(ele,cb){
+			for(var i=0,len=ele.length;i<len;i++){
+				cb&&cb(ele[i],i); //闭包
+			}
+		}
+		forEach(aLi,function(obj,idx){
+			obj.style.left = idx * 40 +'px';
+		})
+		
+		//为什么要学闭包
+		
+</script>
+</html>
+
+<!--
+
+	for(var i=0,len=arr.length;i<len;i++){
+				//数组有一个属性叫做 length 可遍历 json对象没有 length属性
+			}
+
+	AJAX
+
+	https://route.showapi.com/181-1?showapi_appid=30603&showapi_sign=98960666afeb4992ae91971d13494090&page=1&num=8
+
+	https://route.showapi.com/181-1
+	?
+	showapi_appid=30603 账号
+	showapi_sign=98960666afeb4992ae91971d13494090
+	秘钥
+	page=1  请求数据页数
+	num=8	请求数据的数量
+	
+	天花板	cpu 
+
+
+	通信 业务 数据 算法
+ 
+	getElementById
+
+	参数方式类似css选择器 兼容到IE8
+
+	querySelector   只能获取单个 默认第一个
+
+	querySelectorAll  获取多个
+
+	网购流程
+		向商家店铺     URL请求地址
+		提交商品信息 商品型号 数量等参数  请求参数	
+
+		付款 微信 支付宝	GET POST  async 同步异步
+		
+		审核   建立数据连接 握手
+		
+		商家确认   后台接收request请求
+			
+		商家发货	response 数据回调	
+		
+
+		showapi_appid=30603 9
+
+		url  + '?' + key + '=' + value + '&' + key + '=' + value
+
+		
+		state
+			0 未初始化
+			1 调用了send方法 正在发送请求 建立数据通道
+			2 send载入完成
+			3 解析响应内容
+			4 响应内容解析完成 数据回完成 可以调用
+
+	
+		get url 1024
+			IE URL 2083
+			
+		http
+
+		学习
+			主要学思维 没有人生下来就有编程思维 经验
+
+			技术栈 技术层面与深度 技术是否健全
+
+			JavaScript 核心原型 入门了 
+			
+			
+			编程 语言 工具 
+
+			var arr=[1,2,3,4,56,7,8,9]
+			求数组累加和
+
+			数组
+				var arr = [1,2,3,4,5];
+
+		
+				class 语法糖
+
+
+			初级 [方法,属性,对象,事件,数组,控制流程,工具类]
+			中级 [迭代,递归,词法作用域,数组的高级操作,数组映射,矩阵算法,js解释引擎,封装,继承,多态,对象,面向对象,json,jsonDOM,ajax,闭包,跨域,包装对象,语法糖,上下文,this,指针偏移[call,apply,bind],表达式规则与优先级,数据类型与隐式转换,解构,回调函数,高级函数,高级参数应用arguments,模块化,业务模型,cookie高级封装,定时器高级应用,正则表达式模块开发]
+			高级[算法 ,数据结构 设计模式 业务模型锻炼]
+			业务模型锻炼
+			
+				降频处理
+				
+				数组映射
+
+	先天优势 优秀 更努力
+		
+
+		学习 语法 标签 方法使用 
+		
+		经验 思维 规范
+
+		学习如何学习
+
+		学会提出问题
+			学会思考问题
+				学会解决问题
+		
+-->

@@ -1,0 +1,13 @@
+新浪微博发布框效果		26:38
+
+【配图】
+
+事件：
+onfocus
+onblur
+onpropertychange
+oninput
+判断ie浏览器：!-[1,]
+处理汉字的字节：String(str).replace(/[^\x00-\xff]/g,'aa')
+编写toChange函数
+处理其他辅助功能

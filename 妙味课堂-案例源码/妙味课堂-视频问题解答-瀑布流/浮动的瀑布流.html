@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{ margin:0; padding:0;}
+li{ list-style:none;}
+
+#div1{ width:785px; height:auto; margin:20px auto;}
+ul{ width:225px; margin:5px; float:left;}
+</style>
+<script type="text/javascript" src="new_ajax.js"></script>
+<script>
+window.onload = function(){
+
+	var aUl = document.getElementsByTagName('ul');
+	var bBtn = true;
+	
+	window.onscroll = function(){
+		
+		var veiwHeight = document.documentElement.clientHeight;
+		var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
+	
+		for(var i=0;i<aUl.length;i++){
+			
+			var aLi = aUl[i].getElementsByTagName('li');
+				
+			var lastLi = aLi[aLi.length-1];
+			
+			if(posTop(lastLi) < veiwHeight + scrollY && bBtn){
+				
+				bBtn = false;
+				
+				ajax('data.js',function(str){
+					
+					var json = eval('('+ str +')');
+					
+					if(json.code){
+						bBtn = true;
+					}
+					
+					for(var i=0;i<json.list.length;i++){
+						var list = json.list[i];
+						
+						for(var j=0;j<list.src.length;j++){
+							var oLi = document.createElement('li');
+							oLi.innerHTML = '<img src="'+ list.src[j] +'" /><p>'+ list.title[j] +'</p>';
+							aUl[i].appendChild(oLi);
+						}
+						
+					}
+					
+				});
+				
+			}
+			
+		}
+	};
+
+
+	
+	function posTop(obj){
+		var top = 0;
+		
+		while(obj){
+			top += obj.offsetTop;
+			obj = obj.offsetParent;
+		}
+		
+		return top;
+	}
+
+};
+
+</script>
+</head>
+
+<body>
+<div id="div1">
+	<ul>
+    	<li>
+        	<img src="img/1.jpg" />
+            <p>111111111</p>
+        </li>
+        <li>
+        	<img src="img/2.jpg" />
+            <p>111111111</p>
+        </li>
+        <li>
+        	<img src="img/3.jpg" />
+            <p>111111111</p>
+        </li>
+    </ul>
+    <ul>
+    	<li>
+        	<img src="img/4.jpg" />
+            <p>111111111</p>
+        </li>
+        <li>
+        	<img src="img/5.jpg" />
+            <p>111111111</p>
+        </li>
+        <li>
+        	<img src="img/6.jpg" />
+            <p>111111111</p>
+        </li>
+        <li>
+        	<img src="img/9.jpg" />
+            <p>111111111</p>
+        </li>
+    </ul>
+    <ul>
+    	<li>
+        	<img src="img/7.jpg" />
+            <p>111111111</p>
+        </li>
+        <li>
+        	<img src="img/8.jpg" />
+            <p>111111111</p>
+        </li>
+        <li>
+        	<img src="img/9.jpg" />
+            <p>111111111</p>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

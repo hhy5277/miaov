@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+#progressBox{ width:300px; height:40px; border:1px solid #C8C8C8; background:white; position:relative;}
+#progressBar{ position:absolute; left:0; top:0; z-index:2; height:40px; width:100%; line-height:40px; color:white; text-align:center; font-size:20px; font-weight:bold; font-family:Georgia; clip:rect(0px, 0, 40px, 0px); background:#00A1F5;}
+#progressText { position:absolute; left:0; top:0; z-index:1; width:100%; height:40px; line-height:40px; color:black; text-align:center; font-size:20px; font-weight:bold; font-family:Georgia;}
+</style>
+<script language="javascript" type="text/javascript" src="js/flashobject.js"></script>
+<script language="javascript" type="text/javascript" src="js/jquery.js"></script>
+<script>
+
+$(document).ready(function(){
+	loadSwf(1,1);
+	
+	$("#loadBtn_1").click(function(){
+		$("#urlText_1").val()!=""?loadImg($("#urlText_1").val(),"picDiv_1"):alert("路径不能为空");
+	})
+
+})
+
+function loadImg(url,picDiv){
+	
+	if (navigator.appName.indexOf("Microsoft") != -1){
+		window["swfId"].forjs(url,picDiv);
+	}else{
+		document["swfId"].forjs(url,picDiv);
+	}
+}
+function loadSwf(rootWidth,rootHeight){
+	var fo = new FlashObject("loadSwf.swf", "swfId", rootWidth, rootHeight, "8", ""); 
+	fo.addParam("quality", "high"); 
+	fo.addParam("salign", "t"); 
+	fo.addParam("scale", "noscale"); 
+	fo.addParam("loop", "false");
+	fo.write("flashcontent");
+}
+
+function loadElement(picDiv,n){
+	
+	progressFn(n);
+}
+
+
+function picCallBack(url,picDiv,w,h){
+	$("#"+picDiv).html("　　图片高宽象素为:"+w+"*"+h+"<img src='"+url+"' alt=''/>").hide().fadeIn(1000);
+}
+
+function progressFn(cent){
+		
+	var oDiv1 = document.getElementById('progressBox');
+	var oDiv2 = document.getElementById('progressBar');
+	var oDiv3 = document.getElementById('progressText');
+	
+	var allWidth = parseInt(getStyle(oDiv1,'width'));
+	
+	oDiv2.innerHTML = cent + '%';
+	oDiv3.innerHTML = cent + '%';
+	oDiv2.style.clip = 'rect(0px, '+ cent * (allWidth/100) +'px, 40px, 0px)';
+	
+	function getStyle(obj,attr){
+		if(obj.currentStyle){
+			return obj.currentStyle[attr];
+		} 
+		else{
+			return getComputedStyle(obj)[attr];
+		}
+	}
+	
+}
+</script>
+</head>
+
+<body>
+<div id="flashcontent"></div>
+
+<div>
+	图片路径1:<input type="text" style="width:400px;" id="urlText_1"/>
+	<input type="button" value="加载图片" id="loadBtn_1"/>
+</div>
+<div id="progressBox">
+    <div id="progressBar">0%</div>
+    <div id="progressText">0%</div>
+</div>
+<div id="picDiv_1"></div>
+</body>
+</html>

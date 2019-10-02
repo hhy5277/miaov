@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{ margin:0; padding:0;}
+body{ font:12px/1.125 Arial,Helvetica,sans-serif;}
+li{ list-style:none;}
+#login{ width:252px; height:385px; background:url(bg.jpg) no-repeat; margin:20px auto; position:relative;}
+.detail{margin:0 0 5px 30px; position:relative; top:110px;}
+.detail input{ color: #999999; border:1px solid #74C8E5; border-radius:3px 3px 3px 3px; height:15px; line-height:14px; padding:8px 5px 7px; width:184px;}
+#suggest{ background:none repeat scroll 0 0 #FFFFFF; border:1px solid #CCCCCC; left:30px; margin:0; overflow:hidden; padding:0; position:absolute; text-align:left; top:142px; visibility:visible; width:194px ;z-index:1; display:none;}
+.note, .item{ clear: both; color: #999999; cursor: pointer; font-size: 12px; height: 20px; line-height: 20px; list-style: none outside none; margin: 0 1px; padding: 0 5px; white-space: nowrap;}
+.active{ white-space:nowrap; clear:both; color:rgb(153, 153, 153); cursor:pointer; font-size:12px; height:20px; line-height:20px; list-style:none outside none; margin:0pt 1px; padding:0pt 5px; background:none repeat scroll 0% 0% rgb(232, 244, 252);}
+</style>
+<script>
+
+window.onload = function(){
+	var s1 = new Suggest();
+	s1.init();   //初始化程序
+};
+
+function Suggest(){
+	this.oInput = document.getElementById('input1');
+	this.oUl = document.getElementById('suggest');
+	this.aLi = this.oUl.getElementsByTagName('li');
+}
+
+Suggest.prototype = {
+
+	init : function(){
+		this.toChange();
+		this.toBlur();
+	},
+	toChange : function(){
+		//ie : onpropertychange
+		//标准 : oninput
+		var ie = !-[1,];
+		var This = this;
+		
+		if(ie){
+			this.oInput.onpropertychange = function(){
+				if(This.oInput.value==''){ 
+					This.tips(); 
+					return;
+				}
+				This.thowUl();
+				This.tips();
+				This.sel(0);
+			};
+		}
+		else{
+			this.oInput.oninput = function(){
+				This.thowUl();
+				This.tips();
+				This.sel(0);
+			};
+		}
+	},
+	thowUl : function(){
+		this.oUl.style.display = 'block';
+	},
+	toBlur : function(){
+		var This = this;
+		this.oInput.onblur = function(){
+			This.oUl.style.display = 'none';
+		};
+	},
+	tips : function(){
+	
+		var value = this.oInput.value;
+		var re = new RegExp('@'+value.substring(value.indexOf('@')+1)+'');
+	
+		for(var i=1;i<this.aLi.length;i++){
+			this.aLi[i].style.display = 'block';
+			this.aLi[i].bBtn = true;
+		}
+	
+		if(re.test(value)){
+			
+			for(var i=1;i<this.aLi.length;i++){
+				var oEmail = this.aLi[i].getAttribute('email');
+				if(i==1){
+					this.aLi[i].innerHTML = value;
+				}
+				else{
+					if(re.test(oEmail)){
+						this.aLi[i].style.display = 'block';
+						this.aLi[i].bBtn = true;
+					}
+					else{
+						this.aLi[i].style.display = 'none';
+						this.aLi[i].bBtn = false;
+					}
+				}
+			}
+			
+		}
+		else{
+			for(var i=1;i<this.aLi.length;i++){
+				var oEmail = this.aLi[i].getAttribute('email');
+				if(!oEmail){
+					this.aLi[i].innerHTML = value;
+				}
+				else{
+					this.aLi[i].innerHTML = value + oEmail;
+				}
+			}
+		}
+	},
+	sel : function(iNow){
+		
+		var This = this;
+		var arr = [];
+		
+		for(var i=1;i<this.aLi.length;i++){
+			this.aLi[i].className = 'item';
+			if(this.aLi[i].bBtn){
+				arr.push(this.aLi[i]);
+			}
+		}
+		
+		if(this.oInput.value == ''){
+			arr[iNow].className = 'item';
+		}
+		else{
+			arr[iNow].className = 'active';
+		}
+		
+		
+		for(var i=1;i<arr.length;i++){
+			arr[i].index = i;
+			arr[i].onmouseover = function(){
+				for(var i=1;i<This.aLi.length;i++){
+					This.aLi[i].className = 'item';
+				}
+				this.className = 'active';
+				iNow = this.index;
+			};
+			
+			arr.onmousedown = function(){
+				This.oInput.value = this.innerHTML;
+			};
+		}
+		
+		document.onkeydown = function(ev){
+			var ev = ev || window.event;
+			if(ev.keyCode == 38){  //上
+				if(iNow == 0){
+					iNow = arr.length-1;
+				}
+				else{
+					iNow--;
+				}
+				for(var i=1;i<This.aLi.length;i++){
+					This.aLi[i].className = 'item';
+				}
+				arr[iNow].className = 'active';
+			}
+			else if(ev.keyCode == 40){  //下
+				if(iNow == arr.length-1){
+					iNow = 0;
+				}
+				else{
+					iNow++;
+				}
+				for(var i=1;i<This.aLi.length;i++){
+					This.aLi[i].className = 'item';
+				}
+				arr[iNow].className = 'active';
+			}
+			else if(ev.keyCode == 13){  //回车
+				This.oInput.value = arr[iNow].innerHTML;
+				This.oInput.blur();	
+			}
+		};
+		
+	}
+};
+
+</script>
+</head>
+
+<body>
+<div id="login">
+	<div class="detail">
+    	<input id="input1" type="text" maxlength="128" placeholder="邮箱/会员帐号/手机号" autocomplete="off" node-type="loginname" class="name" tabindex="1" name="loginname">
+    </div>
+    <div class="detail">
+    	<input type="password" maxlength="24" placeholder="请输入密码" node-type="password" class="pass" tabindex="2" name="password"></div>
+   	<ul id="suggest">
+    	<li class="note">请选择邮箱类型</li>
+        <li email="" class="item"></li>
+        <li email="@sina.com" class="item">@sina.com</li>
+        <li email="@163.com" class="item">@163.com</li>
+        <li email="@qq.com" class="item">@qq.com</li>
+        <li email="@126.com" class="item">@126.com</li>
+        <li email="@vip.sina.com" class="item">@vip.sina.com</li>
+        <li email="@sina.cn" class="item">@sina.cn</li>
+        <li email="@hotmail.com" class="item">@hotmail.com</li>
+        <li email="@gmail.com" class="item">@gmail.com</li>
+        <li email="@sohu.com" class="item">@sohu.com</li>
+        <li email="@yahoo.cn" class="item">@yahoo.cn</li>
+        <li email="@139.com" class="item">@139.com</li>
+        <li email="@wo.com.cn" class="item">@wo.com.cn</li>
+        <li email="@189.cn" class="item">@189.cn</li>
+    </ul>
+</div>
+</body>
+</html>

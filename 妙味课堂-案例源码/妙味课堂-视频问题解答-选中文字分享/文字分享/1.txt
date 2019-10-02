@@ -1,0 +1,12 @@
+新浪选中文字的分享效果	12:50
+
+一个新浪产品，产生多少JS问题？
+下面又是一枚新浪页面上的小应用：
+
+封装selectText()方法
+document.selection.createRange().text;
+window.getSelection().toString();
+判断显示长度
+解决IE下图标与鼠标对不齐的问题：延时显示
+点击页面任意位置，隐藏小图标
+给小图标加点击事件，跳转其他地址，拼接url字符串地址
