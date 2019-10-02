@@ -1,0 +1,28 @@
+.auto{
+	width: 1190px;
+	margin: 0 auto;
+}
+.head .nopd{
+	padding-left: 0;
+}
+.head .red{
+	color: #c40000;
+}
+.right_bannar{
+	float: right;
+	margin: 17px 36px 0 0;
+}
+.content .nobdr{
+	border-right: none;
+}
+.green{
+	color: #1f7700;
+	font-family: tahoma;
+}
+.content .nobg{
+	background: none;
+}
+.content .red{
+	color: #c40000;
+	font-weight: bold;
+}

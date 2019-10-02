@@ -1,0 +1,12 @@
+.nav_header,.content .nav_head_content,.nav_content,.often{
+	width:1190px;
+	margin:0 auto;
+}
+
+.content_left{
+	float:left;
+	width:890px;
+}
+.binfen_li{
+	overflow: hidden;
+}

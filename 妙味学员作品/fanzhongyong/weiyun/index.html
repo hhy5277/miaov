@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>小饭云盘</title>
+		<link rel="stylesheet" href="css/animate.min.css" />
+		<link rel="stylesheet" href="css/main.css" />
+	</head>
+	<body>
+		<div class="xiaoF_weiyun">
+			
+			<!--header start-->
+			<div class="header">
+				
+				<!--logo-->
+				<a href="javascript:void(0)" class="logo">
+					<span class="icon"></span>
+				</a>
+				
+				<div class="userinfo" id="mainUser-info">
+					<!--user 图标-->
+					<div class="userheder">
+						<a href="javascript:void(0)">
+							<span class="headerPic">
+								<img src="images/pic.jpg" width="40" height="40" />
+							</span>
+							<em class="icon"></em>
+						</a>
+					</div>
+					
+					<!--功能菜单-->
+					<div class="infosTool">
+						<div class="ui-head">
+							<span class="nick_name">饭</span>
+						</div>
+						<ul class="info-menu">
+							<li><a href="javascript:void(0)" style="cursor: not-allowed;">开通会员</a></li>
+							<li><a href="javascript:void(0)" id="sendComments">留言板</a></li>
+							<li><a href="javascript:void(0)" style="cursor: not-allowed;">退出</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<!--header start-->
+			
+			
+			<!--工具菜单toolMenu start-->
+			<div class="toolMenu">
+				
+				<!--工具按钮-->
+				<a href="javascript:void(0)" class="download" id="download">
+					<i class="icon"></i>
+					<span>下载</span>
+				</a>
+				<a href="javascript:void(0)" class="share" id="share">
+					<i class="icon"></i>
+					<span>分享</span>
+				</a>
+				
+				<a href="javascript:void(0)" class="newfolder" id="newfolder">
+					<i class="icon"></i>
+					<span>新建文件夹</span>
+				</a>
+				
+				<a href="javascript:void(0)" class="rename" id="rename">
+					<i class="icon"></i>
+					<span>重命名</span>
+				</a>
+				
+				<a href="javascript:void(0)" class="cancle" id="cancle">
+					<i class="icon"></i>
+					<span>删除</span>
+				</a>
+				<a href="javascript:void(0)" class="move" id="move">
+					<i class="icon"></i>
+					<span>移动到</span>
+				</a>
+				
+				<a href="javascript:void(0)" class="refresh" id="refresh">
+					<i class="icon"></i>
+					<span>刷新</span>
+				</a>
+				
+				<!--切换视图及排序区-->
+				<div class="view">
+					
+					<!--查看目录树-->
+					<a href="javascript:void(0)" class="treeMenu" id="changeView" data-view="list" title="切换视图方式">
+						<i class="icon"></i>
+					</a>
+					
+					<!--排序-->
+					<div class="viewdetails" id="viewMode">
+						<a href="javascript:void(0)" class="sortMode" title="排序方式">
+							<i class="icon icon1"></i>
+							<i class="icon icon2"></i>
+						</a>
+						<div class="sortMd_lists">
+							<ul>
+								<li>
+									<a href="javascript:void(0)" class="sort_timer" id="sort_timer" data-sortMode = "up" title="升序">
+										<i class="icon"></i>
+										<span>按时间排序</span>
+									</a>
+								</li>
+								<li>
+									<a href="javascript:void(0)" class="sort_letter" id="sort_letter">
+										<i class="icon"></i>
+										<span>按字母排序</span>
+									</a>
+								</li>
+								<li>
+									<a href="javascript:void(0)" class="show_thumbnail" id="show_thumbnail">
+										<i class="icon"></i>
+										<span>显示缩略图</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--工具菜单toolMenu start-->
+			
+			<!--mainContent-->
+			<div class="main" id="mainView">
+				<!--left-->
+				<div class="left treeMenu">
+					<!--树形目录-->
+					<div id="treeMenu"></div>
+				</div>
+				
+				<!--right-->
+				<div class="right" id="panelArea">
+					
+					<!--nav 面包屑导航-->
+					<div class="nav">
+						<div class="navbox">
+							<a href="javascript:void(0)" class="selectFiles" id="selectAllFiles" title="selectAll"></a>
+							<ul id="breadNav"></ul>
+						</div>
+					</div>
+					
+					<!--暂无文件提示-->
+					<div class="noFileTips" id="noFileTips">
+						<div class="nullfile">
+							<span class="icon"></span>
+							<p>暂无文件</p>
+							<p>请点击左上角的“上传”按钮添加</p>
+						</div>
+					</div>
+					
+					<!--视图方式：图标形式-->
+					<div class="view-of-icon" id="view-of-icon">
+						<div class="vi-panel">
+							
+							<!--视图列表-->
+							<div class="toolpanel details" id="filesView"  style="display: none;"></div>
+							
+							<!--详细列表-->
+							<div class="fileListView details" id="filesLists"></div>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!--遮盖层-->
+		<div class="tm-overlay" id="overlayout"></div>
+		
+		<!--分享-->
+		<div class="shareS" id="shareS">
+			<div class="shareTle">
+				请选择分享的位置
+				<a class="close"></a>
+			</div>
+			<div class="bdsharebuttonbox" data-tag="share_1">
+				<a class="bds_qzone" data-cmd="qzone" href="javascript:void(0)"  title="分享到朋友圈">朋友圈</a>
+				<a class="bds_weixin" data-cmd="weixin" href="javascript:void(0)" title="分享到微信">微信</a>
+				<a class="bds_sqq" data-cmd="sqq" href="javascript:void(0)"  title="分享给QQ好友">QQ好友</a>
+				<a class="bds_mail" data-cmd="mail" href="javascript:void(0)"  title="用电子邮件分享">电子邮件</a>
+				<a class="bds_more" href="javascript:void(0)" target="_blank" data-cmd="more">更多</a>
+				<script>
+					window._bd_share_config = {
+						common : {
+							bdText : '人生如戏，全靠演技，戏如人生，何必当真',	
+							bdDesc : '我想对你说：嘿嘿嘿',	
+							bdUrl : 'http://user.qzone.qq.com/891779683/blog/1278916664'
+						},
+						share : [{
+							"bdSize" : 24
+						}]
+					}
+					with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+				</script>
+				
+			</div>
+			
+			<div class="cancles">
+				<a href="javascript:void(0)" class="cancle">取消</a>
+			</div>
+		</div>
+		
+		<!--移动到提示-->
+		<div class="moveToOther" id="moveToOther">
+			<div class="m_title">
+				<span>请选择移动位置</span>
+				<a href="javascript:void(0)" class="close"></a>
+			</div>
+			<div class="selarea">
+				<div class="fileName">
+					<span class="icon"></span>
+					<span class="name">js基础课程</span>
+				</div>
+				<!--文件目录-->
+				<div class="treeMenuPanel treeMenu" id="treeMenuPanel"> 
+				</div>
+			</div>
+			<div class="btnsCol">
+				<a href="javascript:void(0)" class="sure">确定</a>
+				<a href="javascript:void(0)" class="cancle">取消</a>
+			</div>
+		</div>
+		
+		<!--遮盖层-->
+		<div class="tm-overlay" id="messageslay"></div>
+		
+		<!--留言板-->
+		<div class="messages" id="messages" style="display: none;">
+			<div class="titles">
+				<span>留言板:</span>
+				<a href="javscript:void(0)" title="关闭" class="close"></a>
+			</div>			
+			<div class="commentsbox">
+				<div class="say">
+					<textarea class="comment-text" id="comment-text" placeholder="光标闪闪抒想法，键盘声声送评论。喂，留个言呗，反正我也看不到！"></textarea>
+					<button type="button" class="btn_comment" data-text="发表评论">发表评论</button>
+					<p class="wordcount"><span>还可以输入</span><span class="num" id="CtNum">182</span><span>字</span></p>
+				</div>
+				<!--排列列表-->
+				<div class="comment-lists"></div>
+			</div>
+		</div>
+		
+		<input type="hidden" id="getPidInput" value="0"/>
+		<script type="text/javascript" src="js/jquery-1.11.1.min.js" ></script>
+		<script type="text/javascript" src="js/data.js"></script>
+		<script type="text/javascript" src="js/py.js"></script>
+		<script type="text/javascript" src="js/dataControl.js"></script>
+		<script type="text/javascript" src="js/template.js"></script>
+		<script type="text/javascript" src="js/tm_tips.js"></script>
+		<script type="text/javascript" src="js/tm_dialog.js"></script>
+		<script type="text/javascript" src="js/tm_moves.js"></script>
+		<script type="text/javascript" src="js/index.js"></script>
+		<script type="text/javascript">
+			$(function(){
+				wy();
+			});
+		</script>
+	</body>
+</html>

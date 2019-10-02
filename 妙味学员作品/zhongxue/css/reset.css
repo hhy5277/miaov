@@ -1,0 +1,36 @@
+body, h3, h1, h4, p ,dl ,dd{
+	margin: 0;
+}
+a{
+	text-decoration: none;
+}
+img{
+	border: none;
+	vertical-align: top;
+}
+.clearfix:after{
+	content: "";
+	clear: both;
+	display: block;
+}
+input{
+	margin: 0;
+	padding: 0;
+}
+ul{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+

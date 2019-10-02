@@ -1,0 +1,1420 @@
+/*
+ * @version : v1.0
+ * @author  : 饭
+ * @update ：     new Date()
+ * @annotation : 然并卵 ！
+ */
+@charset "UTF-8";
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+form,
+fieldset,
+input,
+textarea,
+p,
+blockquote,
+th,
+td,
+span {
+  padding: 0;
+  margin: 0;
+}
+body {
+  font-size: 12px;
+  font-family: "Microsoft YaHei", "微软雅黑", "Arial", "黑体", "宋体", sans-serif;
+  background: #fff;
+  overflow: hidden;
+}
+body,
+html {
+  height: 100%;
+  width: 100%;
+  min-width: 960px;
+}
+ul,
+li {
+  list-style: none;
+}
+fieldset,
+img,
+html,
+body,
+iframe {
+  border: 0;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+em,
+strong,
+b,
+i {
+  font-style: normal;
+  font-size: 100%;
+  font-weight: normal;
+}
+input,
+textarea,
+a,
+button,
+select {
+  outline: none;
+  font-size: 12px;
+  border: 0;
+}
+input::-ms-clear,
+input::-ms-reveal {
+  display: none;
+}
+textarea {
+  overflow: auto;
+  resize: none;
+}
+textarea,
+input,
+button,
+select {
+  color: inherit;
+  font-family: "Microsoft YaHei", "微软雅黑", "Arial", "黑体", "宋体", sans-serif;
+}
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+.clear {
+  clear: both;
+  display: block;
+}
+.hide {
+  display: none;
+}
+body {
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+a {
+  text-decoration: none;
+  outline: none;
+}
+/*禁止选中*/
+.noSel {
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/*自动省略号*/
+.tmui-ellipsis {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/*.tm_layer*/
+.tm-overlay {
+  width: 100%;
+  height: 100%;
+  display: none;
+  background-color: #141414;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  filter: alpha(opacity=38);
+  -moz-opacity: 0.38;
+  -khtml-opacity: 0.38;
+  opacity: 0.38;
+}
+/*全局icon图标*/
+.icon {
+  display: inline-block;
+  background-image: url(../images/sprits.png);
+  background-repeat: no-repeat;
+}
+.after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  clear: both;
+}
+.top_bd {
+  border-top: 0;
+/*上边边框*/ }
+.right_bd {
+  border-right: 0;
+/*右边边框*/ }
+.bottom_bd {
+  border-bottom: 0;
+/*底部边框*/ }
+.left_bd {
+  border-left: 0;
+/*左边边框*/ }
+.center {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}
+.xiaoF_weiyun {
+  width: 100%;
+  height: 100%;
+}
+.hide {
+  display: none;
+}
+/*header css*/
+.header {
+  width: 100%;
+  height: 70px;
+}
+.logo {
+  display: block;
+  padding: 18px 0 0 28px;
+  float: left;
+  line-height: 35px;
+  font-size: 18px;
+  color: #389cd1;
+}
+.logo span {
+  width: 131px;
+  height: 35px;
+  background-position: -254px -76px;
+}
+.userinfo {
+  float: right;
+  margin-right: 26px;
+  padding-top: 10px;
+  position: relative;
+}
+.userinfo .userheder {
+  border: 1px solid #fff;
+  padding: 5px 0;
+  background: #fff;
+  z-index: 10;
+  position: relative;
+}
+.userinfo .userheder a {
+  display: block;
+  overflow: hidden;
+  padding: 0px 16px;
+}
+.userinfo .userheder .headerPic {
+  width: 40px;
+  height: 40px;
+  display: block;
+  border-radius: 50%;
+  background: #ccc;
+  overflow: hidden;
+  margin-right: 10px;
+  float: left;
+}
+.userinfo .userheder em {
+  width: 10px;
+  height: 10px;
+  display: block;
+  float: left;
+  background-position: -355px -8px;
+  margin-top: 16px;
+}
+.userinfo .userheder.active {
+  border: 1px solid #c2c3ca;
+  border-bottom: 0;
+}
+.userinfo .userheder.active em {
+  background-position: -371px -8px;
+}
+.userinfo .infosTool {
+  width: 168px;
+  height: auto;
+  border: 1px solid #c2c3ca;
+  position: absolute;
+  z-index: 9;
+  box-shadow: 0px 1px 2px #ccc;
+  top: 60px;
+  right: 0px;
+  display: none;
+  background: #fff;
+}
+.userinfo .ui-head {
+  padding: 0 15px;
+}
+.userinfo .ui-head .nick_name {
+  display: block;
+  padding-top: 5px;
+  font-size: 14px;
+  color: #333;
+}
+.userinfo .info-menu {
+  margin-top: 10px;
+  padding: 0 1px 1px 1px;
+}
+.userinfo .info-menu a {
+  padding: 7px 3px 7px 15px;
+  border-top: 1px solid #c2c3ca;
+  display: block;
+  color: #666;
+  transition: all 0.3s ease-out;
+}
+.userinfo .info-menu a:hover {
+  background: #f3f8ff;
+}
+/*工具菜单*/
+.toolMenu {
+  width: auto;
+  height: 36px;
+  padding: 11px 20px;
+  font-size: 0;
+  background: #ecf0f6;
+  border: 1px solid #d0d9de;
+  border-right: 0;
+  border-left: 0;
+}
+.toolMenu:after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  clear: both;
+}
+.toolMenu a {
+  display: inline-block;
+  font-size: 14px;
+  color: #66757f;
+  height: 36px;
+  line-height: 36px;
+  margin-right: 10px;
+  border: 1px solid #d0d9de;
+  border-radius: 3px;
+  padding: 0 20px;
+  background: #fff;
+}
+.toolMenu a i {
+  display: inline-block;
+  position: relative;
+  top: 2px;
+}
+.toolMenu a.download i {
+  width: 16px;
+  height: 14px;
+  background-position: -1px -29px;
+}
+.toolMenu a.share i {
+  width: 16px;
+  height: 16px;
+  background-position: -37px -28px;
+}
+.toolMenu a.move i {
+  width: 16px;
+  height: 16px;
+  background-position: -73px -28px;
+}
+.toolMenu a.rename i {
+  width: 16px;
+  height: 16px;
+  background-position: -109px -29px;
+}
+.toolMenu a.cancle i {
+  width: 16px;
+  height: 16px;
+  background-position: -145px -29px;
+}
+.toolMenu a.newfolder i {
+  width: 16px;
+  height: 16px;
+  background-position: -181px 0px;
+}
+.toolMenu a.refresh i {
+  width: 16px;
+  height: 16px;
+  background-position: -218px -1px;
+}
+.toolMenu a.refresh {
+  padding: 0 10px;
+}
+.toolMenu a:hover {
+  color: #55addc;
+}
+.toolMenu a:hover.download i {
+  background-position: -1px -2px;
+}
+.toolMenu a:hover.share i {
+  width: 16px;
+  height: 16px;
+  background-position: -37px -1px;
+}
+.toolMenu a:hover.move i {
+  width: 16px;
+  height: 16px;
+  background-position: -73px -1px;
+}
+.toolMenu a:hover.rename i {
+  width: 16px;
+  height: 16px;
+  background-position: -109px -2px;
+}
+.toolMenu a:hover.cancle i {
+  width: 16px;
+  height: 16px;
+  background-position: -145px -2px;
+}
+.toolMenu a:hover.newfolder i {
+  width: 16px;
+  height: 16px;
+  background-position: -181px -27px;
+}
+.toolMenu a:hover.refresh i {
+  width: 16px;
+  height: 16px;
+  background-position: -218px -28px;
+}
+.toolMenu a:hover.refresh {
+  padding: 0 10px;
+}
+.toolMenu .view {
+  width: auto;
+  height: auto;
+  float: right;
+  position: relative;
+}
+.toolMenu .view .treeMenu {
+  padding: 0 10px;
+  transition: background-color 0.3s;
+}
+.toolMenu .view .treeMenu i {
+  background-position: -254px -1px;
+  width: 16px;
+  height: 16px;
+}
+.toolMenu .view .treeMenu:hover {
+  background-color: #55addc;
+}
+.toolMenu .view .treeMenu:hover i {
+  background-position: -254px -28px;
+}
+.toolMenu .view .viewdetails {
+  float: right;
+}
+.toolMenu .view .sortMode {
+  padding: 0 10px;
+  background: #fff;
+  margin-right: 0;
+  position: relative;
+  z-index: 2;
+  border-radius: 3px 3px 0px 0px;
+}
+.toolMenu .view .sortMode .icon1 {
+  width: 16px;
+  height: 16px;
+  background-position: -27px -126px;
+}
+.toolMenu .view .sortMode .icon2 {
+  width: 10px;
+  height: 10px;
+  background-position: -355px -8px;
+}
+.toolMenu .view .sortMode:hover .icon1,
+.toolMenu .view .sortMode.active .icon1 {
+  background-position: -1px -126px;
+}
+.toolMenu .view .sortMode:hover .icon2,
+.toolMenu .view .sortMode.active .icon2 {
+  background-position: -387px -8px;
+}
+.toolMenu .view .sortMode.active {
+  border: 1px solid #55addc;
+  border-bottom: 0;
+}
+.toolMenu .view .sortMd_lists {
+  position: absolute;
+  right: 0;
+  top: 36px;
+  width: 130px;
+  border: 1px solid #55addc;
+  background: #fff;
+  z-index: 1;
+  border-radius: 3px 0 3px 3px;
+  display: none;
+}
+.toolMenu .view .sortMd_lists li a {
+  margin: 0;
+  border: 0;
+  display: block;
+  border-radius: 0;
+  padding: 0 10px;
+}
+.toolMenu .view .sortMd_lists li a i {
+  width: 16px;
+  height: 16px;
+  margin-right: 3px;
+}
+.toolMenu .view .sortMd_lists li a.sort_timer i {
+  background-position: -27px -57px;
+}
+.toolMenu .view .sortMd_lists li a.sort_letter i {
+  background-position: -27px -90px;
+}
+.toolMenu .view .sortMd_lists li a.show_thumbnail i {
+  background-position: -27px -126px;
+}
+.toolMenu .view .sortMd_lists li a:hover {
+  background: #e1e8ed;
+}
+.toolMenu .view .sortMd_lists li a:hover.sort_timer i {
+  background-position: -1px -57px;
+}
+.toolMenu .view .sortMd_lists li a:hover.sort_letter i {
+  background-position: -1px -90px;
+}
+.toolMenu .view .sortMd_lists li a:hover.show_thumbnail i {
+  background-position: -1px -126px;
+}
+/*main*/
+.main {
+  width: 100%;
+  height: auto;
+  background: #fff;
+}
+.left,
+.right {
+  height: 100%;
+  float: left;
+}
+/*左边树形菜单*/
+.left {
+  width: 240px;
+  border-right: 1px solid #e1e8ed;
+  font-size: 14px;
+}
+.treeMenu li .title {
+  height: 30px;
+  line-height: 30px;
+}
+.treeMenu li .title .icon1,
+.treeMenu li .title em {
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  display: inline-block;
+}
+.treeMenu li .title .icon1 {
+  background-position: -370px -25px;
+}
+.treeMenu li .title .icon2 {
+  width: 16px;
+  height: 16px;
+  background-position: -21px -151px;
+  position: relative;
+  top: 2px;
+}
+.treeMenu li .title.control-none .icon1 {
+  background-position: 10000px 10000px;
+}
+.treeMenu li .title.control .icon1 {
+  background-position: -355px -25px;
+}
+.treeMenu li .title.control .icon2,
+.treeMenu li .title.control em {
+  background-position: -1px -151px;
+}
+.treeMenu li .title.active {
+  background: #f0f3f6;
+}
+.treeMenu li .title:hover {
+  background: #f0f3f6;
+  cursor: default;
+}
+.treeMenu li ul {
+  display: none;
+}
+.treeMenu li ul.show {
+  display: block;
+}
+/*右边功能区*/
+.right {
+  background: #f5f8fa;
+}
+.right .nav {
+  width: 100%;
+  height: 48px;
+  background: #fff;
+  border-bottom: 1px solid #ecf0f6;
+}
+.right .navbox {
+  padding: 15px;
+}
+.right .navbox:after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  clear: both;
+}
+.right .navbox .selectFiles {
+  width: 15px;
+  height: 15px;
+  border: 1px solid #d0d9de;
+  display: block;
+  float: left;
+}
+.right .navbox .selectFiles.sel {
+  background-image: url(../images/sprits.png);
+  background-repeat: no-repeat;
+  background-color: #55addc;
+  border-color: #55addc;
+  background-position: -384px -24px;
+}
+.right .navbox ul {
+  float: left;
+  margin-left: 10px;
+  margin-top: -7px;
+}
+.right .navbox ul:after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  clear: both;
+}
+.right .navbox ul li {
+  float: left;
+  margin-left: 5px;
+}
+.right .navbox ul li a,
+.right .navbox ul li .currPath {
+  font-size: 14px;
+  color: #2a3133;
+  padding: 0 15px 15px 15px;
+}
+.right .navbox ul li a.active,
+.right .navbox ul li .currPath.active,
+.right .navbox ul li a:hover,
+.right .navbox ul li .currPath:hover {
+  color: #55addc;
+  border-bottom: 2px solid #55addc;
+}
+.right .navbox ul li .currPath {
+  line-height: 29px;
+}
+.right .navbox ul li i {
+  width: 10px;
+  height: 20px;
+  background-position: -1px -181px;
+  position: relative;
+  top: 6px;
+  margin-left: 5px;
+}
+.right .navbox ul li:last-of-type i {
+  background-image: none;
+}
+.right .noFileTips {
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+/*显示提示*/
+.right .noFileTips.noFileTipsShow {
+  display: table;
+}
+.right .noFileTips .nullfile {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  width: 260px;
+  height: 200px;
+  margin: 0 auto;
+}
+.right .noFileTips .nullfile span {
+  width: 180px;
+  height: 128px;
+  background-position: 0px -242px;
+}
+.right .noFileTips .nullfile p {
+  color: #66757f;
+}
+.right .noFileTips .nullfile p:nth-of-type(1) {
+  font-size: 24px;
+  font-weight: 500;
+  margin: 20px 0 3px 0;
+}
+.right .noFileTips .nullfile p:nth-of-type(2) {
+  font-size: 14px;
+}
+/*视图方式：大图标形式*/
+.view-of-icon,
+.fileListView {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.view-of-icon .vi-panel,
+.fileListView .vi-panel {
+  height: 100%;
+  overflow: hidden;
+}
+.view-of-icon .toolpanel,
+.fileListView .toolpanel {
+  width: auto;
+  height: 400px;
+  overflow-y: auto;
+  padding: 30px;
+}
+.files {
+  width: 178px;
+  height: 178px;
+  background: #ebeff0;
+  border: 1px solid #ebeff0;
+  border-radius: 3px;
+  overflow: hidden;
+  text-align: center;
+  transition: all 0.1s ease-in;
+  position: relative;
+  float: left;
+  margin: 0 25px 20px 0;
+}
+.files .icon {
+  margin-top: 35px;
+  margin-bottom: 10px;
+  width: 80px;
+  height: 80px;
+}
+.files .folderIcon {
+  background-position: -72px -139px;
+}
+.files .txtIcon {
+  background-position: -181px -135px;
+}
+.files .zipIcon {
+  background-position: -290px -135px;
+}
+.files .filename {
+  color: #66757f;
+  font-size: 14px;
+}
+.files .selectBox {
+  width: 14px;
+  height: 14px;
+  border: 1px solid #d0d9de;
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  display: none;
+}
+.files input.txt {
+  display: none;
+}
+/*重命名*/
+.files.reNameFile .filename {
+  display: none;
+}
+.files.reNameFile input.txt {
+  width: 100px;
+  padding: 0 10px;
+  font-family: "微软雅黑";
+  font-size: 14px;
+  color: #666;
+  border: 1px solid #ccc;
+  height: 22px;
+  line-height: 22px;
+  display: inline-block;
+  text-align: center;
+}
+.files:hover {
+  background: #fff;
+}
+.files:hover .selectBox {
+  display: block;
+}
+/*选中当前文件*/
+.files.active {
+  background: #fff;
+}
+.files.active .selectBox {
+  display: block;
+  background-image: url(../images/sprits.png);
+  background-repeat: no-repeat;
+  background-color: #55addc;
+  border-color: #55addc;
+  background-position: -384px -24px;
+}
+.files.active .filename {
+  color: #55addc;
+}
+/*视图方式：详细列表形式*/
+.fileListView {
+  width: 100%;
+}
+.fileListView .files {
+  height: 40px;
+  width: 100%;
+  background: #f5f8fa;
+  line-height: 40px;
+  border: 0;
+  border-bottom: 1px solid #e1e8ed;
+  padding: 0 15px;
+  font-size: 14px;
+  margin: 0;
+  overflow: hidden;
+}
+.fileListView .files:after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  clear: both;
+}
+.fileListView .files.active {
+  background: #fff;
+}
+.fileListView .files .titles,
+.fileListView .files .tools {
+  float: left;
+}
+.fileListView .files .timer {
+  float: right;
+}
+.fileListView .files .selectBox {
+  display: block;
+  top: 12px;
+}
+.fileListView .files .titles {
+  width: 40%;
+  height: 40px;
+  overflow: hidden;
+  text-align: left;
+  font-size: 0;
+}
+.fileListView .files .titles .folderIcon {
+  margin: 0;
+  float: left;
+  margin-left: 25px;
+  margin-top: 9px;
+  width: 24px;
+  height: 21px;
+  background-position: -217px -243px;
+}
+.fileListView .files .titles .filename {
+  line-height: 40px;
+  font-size: 14px;
+  display: inline-block;
+  float: left;
+  margin-left: 10px;
+}
+.fileListView .files .titles .txt {
+  position: relative;
+  top: 5px;
+  margin-left: 10px;
+}
+.fileListView .files.reNameFile .titles .filename {
+  display: none;
+}
+.fileListView .files .tools {
+  width: 30%;
+  height: 40px;
+  text-align: left;
+}
+.fileListView .files .tools .icon {
+  width: 16px;
+  height: 16px;
+  margin: 0 20px 0 0;
+  float: none;
+  display: inline-block;
+  position: relative;
+  top: 3px;
+}
+.fileListView .files .tools .icon.download {
+  background-position: -1px -29px;
+}
+.fileListView .files .tools .icon.download:hover {
+  background-position: -1px -2px;
+}
+.fileListView .files .tools .icon.share {
+  background-position: -37px -28px;
+}
+.fileListView .files .tools .icon.share:hover {
+  background-position: -37px -1px;
+}
+.fileListView .files .tools .icon.move {
+  background-position: -73px -28px;
+}
+.fileListView .files .tools .icon.move:hover {
+  background-position: -73px -1px;
+}
+.fileListView .files .tools .icon.rename {
+  background-position: -109px -29px;
+}
+.fileListView .files .tools .icon.rename:hover {
+  background-position: -109px -2px;
+}
+.fileListView .files .tools .icon.cancle {
+  background-position: -145px -29px;
+}
+.fileListView .files .tools .icon.cancle:hover {
+  background-position: -145px -2px;
+}
+.fileListView .files .timer {
+  width: 20%;
+}
+.tm_tips {
+  font-size: 14px;
+  padding: 0px 20px;
+  height: 35px;
+  font-weight: bold;
+  display: inline-block;
+  line-height: 35px;
+  font-family: "微软雅黑", "microsoft yahei";
+  color: #fff;
+  overflow: hidden;
+  border-radius: 5px;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
+  position: fixed;
+  z-index: 9999999;
+  cursor: default;
+}
+/*加载中*/
+.tm_loading,
+.tm_success,
+.tm_warning,
+.tm_onnectionErr {
+  background: #86ce8b;
+  overflow: hidden;
+}
+.tm_loading .icon {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  background-image: url(../images/loading.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  position: relative;
+  top: 6px;
+}
+/*成功*/
+.tm_success .icon,
+.tm_warning .icon,
+.tm_onnectionErr .icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  float: left;
+  background-repeat: no-repeat;
+  margin-top: 6px;
+  margin-right: 5px;
+}
+.tm_success .icon {
+  background-position: -290px -242px;
+}
+/*警告*/
+.tm_warning {
+  background: #f3a960;
+}
+.tm_warning .icon {
+  background-position: -324px -242px;
+}
+/*服务器连接超时*/
+.tm_onnectionErr {
+  background: #ef8989;
+}
+.tm_onnectionErr .icon {
+  background-position: -255px -242px;
+}
+/*弹出提示*/
+.tm_dialog {
+  width: 413px;
+  border-radius: 5px;
+  overflow: hidden;
+  height: auto;
+  background: #fff;
+  padding-bottom: 1px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+  font-family: "宋体", "Microsoft Yahei";
+  position: absolute;
+  margin: 0 auto;
+  display: none;
+  z-index: 100;
+}
+.tm_dialog .tm_title {
+  padding: 0 10px;
+  height: 42px;
+  cursor: move;
+  background: #fff;
+  position: relative;
+}
+.tm_dialog .tm_title h2 {
+  height: 42px;
+  line-height: 42px;
+  color: #565656;
+  padding-left: 20px;
+  font-size: 16px;
+  -webkit-transition: all ease-in-out;
+  -moz-transition: all ease-in-out;
+  -o-transition: all ease-in-out;
+  -ms-transition: all ease-in-out;
+  transition: all ease-in-out;
+  cursor: move;
+  border-bottom: 1px solid #e8e8e8;
+  font-family: "微软雅黑", "microsoft yahei";
+  letter-spacing: 1px;
+}
+.tm_dialog .tm_title a.tm_close {
+  display: block;
+  width: 16px;
+  height: 15px;
+  background-image: url(../images/sprits.png);
+  background-position: -325px -28px;
+  background-repeat: no-repeat;
+  position: absolute;
+  right: 14px;
+  top: 14px;
+}
+.tm_dialog .tm_title a.tm_close:hover {
+  background-position: -325px -2px;
+}
+.tm_dialog .tm_contents {
+  padding: 40px 0 20px 0;
+  width: 350px;
+  margin: 0 auto;
+  font-size: 18px;
+  max-height: 100px;
+  overflow: hidden;
+  color: #565656;
+  font-size: 14px;
+  font-family: "微软雅黑", "microsoft yahei";
+  text-align: center;
+}
+.tm_dialog .tm_contents .tips-title {
+  color: #565656;
+  font-size: 14px;
+  font-family: "微软雅黑", "microsoft yahei";
+  text-align: center;
+}
+.tm_dialog .tm_contents p span {
+  margin-right: 10px;
+  color: #575f6a;
+  font-size: 14px;
+  font-weight: bold;
+}
+.tm_dialog .tm-btns {
+  width: 60%;
+  height: 30px;
+  margin: 20px auto;
+  text-align: center;
+}
+.tm_dialog .tm-btns a {
+  display: inline-block;
+  font-size: 14px;
+  font-family: "微软雅黑", "microsoft yahei";
+  color: #fff;
+  text-align: center;
+  padding: 0 25px;
+  line-height: 28px;
+  background: #55addc;
+  border: 1px solid #55addc;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.tm_dialog .tm-btns .tm_cancel {
+  background: #f9f9f9;
+  color: #565656;
+  border-color: #e8e8e8;
+  margin-left: 10px;
+}
+/*移动到XXX*/
+.moveToOther {
+  width: 410px;
+  height: auto;
+  background: #fff;
+  border: 2px solid #55addc;
+  position: absolute;
+  z-index: 120;
+  border-radius: 9px;
+  overflow: hidden;
+  display: none;
+}
+.moveToOther .m_title {
+  height: 45px;
+  padding: 0 20px;
+  position: relative;
+  border-bottom: 1px solid #d2e9f5;
+}
+.moveToOther .m_title:hover {
+  cursor: move;
+}
+.moveToOther .m_title span {
+  line-height: 45px;
+  color: #666;
+  font-size: 16px;
+}
+.moveToOther .m_title a.close {
+  display: block;
+  width: 16px;
+  height: 15px;
+  background-image: url(../images/sprits.png);
+  background-position: -325px -28px;
+  background-repeat: no-repeat;
+  position: absolute;
+  right: 15px;
+  top: 17px;
+}
+.moveToOther .m_title a.close:hover {
+  background-position: -325px -2px;
+}
+.moveToOther .selarea {
+  height: auto;
+  padding: 0 20px;
+  margin-bottom: 20px;
+}
+.moveToOther .selarea .fileName {
+  height: 40px;
+  line-height: 40px;
+  font-size: 14px;
+}
+.moveToOther .selarea .fileName .icon {
+  width: 24px;
+  height: 21px;
+  background-position: -217px -243px;
+  margin-right: 10px;
+  position: relative;
+  top: 6px;
+}
+.moveToOther .selarea .treeMenuPanel {
+  border: 1px solid #e1e8ed;
+  height: 240px;
+  overflow-y: auto;
+}
+.moveToOther .btnsCol {
+  width: 100%;
+  font-size: 0;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.moveToOther .btnsCol a {
+  font-size: 14px;
+  display: inline-block;
+  width: 80px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 3px;
+}
+.moveToOther .btnsCol a.sure {
+  border: 1px solid #55addc;
+  background: #55addc;
+  color: #fff;
+}
+.moveToOther .btnsCol a.sure:active {
+  background: #3fa3d8;
+}
+.moveToOther .btnsCol a.cancle {
+  border: 1px solid #55addc;
+  background: #fff;
+  color: #55addc;
+  margin-left: 10px;
+}
+.moveToOther .btnsCol a.cancle:active {
+  background: #f5f3f3;
+}
+/*改变谷歌滚动条的样式*/
+::selection {
+  background: pink;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 6px;
+  background: #ccc;
+}
+::-webkit-scrollbar-button {
+  background-color: #e5e5e5;
+}
+::-webkit-scrollbar-track {
+  background: #999;
+}
+::-webkit-scrollbar-track-piece {
+  background: #ccc;
+}
+::-webkit-scrollbar-thumb {
+  background: #666;
+}
+::-webkit-scrollbar-corner {
+  background: #82AFFF;
+}
+::-webkit-scrollbar-resizer {
+  background: #FF0BEE;
+}
+scrollbar {
+  -moz-appearance: none !important;
+  background: #00ff00 !important;
+}
+scrollbarbutton {
+  -moz-appearance: none !important;
+  background-color: #0000ff !important;
+}
+scrollbarbutton:hover {
+  -moz-appearance: none !important;
+  background-color: #ff0000 !important;
+}
+/* 隐藏上下箭头 */
+scrollbarbutton {
+  display: none !important;
+}
+/* 纵向滚动条宽度 */
+scrollbar[orient="vertical"] {
+  min-width: 12px !important;
+}
+/*
+    1366*768 1440*900 div---如果你是用fixed的div层的高度一定要控制在：520px以内 
+ */
+.shareS {
+  width: 320px;
+  height: 246px;
+  border: 1px solid #d0d3d6;
+  display: none;
+  background: #fff;
+  border-radius: 3px;
+  overflow: hidden;
+  position: absolute;
+  z-index: 111;
+  color: #666;
+}
+.shareS .shareTle {
+  height: 45px;
+  line-height: 45px;
+  padding-left: 20px;
+  border-bottom: 1px solid #ccc;
+  font-size: 16px;
+  cursor: move;
+}
+.shareS .shareTle .close {
+  display: block;
+  width: 16px;
+  height: 15px;
+  background-image: url(../images/sprits.png);
+  background-position: -325px -28px;
+  background-repeat: no-repeat;
+  position: absolute;
+  right: 15px;
+  top: 17px;
+  cursor: pointer;
+}
+.shareS .shareTle .close:hover {
+  background-position: -325px -2px;
+}
+.shareS .bdsharebuttonbox a {
+  display: block;
+  padding: 0 30px 0 60px;
+  line-height: 30px;
+  font-size: 16px;
+  color: #666;
+  height: auto;
+  clear: both;
+  float: none;
+  background-position: 25px 3px;
+  border-top: 1px dashed #f5f7f9;
+  margin: 0;
+  background-repeat: no-repeat;
+}
+.shareS .bdsharebuttonbox a:hover {
+  color: #55addc;
+  background-color: #f3f2f2;
+}
+.shareS .bdsharebuttonbox a.bds_qzone {
+  background-image: url(../images/qzone.png);
+}
+.shareS .bdsharebuttonbox a.bds_weixin {
+  background-image: url(../images/weixin.png);
+}
+.shareS .bdsharebuttonbox a.bds_sqq {
+  background-image: url(../images/qq.png);
+}
+.shareS .bdsharebuttonbox a.bds_mail {
+  background-image: url(../images/mail.png);
+}
+.shareS .cancles {
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  border-top: 1px solid #d0d3d6;
+  text-align: right;
+}
+.shareS .cancles a {
+  background: #2698f0;
+  color: #fff;
+  border: 1px solid #2698f0;
+  border-radius: 2px;
+  font-size: 14px;
+  display: inline-block;
+  width: 58px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  margin-top: 8px;
+}
+.shareS .cancles a:hover {
+  background: #5370a7;
+  border: 1px solid #5370a7;
+}
+.messages {
+  width: 750px;
+  height: auto;
+  position: absolute;
+  background: #fff;
+  z-index: 111;
+}
+.messages .titles {
+  line-height: 30px;
+  font-size: 16px;
+  padding-left: 20px;
+}
+.messages .titles .close {
+  display: block;
+  width: 16px;
+  height: 15px;
+  background-image: url(../images/sprits.png);
+  background-position: -325px -28px;
+  background-repeat: no-repeat;
+  position: absolute;
+  right: 12px;
+  top: 8px;
+}
+.messages .titles .close:hover {
+  background-position: -325px -2px;
+}
+.messages .commentsbox {
+  padding: 0px 20px 20px 20px;
+}
+.messages .commentsbox .say {
+  margin-bottom: 10px;
+}
+.messages .commentsbox .say:after {
+  content: "";
+  width: 0;
+  height: 0;
+  display: block;
+  clear: both;
+}
+.messages .commentsbox .comment-text {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+  padding: 10px;
+  height: 80px;
+  text-align: justify;
+  width: 688px;
+  border: 1px solid #e5e5e5;
+}
+.messages .commentsbox .wordcount {
+  float: right;
+  font-size: 16px;
+  line-height: 30px;
+  margin-right: 20px;
+}
+.messages .commentsbox .wordcount .num {
+  padding: 0 3px;
+  color: #808080;
+  font-weight: 700;
+  font-size: 18px;
+  font-style: italic;
+  font-family: Constantia, Georgia;
+}
+.messages .commentsbox .btn_comment {
+  float: right;
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: normal;
+  text-align: center;
+  cursor: pointer;
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: #0275d8;
+  border-color: #0275d8;
+}
+.messages .commentsbox .btn_comment:hover {
+  background-color: #025aa5;
+  border-color: #01549b;
+}
+.messages .commentsbox .btn_comment:active {
+  background-color: #014682;
+  border-color: #01315a;
+}
+.messages .commentsbox .comment-lists {
+  width: auto;
+  max-height: 350px;
+  overflow-y: auto;
+}
+.messages .commentsbox .comment-lists .pl {
+  overflow: hidden;
+  padding: 10px;
+}
+.messages .commentsbox .comment-lists .pl .header-pic {
+  width: 50px;
+  height: 50px;
+  float: left;
+  padding: 5px;
+  background: #fff;
+  border-radius: 50%;
+}
+.messages .commentsbox .comment-lists .pl .details {
+  width: 600px;
+  font-size: 14px;
+  float: left;
+  border-bottom: 1px dashed #ccc;
+}
+.messages .commentsbox .comment-lists .pl .conlists {
+  height: auto;
+  background: #f9f9f9;
+  position: relative;
+  padding: 5px;
+  text-align: justify;
+  word-break: break-all;
+}
+.messages .commentsbox .comment-lists .pl .conlists .sj {
+  width: 30px;
+  height: 30px;
+  display: block;
+  background: #f9f9f9;
+  position: absolute;
+  left: -30px;
+  top: 0;
+  z-index: -1;
+}
+.messages .commentsbox .comment-lists .pl .timer {
+  line-height: 24px;
+  text-align: right;
+  padding-right: 30px;
+  font-size: 16px;
+  color: #666;
+}
+.messages .commentsbox .comment-lists .pl .timer span {
+  font-family: Constantia, Georgia;
+}
+/*# sourceMappingURL=main.css.map */

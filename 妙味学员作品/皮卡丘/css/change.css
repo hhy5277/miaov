@@ -1,0 +1,163 @@
+body{
+	margin: 0;	
+	
+}
+i{
+	font-style: normal;
+}
+p{
+	margin: 0;
+	padding: 0;
+}
+img{
+	vertical-align: top;
+}
+a{
+	text-decoration: none;
+	color: inherit;
+}
+ul,li{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+#change-parent{
+	background: url(../img/222.png) no-repeat;
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+}
+
+
+
+
+
+/*顶部问号和关闭*/ 
+.change-top{               /*border: 1px solid #Fff; */      
+    height: 80px;
+	position: relative;
+}
+.change-top #q{
+	position: absolute;
+	left: 4px;
+	cursor: pointer;	
+}
+.change-top #x{
+	position: absolute;
+	top: 2px;
+	right: 4px;
+	cursor: pointer;	
+}
+
+
+/*中间交换区*/
+.change-content{                 /*border: 1px solid #fff;*/
+	margin: 44px auto 0;
+	height: 644px;
+	width: 1320px;
+}
+.change-content .change-box{            /*border: 1px solid red;*/
+	width: 356px;
+	float: left;
+	height: 630px;
+	position: relative;
+}
+.change-content .change-box1{
+	margin-left: 95px;
+}
+.change-content .change-box2{
+	margin-left: 35px;
+}
+.change-content .change-box3{
+	margin-left: 35px;
+}
+ 
+.change-btns{                       /*border: 1px solid red; */  
+	color: #fff;
+	font: bold 18px/34px arial;
+	width: 148px;
+	height: 72px;
+	text-align: center;
+	position: absolute;
+	top: 410px;
+	left: 106px;
+	cursor: pointer;
+}
+.change-box .change-bar{                       /*border: 1px solid red; */ 
+	width: 190px;
+	height: 25px;
+	color: #f1f2d3;
+	font: bold 20px/25px arial;
+	text-align: center;
+	position: absolute;
+	top: 520px;
+	left: 80px;
+}
+
+.change-box .change-renovate{                    /* border: 1px solid red;  */
+	width: 158px;
+	height: 30px;
+	color: #1db8e8;
+	font: bold 22px/30px arial;
+	text-align: center;
+	padding-top: 35px;
+	position: absolute;
+	top: 564px;
+	left: 97px;
+	font-style: italic;
+	cursor: pointer;
+}
+
+/*问号遮罩*/
+.change-cover{
+	width:100%;
+    height:100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0,0,0,0.7);	
+    display: none;
+}
+.change-cover .change-coverBox{
+	width:900px;
+    height:580px;
+    background-color: rgba(255,255,255,0.8);
+    position: absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    left:0;
+    margin:auto;
+    border-radius: 12px;
+    padding: 14px;
+}
+.change-coverBox .change-coverTitle{
+	font: bold 28px/50px '微软雅黑';
+	color: #78512a;
+	width: 200px;
+	border-bottom: 1px solid yellow;
+	padding-left: 5px;
+	margin-bottom: 3px;
+}
+.change-coverBox .change-coverTxt{
+	font: bold 16px/32px '微软雅黑';
+	color: #78512a;
+}
+
+
+.change-box #img1{
+	position: absolute;
+	/*top: 180px;*/
+	left: 120px;
+}
+.change-box #img2{
+	position: absolute;
+	/*top: 200px;*/
+	left: 120px;
+}
+.change-box #img3{
+	position: absolute;
+	/*top: 190px;*/
+	left: 120px;
+}

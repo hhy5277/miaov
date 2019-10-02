@@ -1,0 +1,637 @@
+@charset "UTF-8";
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+form,
+fieldset,
+input,
+textarea,
+p,
+blockquote,
+th,
+td,
+span {
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+body {
+  font-size: 12px;
+  font-family: "Microsoft YaHei", "微软雅黑", "Arial", "黑体", "宋体", sans-serif;
+  background: #ececec;
+}
+ul,
+li {
+  list-style: none;
+}
+fieldset,
+img,
+html,
+body,
+iframe {
+  border: 0;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+em,
+strong,
+b,
+i {
+  font-style: normal;
+  font-size: 100%;
+  font-weight: normal;
+}
+input,
+textarea,
+a,
+button,
+select {
+  outline: none;
+  font-size: 12px;
+  border: 0;
+}
+input::-ms-clear,
+input::-ms-reveal {
+  display: none;
+}
+textarea {
+  overflow: auto;
+  resize: none;
+}
+textarea,
+input,
+button,
+select {
+  color: inherit;
+  font-family: "Microsoft YaHei", "微软雅黑", "Arial", "黑体", "宋体", sans-serif;
+}
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+.clear {
+  clear: both;
+  display: block;
+}
+.hide {
+  display: none;
+}
+body {
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: url(../images/bg_03.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 50% 50%;
+}
+body,
+html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-size: 14px;
+  color: #666;
+}
+a {
+  text-decoration: none;
+  outline: none;
+}
+/*禁止选中*/
+.noSel {
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.clear {
+  content: "";
+  width: 0;
+  height: 0;
+  display: block;
+  overflow: hidden;
+  clear: both;
+}
+.icon,
+.ic {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-image: url(../images/sprits.png);
+  background-repeat: no-repeat;
+}
+.after {
+  content: "";
+  width: 0;
+  height: 0;
+  display: block;
+  clear: both;
+}
+/*右键菜单*/
+.menu {
+  width: 260px;
+  height: 320px;
+  background: #f0f1f1;
+  position: absolute;
+  display: none;
+  border: 2px solid #919292;
+  top: 50px;
+  left: 100px;
+  z-index: 999;
+}
+.menu li {
+  height: 40px;
+  line-height: 40px;
+  background: #f1f2f2;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.4s ease;
+  padding: 0 20px;
+  color: #3a3a3a;
+  position: relative;
+  box-sizing: border-box;
+}
+.menu li .icon {
+  position: relative;
+  top: 4px;
+  margin-right: 10px;
+}
+.menu li .arrow {
+  background-position: -520px -2px;
+  position: relative;
+  top: 9px;
+  float: right;
+}
+.menu li .smallMenu {
+  width: 100px;
+  height: auto;
+  position: absolute;
+  z-index: 10;
+  display: none;
+  top: -2px;
+  left: 100%;
+  background: #f0f1f2;
+  border: 2px solid #8b8b8b;
+}
+.menu li .smallMenu a {
+  display: block;
+  line-height: 40px;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  background: #f0f1f2;
+  font-size: 14px;
+  color: #3a3a3a;
+}
+.menu li .smallMenu a:hover {
+  background: #dbdbdb;
+}
+.menu li .smallMenu:after {
+  content: "";
+  width: 11px;
+  height: 15px;
+  display: block;
+  background: url(../images/sprits.png) no-repeat -540px -5px;
+  position: absolute;
+}
+.menu li .smallMenu.currR:after {
+  left: -10px;
+  top: 10px;
+  z-index: 9;
+}
+.menu li .smallMenu.currL {
+  left: -104px;
+}
+.menu li .smallMenu.currL:after {
+  right: -10px;
+  top: 10px;
+  z-index: 9;
+  transform: rotate(180deg);
+}
+.menu li:after {
+  content: "";
+  width: 0;
+  height: 0;
+  display: block;
+  clear: both;
+}
+.menu li:hover {
+  background: #dadadb;
+}
+.menu li:hover .smallMenu {
+  display: block;
+}
+.menu li:nth-of-type(1) .icon {
+  background-position: -471px -2px;
+}
+.menu li:nth-of-type(2) .icon {
+  background-position: -438px -2px;
+}
+.menu li:nth-of-type(3) .icon {
+  background-position: -392px -3px;
+}
+.menu li:nth-of-type(4) {
+  border-bottom: 1px solid #c2c3c3;
+}
+.menu li:nth-of-type(4) .icon {
+  background-position: 0 0;
+}
+.menu li:nth-of-type(5),
+.menu li:nth-of-type(6),
+.menu li:nth-of-type(7) {
+  color: #999;
+  cursor: not-allowed;
+}
+.menu li:nth-of-type(5) .icon,
+.menu li:nth-of-type(6) .icon,
+.menu li:nth-of-type(7) .icon {
+  background-position: -120px 0;
+}
+.menu li:nth-of-type(7) .icon {
+  background-position: -89px 0;
+}
+.menu li:nth-of-type(8) .icon {
+  background-position: -226px -5px;
+}
+/* desk-continer */
+.desk-continer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.desk-continer .file {
+  width: 100px;
+  height: 100px;
+  border-width: 2px;
+  border-color: transparent;
+  border-style: solid;
+  box-sizing: border-box;
+  padding: 8px 0;
+  text-align: center;
+  font-size: 14px;
+  color: #fff;
+  transition: background-color 0.5s ease;
+  border-radius: 5px;
+  position: absolute;
+  cursor: default;
+}
+.desk-continer .file .icon {
+  width: 60px;
+  height: 62px;
+  display: block;
+  margin: 0 auto;
+}
+.desk-continer .file .fileIcon {
+  background-position: -92px -199px;
+}
+.desk-continer .file .garbage {
+  background-position: 2px -199px;
+}
+.desk-continer .file .music {
+  background-position: -203px -111px;
+}
+.desk-continer .file .video {
+  background-position: -525px -195px;
+}
+.desk-continer .file .picture {
+  background: url(../images/xin.jpg) no-repeat;
+  width: 62px;
+  height: 62px;
+  display: block;
+  margin: 0 auto;
+  background-size: cover;
+  background-position: 50% 50%;
+}
+.desk-continer .file .calendar {
+  width: 60px;
+  height: 62px;
+  margin: 0 auto;
+  background: url(../images/calendar.png) no-repeat 0px 10px;
+}
+.desk-continer .file.seled,
+.desk-continer .file:hover {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: #d6d6d7;
+}
+.desk-continer.bigFile .file {
+  width: 120px;
+  height: 120px;
+}
+.desk-continer.smallFile .file {
+  width: 80px;
+  height: 80px;
+}
+.desk-continer.smallFile .file .fileName {
+  display: none;
+}
+.iframe {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  transition: all 0.5s ease-in-out;
+}
+.iframe .goback {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  transition: all 0.5s ease;
+  font-size: 20px;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.3);
+  bottom: 35px;
+  left: 10px;
+}
+.iframe .goback:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+.iframe .goback:active {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+.iframe iframe {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  width: 100%;
+  height: 100%;
+}
+.smallDate {
+  width: 180px;
+  height: 70px;
+  cursor: default;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border: 1px dotted rgba(200, 200, 200, 0);
+  border-radius: 5px;
+  padding: 10px;
+  transition: border .4s;
+  border: 1px solid red;
+}
+.smallDate .date_main {
+  width: 200px;
+}
+.smallDate .date_main .date_left {
+  width: 48px;
+  height: 68px;
+  border: 1px solid #E50020;
+  border-radius: 5px;
+  float: left;
+}
+.smallDate .date_main .date_left .styleCircle {
+  height: 14px;
+}
+.smallDate .date_main .date_left .styleCircle li {
+  width: 2px;
+  height: 2px;
+  border: 1px solid #E50020;
+  border-radius: 100%;
+  float: left;
+  margin: 5px 4px;
+}
+.smallDate .date_main .date_left .main {
+  text-align: center;
+  background: #fd9187;
+  width: 40px;
+  height: 45px;
+  margin: 0 auto;
+}
+.smallDate .date_main .date_left .main .month {
+  font-size: 12px;
+  color: #666;
+  padding-top: 5px;
+}
+.smallDate .date_main .date_left .main .day {
+  font-weight: bold;
+  font-size: 18px;
+  color: #fff;
+}
+.smallDate .date_main .date_right {
+  width: 130px;
+  height: 70px;
+  float: right;
+}
+.smallDate .date_main .date_right p {
+  font-size: 14px;
+  color: #666;
+  font-weight: bold;
+  text-shadow: 0 0 10px #fff;
+  line-height: 23px;
+}
+.cdPanel {
+  width: 315px;
+  height: 398px;
+  position: absolute;
+  right: 0;
+  bottom: -398px;
+  background: rgba(93, 64, 69, 0.9);
+  overflow: hidden;
+}
+.cdPanel .closeBtn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  padding: 5px;
+  text-align: center;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  border-radius: 10px;
+  color: #919594;
+  font-size: 18px;
+  transition: 0.3s;
+}
+.cdPanel .closeBtn:hover {
+  background: #da546e;
+  color: #fff;
+}
+#Mycalendar ul {
+  height: 30px;
+  border-bottom: 1px solid #ccc;
+}
+#Mycalendar ul li {
+  width: 45px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  float: left;
+  font-size: 16px;
+  color: #fff;
+}
+.panel {
+  width: 945px;
+  overflow: hidden;
+  background: background:rgba(93, 64, 69, 0.9);
+  position: absolute;
+  left: 0;
+}
+.dateLists,
+#dateListsNext {
+  width: 315px;
+  float: left;
+  height: 270px;
+  font-size: 0;
+}
+.dateLists span {
+  display: inline-block;
+  border-radius: 50%;
+  font-size: 16px;
+  color: #fff;
+  width: 45px;
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  cursor: default;
+  transition: all 0.2s ease-in-out;
+}
+.dateLists span:hover {
+  background: #d88b9a;
+}
+.dateLists span.active {
+  color: #fff;
+  background: #e15671;
+}
+.dateLists span.otherDates {
+  color: #999;
+}
+.dateLists span.otherDayActive {
+  background: #f86c87;
+}
+.datetTimer {
+  height: 42px;
+  width: 100%;
+  font-size: 14px;
+  text-indent: 12px;
+  color: #fff;
+  padding: 5px 0;
+}
+.datetTimer span {
+  font-size: 24px;
+}
+.datetTimer p {
+  font-size: 14px;
+  color: #e15671;
+}
+.toolerBar {
+  width: 100%;
+  height: 45px;
+  text-align: center;
+}
+.toolerBar a {
+  color: #666;
+  font-weight: bold;
+  padding: 0 5px;
+  background: rgba(75, 64, 88, 0.8);
+  color: #fff;
+}
+.toolerBar a.prev {
+  float: left;
+}
+.toolerBar a.next {
+  float: right;
+}
+.toolerBar .yearAndMouth {
+  display: inline-block;
+}
+.toolerBar .YMs {
+  display: inline-block;
+  width: 100px;
+  line-height: 45px;
+  transition: 0.5s;
+  color: #fff;
+  float: left;
+  padding: 0 12px;
+  font-size: 16px;
+  cursor: default;
+}
+.toolerBar .YMs:hover {
+  color: #e15671;
+  text-shadow: 0 0 10px #fff;
+}
+.toolerBar .changeCalendar {
+  float: right;
+  margin-top: 1px;
+}
+.toolerBar .changeCalendar a {
+  display: inline-block;
+  width: 30px;
+  height: 43px;
+  font-size: 16px;
+  line-height: 43px;
+  transition: 0.3s;
+}
+.toolerBar .changeCalendar a:hover {
+  background-color: #4b4044;
+}
+.changeCalendar a.prev {
+  background-position: 5px 0;
+}
+.changeCalendar a.next {
+  background-position: -23px 0;
+}
+.callTime {
+  width: 360px;
+  font-size: 20px;
+  text-align: center;
+  margin: 0 auto;
+}
+.allMonthList,
+.yearsLists {
+  width: 315px;
+  height: 270px;
+  color: #fff;
+  position: absolute;
+  bottom: 0;
+  font-size: 0;
+  background: #655459;
+  transition: all 0.8s ease;
+  transform: scale(0);
+}
+.allMonthList span,
+.yearsLists span {
+  width: 105px;
+  height: 67.5px;
+  border-radius: 50%;
+  display: inline-block;
+  font-size: 18px;
+  text-align: center;
+  line-height: 67.5px;
+  cursor: default;
+  transition: all 0.3s ease;
+}
+.allMonthList span:hover,
+.yearsLists span:hover {
+  background: #c0a8ae;
+}
+/*# sourceMappingURL=main.css.map */

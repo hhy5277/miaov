@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>logon</title>
+    <link rel="stylesheet" href="./css/logon.css">
+
+    <style type="text/css">
+        .jq22-content{
+            position: relative;
+
+        }
+        #holder {
+            position: absolute;
+        }
+    </style>
+</head>
+<body onselectstart="return false">
+<div class="jq22-container">
+    <header class="jq22-header">
+        <div class="jq22-demo center">
+        </div>
+    </header>
+    <div class="jq22-content">
+        <div id='holder'>
+            <div class="logon">
+                <div class="item"><img src="./img/logo1.png" alt="logo"></div>
+            </div>
+            <div class="reg" onselectstart="return false;">
+                <span class="titleQ">La Élite</span>
+                <div class="img">
+                    <audio id='test' src="music/pkq.mp3"></audio>
+                    <img src="./img/logo.jpg" alt="" style="width:180px;height:180px;">
+                </div>
+                <input type="text" class="ipt1" placeholder="请输入您的账号"/>
+                <input type="password" class="ipt2" placeholder="请输入您的密码" />
+                <a href="javascript:;" class="btn" id="aQy">登&nbsp&nbsp录</a>
+                <span id="forget">忘记密码?</span>
+                <div class="regBot">
+                    <input type="button" value="游客登陆" class="btn1"/>
+                    <input type="button" value="注册" class="btn2"/>
+                    <input type="button" value="账户安全" class="btn3"/>
+                </div>
+            </div>
+            <div class="reg1" onselectstart="return false;">
+                <img src="./img/back.png" alt="back" class="back">
+                <span class="titleQ">La Élite</span>
+                <div class="img">
+                    <img src="./img/logo.jpg" alt="" style="width:180px;height:180px;">
+                </div>
+                <input type="text" class="ipt1" placeholder="请输入您需要注册的用户名"/>
+                <input type="password" class="ipt2" placeholder="请输入您的密码" />
+                <input type="password" class="ipt3" placeholder="请再次输入您的密码" />
+                <input type="text" class="email" placeholder="请输入您的邮箱">
+                <input type="button" class="btn" value="注&nbsp&nbsp册">
+                <input type="checkbox" class="checkQ">
+                <span class="protocol">请详细阅读<a href="./txt/uesr.html">《用户协议》</a></span>
+            </div>
+            <div class="tips" onselectstart="return false;">
+                <span class="tip">
+                    <img src="./img/x.png" alt="close" class="close">
+                    <h3>温馨提示</h3><p>注册成功，您的账号为:</p><p class="name"></p><p>密码为:</p><p class="pas"></p><p>请牢记!</p>
+                </span>
+            </div>
+            <div class="tan">
+
+            </div>
+            <div class="reg2" onselectstart="return false;">
+                <img src="./img/back.png" alt="back" class="back">
+                <span class="titleQ">La Élite</span>
+                <div class="img">
+                    <img src="./img/logo.jpg" alt="" style="width:180px;height:180px;">
+                </div>
+                <span class="s">玩家朋友，游客模式将无法保障数据安全！删除游戏、更换设备等有可能会清除游戏数据</span>
+                <span class="s1">为了您的虚拟财产安全，强烈建议您用<p id="qy1">游客转正</p>进行游戏</span>
+                <a href="javascript:;" class="btn1" id="aQy1">继续登录</a>
+                <input type="button" value="游客转正" class="btn2">
+            </div>
+            <div class="reg3" onselectstart="return false;">
+                <img src="./img/back.png" alt="back" class="back">
+                <span class="titleQ">La Élite</span>
+                <div class="img">
+                    <img src="./img/logo.jpg" alt="" style="width:180px;height:180px;">
+                </div>
+                <input type="text" class="ipt1" placeholder="请输入您的手机号"/>
+                <input type="password" class="ipt2" placeholder="请输入验证码" />
+                <input type="button" id="btnQY" value="免费获取验证码" />
+                <input type="button" class="btn2" value="绑定账号">
+            </div>
+            <div class="reg4" onselectstart="return false;">
+                <img src="./img/back.png" alt="back" class="back">
+                <span class="titleQ">La Élite</span>
+                <div class="img">
+                    <img src="./img/logo.jpg" alt="" style="width:180px;height:180px;">
+                </div>
+                <input type="text" class="ipt1" placeholder="请输入您的手机号"/>
+                <input type="password" class="ipt2" placeholder="请输入验证码" />
+                <input type="button" id="btnQ" value="免费获取验证码" onclick="settime(this)" />
+                <input type="text" class="ipt3" placeholder="请重新设置密码">
+                <input type="button" class="btn2" value="确&nbsp&nbsp认">
+            </div>
+            <div class="msk" onselectstart="return false;">
+                <div class="layer" id="layer">
+                    <span class="btn_cls" id="btn_cls"></span>
+                    <h4>温馨&nbsp提醒</h4>
+                    <p id="tip_txt"></p>
+                </div>
+            </div>
+
+        </div>
+<script src="jq.js"></script>
+<script src="warpdrive.js"></script>
+<script src="js/bgm.js"></script>
+<script>
+    audio('img/纯音乐 - 开场伴奏.mp3',true);
+    $( document ).ready( function() {
+        var settings = {
+            width: 1366,
+            height: 768,
+            autoResize: false,
+            autoResizeMinWidth: null,
+            autoResizeMaxWidth: null,
+            autoResizeMinHeight: null,
+            autoResizeMaxHeight: null,
+            addMouseControls: true,
+            addTouchControls: true,
+            hideContextMenu: true,
+            starCount: 6666,
+            starBgCount: 2222,
+            starBgColor: { r:0, g:204, b:255 },
+            starBgColorRangeMin: 20,
+            starBgColorRangeMax: 80,
+            starColor: { r:0, g:204, b:255 },
+            starColorRangeMin: 50,
+            starColorRangeMax: 100,
+            starfieldBackgroundColor: { r:5, g:5, b:14 },
+            starDirection: 1,
+            starSpeed: 20,
+            starSpeedMax: 200,
+            starSpeedAnimationDuration: 2,
+            starFov: 300,
+            starFovMin: 200,
+            starFovAnimationDuration: 2,
+            starRotationPermission: true,
+            starRotationDirection: 1,
+            starRotationSpeed: 0.0,
+            starRotationSpeedMax: 1.0,
+            starRotationAnimationDuration: 2,
+            starWarpLineLength: 2.0,
+            starWarpTunnelDiameter: 100,
+            starFollowMouseSensitivity: 0.025,
+            starFollowMouseXAxis: true,
+            starFollowMouseYAxis: true
+
+        };
+        let warpdrive = new WarpDrive( document.getElementById( 'holder' ), settings );
+    } );
+
+</script>
+<script src="./js/logon.js"></script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/animate.css"/>
+		<link rel="stylesheet" type="text/css" href="css/main.css"/>
+	</head>
+	<body>
+		
+		<!--右键菜单-->
+		<div class="menu" id="menu">
+			<div class="menu-panel">
+				<ul id="menuList">
+					<li>
+						<span class="icon"></span>
+						<span class="title">查看(V)</span>
+						<i class="ic arrow"></i>
+						<div class="smallMenu currR" id="seeWay">
+							<a href="javascript:;">小图标</a>
+							<a href="javascript:;">大图标</a>
+							<a href="javascript:;">中等图标</a>
+						</div>
+					</li>
+					<li>
+						<span class="icon"></span>
+						<span class="title">排序方式(O)</span>
+						<i class="ic arrow"></i>
+						<div class="smallMenu currR" id="sorts">
+							<a href="javascript:;">修改日期</a>
+						</div>
+					</li>
+					<li>
+						<span class="icon"></span>
+						<span class="title">刷新(E)</span>
+					</li>
+					<li>
+						<span class="icon"></span>
+						<span class="title">新建文件夹(N)</span>
+					</li>
+					<li>
+						<span class="icon"></span>
+						<span class="title">显示设置</span>
+					</li>
+					<li>
+						<span class="icon"></span>
+						<span class="title">个性化</span>
+					</li>
+					<li>
+						<span class="icon"></span>
+						<span class="title">控制面板</span>
+					</li>
+					<li>
+						<span class="icon"></span>
+						<span class="title">清除本地存储</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+		
+		<!--desk-continer-->
+		<div class="desk-continer" id="deskContiner">
+			<!--<div class="file" id="garbage">
+				<div class="icon garbage"></div>
+				<p class="fileName">回收站</p>
+			</div>
+			<div class="file" id="music">
+				<div class="icon music"></div>
+				<p class="fileName">音乐</p>
+			</div>
+			<div class="file" id="video">
+				<div class="icon video"></div>
+				<p class="fileName">视频</p>
+			</div>
+			<div class="file" id="picture">
+				<div class="pic"></div>
+				<p class="fileName">照片墙</p>
+			</div>
+			<div class="file" id="calendar">
+				<div class="calendar"></div>
+				<p class="fileName">日历</p>
+			</div>-->
+		</div>
+		
+		
+		<!--时间控件-->
+		<div class="smallDate" id="smallDate">
+			<div class="date_main">
+				<div class="date_left">
+					<ul class="styleCircle">
+						<li></li><li></li><li></li><li></li>
+					</ul>
+					<div class="main">
+						<p class="month"></p>
+						<p class="day"></p>
+					</div>
+				</div>
+				
+				<div class="date_right">
+					<p class="time"></p>
+					<p class="date"></p>
+					<p class="week"></p>
+				</div>
+				
+			</div>
+		</div>
+		
+		<!--日历-->
+		<div class="cdPanel" id="cdPanel">
+			<a href="javascript:;" class="closeBtn" title="关闭">X</a>
+			<div id="Mycalendar"></div>
+		</div>
+		
+		<!--音乐-->
+		<div class="iframe" id="iframeMusic">
+			<a href="javascript:void(0)" class="goback" id="goback">返回</a>
+			<iframe frameborder="0" src="music/index.html"></iframe>
+		</div>
+		
+		<!--照片墙-->
+		<div class="iframe" id="iframephoto">
+			<a href="javascript:void(0)" class="goback" id="goback1">返回</a>
+			<iframe frameborder="0" src="photowall/index.html"></iframe>
+		</div>
+		
+		
+		
+		<script type="text/javascript" src="js/mTween.js"></script>
+		<script type="text/javascript" src="js/calendar.js"></script>
+		<script type="text/javascript" src="js/deskData.js"></script>
+		<script type="text/javascript" src="js/smallDate.js"></script>
+		<script type="text/javascript" src="js/Drags.js"></script>
+		<script type="text/javascript" src="js/desk.js"></script>
+		<script type="text/javascript">
+			window.onload = function(){
+				myDesk.init();
+				
+				new Drag().init({id:"smallDate"});
+				new tmCalender({id : "Mycalendar"}).init();
+			};
+		</script>
+		
+	</body>
+</html>

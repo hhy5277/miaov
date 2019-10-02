@@ -1,0 +1,775 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>前端开发培训 | 妙味课堂-你身边的IT培训专家</title>
+<meta name="description" content="妙味课堂是北京最资深的前端开发培训机构，妙味课堂拥有系统的JavaScript、HTML5、CSS3、移动开发、远程培训等课程，并录制成最系统的前端开发视频教程，妙味课堂推出的VIP前端学习平台已经成为学习氛围最浓郁的前端学习圈" />
+<meta name="keywords" content="JavaScript远程培训,JS远程培训,JavaScript培训,JS培训,JavaScript教程,HTML5培训,CSS3培训,北京前端培训,移动端培训,北京移动端培训,北京JS培训,北京JavaScript培训,北京HTML5培训" />
+<style>
+html, body { width:100%; height:100%; overflow:hidden; }
+body, h1, h2, ul, p { padding:0; margin:0; color:#777; font-size:12px; font-family:arial; }
+li { list-style:none; }
+img { border:none; }
+#box { width:100%; height:100%; background:#000 url(img/bg.png); }
+
+#menu { width:230px; height:100%; border-right:10px solid #cb0a56; position:absolute; top:0; left:0; z-index:2; }
+#menu h1 { height:130px; position:relative; }
+#menu h1 a { position:absolute; left:30px; top:40px; }
+
+#nav { width:210px; position:relative; left:20px; margin-bottom:30px; }
+#nav li { width:210px; height:31px; position:relative; vertical-align:middle; }
+#nav a { width:210px; height:30px; position:absolute; top:0; left:0; text-decoration:none; color:#fff; line-height:30px; text-indent:14px; z-index:2; opacity:0.5; filter:ahpla(opacity=50); }
+
+#nav .message { font-weight:bold; }
+#nav strong { font-weight:normal; height:30px; line-height:30px; font-size:9px; z-index:2; position:absolute; top:0; right:16px; z-index:2; color:#fff; filter:ahpla(opacity=50); opacity:0.5; }
+#nav span { width:0; height:30px; position:absolute; top:0; right:0; background:#cb0a56; z-index:1;}
+#nav ul { width:0px; height:0px;/* SB IE7 IE8 */ overflow:hidden; background:url(img/bg.png); position:absolute; top:0; left:220px; }
+
+#music { position:relative; left:20px; margin-bottom:12px; width:210px; height:30px; }
+#music p { position:absolute; top:-30px; left:0; width:210px; height:30px; filter:alpha(opacity=0); opacity:0; line-height:30px; color:#fff; text-align:center; }
+#music .wrap { width:210px; height:30px; overflow:hidden; position:relative; }
+#music ul { width:210px; height:30px; position:absolute; top:0; left:0; background:#171717; }
+#music li { width:30px; height:30px; float:left; position:relative; cursor:pointer; }
+#music span { display:block; width:30px; height:30px; position:relative; z-index:2; }
+#music strong { position:absolute; top:0; left:0; width:30px; height:30px; background:#cb0a56; filter:alpha(opacity=0); opacity:0; }
+#music .music_a1 { background:url(img/music_a1.png) no-repeat center; }
+#music .music_b1 { background:url(img/music_b1.png) no-repeat center; }
+#music .music_c1 { background:url(img/music_c1.png) no-repeat center; }
+#music .music_c2 { background:url(img/music_c2.png) no-repeat center; }
+#music .music_d1 { background:url(img/music_d1.png) no-repeat center; }
+#music .music_e1 { background:url(img/music_e1.png) no-repeat center; }
+#music .music_e2 { background:url(img/music_e2.png) no-repeat center; }
+#music .sound { width:50px; left:5px; }
+#music .sound div { height:3px; overflow:hidden; position:absolute; top:13px; left:0; }
+#music .sound1 { width:50%; background:#303030; z-index:2; }
+#music .sound2 { width:100%; background:#535353; z-index:1; }
+
+#attention { width:84px; height:20px; margin:0 auto; }
+#attention li { float:left; width:20px; height:20px; margin-right:8px; display:inline; position:relative; cursor:pointer; }
+#attention a { filter:alpha(opacity=50); opacity:0.5; float:left; }
+#attention span { width:86px; height:22px; overflow:hidden; background:url(img/attention_bg.png); position:absolute; top:22px; left:0; line-height:26px; text-align:center; color:#fff; filter:alpha(opacity=0); opacity:0; }
+
+#copyright { width:100%; text-align:center; color:#555; position:absolute; bottom:10px; left:0; }
+
+#menu_hider { width:20px; height:30px; background:#cc0a57 url(img/menu_hider_bg.png) no-repeat center; position:absolute; top:80px; right:-24px; filter:alpha(opacity=100); opacity:1; }
+
+#video_list { height:100%; margin-left:240px; position:relative; z-index:1; }
+#video_list ul { position:absolute; z-index:1; }
+#video_list li { width:0; height:0; position:absolute; left:0; top:0; cursor:pointer; overflow:hidden; }
+#video_list .info { width:100%; height:100%; position:absolute; top:0; left:100%; }
+#video_list strong { width:50px; height:50px; background:url(img/play_gallery.png); position:absolute; top:50%; left:50%; margin:-25px 0 0 -25px; z-index:2; }
+#video_list h2 { width:100%; text-align:center; position:absolute; left:0; bottom:20px; z-index:2; color:#fff; font-size:18px; }
+#video_list span { width:100%; height:100%; filter:alpha(opacity=50); opacity:0.5; background:#000; position:absolute; top:0; left:0; z-index:1; }
+
+#bar { width:10px; height:100%; position:absolute; top:0; right:0; z-index:2; background:#f1f1f1; }
+#bar a { width:100%; height:200px; background:#cb0a56; position:absolute; top:0; left:0; }
+#bar a:hover { background:#b0084a; }
+
+#video_wrap { width:100%; height:100%; position:absolute; top:0; right:0; z-index:4; display:none; }
+#video_wrap .video_box { width:70%; height:100%; position:absolute; top:0; left:0; z-index:2; }
+#video_wrap .close_btn { width:46px; height:46px; position:absolute; top:3%; right:2%; background:url(img/video_info_close_btn.png) no-repeat center; z-index:2; }
+#video_wrap .close_btn:hover { background:#cb0a56 url(img/video_info_close_btn.png) no-repeat center; }
+#video_wrap .prev, #video_wrap .next { background:#cb0a56; width:46px; height:46px; position:absolute; top:50%; margin-top:-23px; z-index:2; }
+#video_wrap .prev { left:2%; background:url(img/video_info_btn1.png) no-repeat center; }
+#video_wrap .next { right:2%; background:url(img/video_info_btn2.png) no-repeat center; }
+#video_wrap .prev:hover { background:#cb0a56 url(img/video_info_btn1.png) no-repeat center; }
+#video_wrap .next:hover { background:#cb0a56 url(img/video_info_btn2.png) no-repeat center; }
+#video_wrap .flash { width:640px; height:455px; position:absolute; top:50%; left:50%; margin:-225px 0 0 -320px; }
+
+#video_wrap .video_info { width:26%; height:100%; background:#fff; position:absolute; top:0; right:0; padding:0 2%; color:#3f3f3f; }
+#video_wrap h2 { font-size:18px; line-height:60px; border-bottom:1px solid #D9D9D9; padding-top:20px; }
+#video_wrap p { line-height:24px; padding-top:10px; }
+#video_wrap .fun { padding:10px; background:#f7f7f7; height:20px; text-align:right; position:relative; top:20px; }
+#video_wrap .fun a { display:inline-block; width:80px; height:20px; line-height:20px; text-decoration:none; color:#333; text-align:center; background:#ddd; }
+#video_wrap .fun a:hover { background:#eee; }
+#video_bg { width:100%; height:100%; background:#000; filter:alpha(opacity=0); opacity:0; position:absolute; top:0; right:0; z-index:3; display:none; }
+
+#prev_page ,#next_page { width:46px; height:46px; position:absolute; top:50%; margin-top:-23px; z-index:2; filter:alpha(opacity=50); opacity:0.5; }
+#prev_page:hover ,#next_page:hover { filter:alpha(opacity=100); opacity:1; }
+#prev_page { left:20px; background:#cb0a56 url(img/video_info_btn1.png) no-repeat center; }
+#next_page { right:40px; background:#cb0a56 url(img/video_info_btn2.png) no-repeat center; }
+
+#loader { width:48px; height:48px; background:#f1f1f1; position:absolute; top:50%; left:50%; margin:-24px 0 0 -24px; text-align:center; border:1px solid #000; }
+#loader img { position:relative; top:16px; }
+</style>
+<script src="move.js"></script>
+<script src="videoData.js"></script>
+<script src="miaovideo.js"></script>
+</head>
+
+<body>
+
+<div id="box">
+
+  <div id="video_wrap">
+
+    <div class="video_box">
+      <a class="close_btn" href="javascript:;"></a>
+      <a class="prev" href="javascript:;"></a>
+      <a class="next" href="javascript:;"></a>
+      <div class="flash"></div>
+    </div>
+
+    <div class="video_info">
+      <div class="video_content"></div>
+      <div class="fun">
+        <a href="http://www.miaov.com/2013/#message" target="_blank">留言</a>
+        <a href="http://bbs.miaov.com/forum.php?mod=forumdisplay&fid=5" target="_blank">提问</a>
+      </div>
+    </div>
+  </div>
+  <div id="video_bg"></div>
+
+  <div id="menu">
+    <h1 title="妙味课堂 - 视频教程"><a href="http://www.miaov.com/2013/miaovideo/miaovideo.html"><img src="img/miaov_logo.png" /></a></h1>
+    <ul id="nav">
+      <li>
+        <a href="http://www.miaov.com/2013/download/video_download.html">妙味视频总目录</a>
+        <span></span>
+      </li>
+      <li>
+        <a href="javascript:;">HTML+CSS整站视频</a>
+        <strong>+</strong>
+        <span></span>
+        <ul>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-5</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-6</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-7</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-8</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-9</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-10</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-11</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">XHTML+CSS2整站视频教程-12</a>
+            <span></span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="javascript:;">码农俱乐部-技术之夜-上</a>
+        <strong>+</strong>
+        <span></span>
+        <ul>
+          <li>
+            <a href="javascript:;">9种焦点图拓展-上</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">9种焦点图拓展-下</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">瀑布流效果的实现-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">瀑布流效果的实现-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">瀑布流效果的实现-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">瀑布流效果的实现-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">原生JS编写小蜜蜂游戏-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">原生JS编写小蜜蜂游戏-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">原生JS编写小蜜蜂游戏-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">jQuery编写推箱子游戏-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">jQuery编写推箱子游戏-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">jQuery编写推箱子游戏-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">jQuery编写推箱子游戏-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">妙味课堂原首页经典弹窗效果-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">妙味课堂原首页经典弹窗效果-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">妙味课堂原首页经典弹窗效果-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">妙味课堂原首页经典弹窗效果-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">妙味课堂原首页经典弹窗效果-5</a>
+            <span></span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="javascript:;">码农俱乐部-技术之夜-中</a>
+        <strong>+</strong>
+        <span></span>
+        <ul>
+          <li>
+            <a href="javascript:;">JS模块化开发-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">JS模块化开发-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">JS模块化开发-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">JS模块化开发-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">CSS3实现3D旋转轮播图-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">CSS3实现3D旋转轮播图-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">CSS3实现3D旋转轮播图-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">CSS3实现3D旋转轮播图-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">CSS3实现3D翻转焦点图-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">CSS3实现3D翻转焦点图-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">CSS3实现3D翻转焦点图-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5拖拽购物车-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5拖拽购物车-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5拖拽购物车-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5拖拽购物车-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5实现祖玛小游戏-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5实现祖玛小游戏-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5实现祖玛小游戏-3</a>
+            <span></span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="javascript:;">码农俱乐部-技术之夜-下</a>
+        <strong>+</strong>
+        <span></span>
+        <ul>
+          <li>
+            <a href="javascript:;">HTML5实现地理信息与本地存储-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5实现地理信息与本地存储-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5实现地理信息与本地存储-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5实现地理信息与本地存储-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5实现地理信息与本地存储-5</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5打造自定义播放器-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5打造自定义播放器-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5打造自定义播放器-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5打造自定义播放器-4</a>
+            <span></span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="javascript:;">JS原创视频教程-实例类：</a>
+        <strong>+</strong>
+        <span></span>
+        <ul>
+          <li>
+            <a href="javascript:;">百叶窗效果</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">原韩雪冬官网图片切换</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">自适应屏幕宽度的轮播图</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">JS实现的分页效果</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">原官网分页特效</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">JS实现的网页进度条</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">联动日历-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">联动日历-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">联动日历-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">联动下拉菜单</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">延迟菜单</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">多图片无缝切换</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">选中文字分享效果</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">微博登录suggest</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">微博发布框效果</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">瀑布流布局实例</a>
+            <span></span>
+          </li>
+        </ul>
+      </li>
+      <li>
+      	<a href="javascript:;">jQuery原创视频教程</a>
+        <strong>+</strong>
+        <span></span>
+        <ul>
+          <li>
+            <a href="javascript:;">jQuery原创视频教程-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">jQuery原创视频教程-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">jQuery原创视频教程-3</a>
+            <span></span>
+          </li>
+      	</ul>
+      </li>
+      <li>
+        <a href="javascript:;">JS原创视频教程-知识点类-1</a>
+        <strong>+</strong>
+        <span></span>
+        <ul>
+          <li>
+            <a href="javascript:;">DOM优化</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">快速排序</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">函数声明与表达式</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">操作iframe</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">枚举算法</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">事件委托</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">闭包</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">对象引用</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">JS中的跨域</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">firebug工具使用</a>
+            <span></span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="javascript:;">JS原创视频教程-知识点类-2</a>
+        <strong>+</strong>
+        <span></span>
+        <ul>
+          <li>
+            <a href="javascript:;">MVC系列-初探backbone-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">MVC系列-初探backbone-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">MVC系列-初探backbone-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">MVC系列-初探backbone-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">MVC系列-初探backbone-5</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5-canvas基础-1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5-canvas基础-2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5-canvas基础-3</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5-canvas基础-4</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5-canvas基础-5</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">HTML5-history(历史管理)</a>
+            <span></span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="javascript:;">面试题视频</a>
+        <strong>+</strong>
+        <span></span>
+        <ul>
+          <li>
+            <a href="javascript:;">JavaScript面试题系列1</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">JavaScript面试题系列2</a>
+            <span></span>
+          </li>
+          <li>
+            <a href="javascript:;">JavaScript面试题系列3</a>
+            <span></span>
+          </li>
+        </ul>
+      </li>
+  
+      <li>
+        <a class="message" href="http://www.miaov.com/2013/#message">::: 留言 :::</a>
+        <span></span>
+      </li>
+    </ul>
+
+    <div id="music">
+      <p>音乐的歌曲名称</p>
+      <div class="wrap">
+        <ul>
+          <li>
+            <span class="music_a1"></span>
+            <strong></strong>
+          </li>
+          <li>
+            <span class="music_b1"></span>
+            <strong></strong>
+          </li>
+          <li>
+            <span class="music_c1"></span>
+            <strong></strong>
+          </li>
+          <li>
+            <span class="music_d1"></span>
+            <strong></strong>
+          </li>
+          <li>
+            <span class="music_e1"></span>
+            <strong></strong>
+          </li>
+          <li class="sound">
+            <div class="sound1"></div>
+            <div class="sound2"></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <ul id="attention">
+      <li>
+        <a href="http://weibo.com/miaovclass" target="_blank"><img src="img/weibo_ico.png" /></a>
+        <span>新浪微博</span>
+      </li>
+      <li>
+        <a href="javascript:;"><img src="img/qq_ico.png" /></a>
+        <span>1056104999</span>
+      </li>
+      <li>
+        <a href="javascript:;"><img src="img/phone_ico.png" /></a>
+        <span>13141414820</span>
+      </li>
+    </ul>
+    <p id="copyright">miaov.com - 2013 - 版权所有</p>
+
+    <a id="menu_hider" href="javascript:;"></a>
+  </div>
+
+  <div id="video_list">
+
+      <div id="loader">
+        <img src="img/loader_ico.gif" />
+      </div>
+
+      <div id="bar">
+        <a href="javascript:;"></a>
+      </div>
+
+      <a id="prev_page" href="javascript:;"></a>
+      <a id="next_page" href="javascript:;"></a>
+
+      <ul>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+        <li>
+          <div class="info">
+            <strong></strong>
+            <h2>数据更新中……</h2>
+            <span></span>
+          </div>
+          <img src="img/video/default.png" />
+        </li>
+      </ul>
+
+    </div>
+</div>
+
+</body>
+</html>
+<!--[if IE 6]>
+<script type="text/javascript">
+    alert('系统检测到你居然还在用IE6？？？算了，你已经没救了，还是关了这窗口别往下看了！');
+    setInterval(function(){
+    alert('你居然还在用IE6看？？？真的，你彻底没救了，赶紧关了这窗口吧，或者用谷歌、火狐等浏览器吧！');
+   }, 10000);
+</script>
+<![endif]-->

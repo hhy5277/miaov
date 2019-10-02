@@ -1,0 +1,332 @@
+#body{
+	margin:0;
+	padding:0;
+	/*font-size:0;*/
+	overflow: hidden;
+	display:none;
+}
+i,em,strong{
+	margin: 0;
+	font-style: normal;
+}
+img{
+	vertical-align: top;
+}
+#box{
+	width:1366px;
+	height:768px;
+	/*background:url(../img/5.jpg) no-repeat;*/
+	background-size:100% 100%;
+	position: relative;
+}
+/*阴影*/
+.shadow{
+	width:200px;
+	height:200px;
+	border-radius: 200px;
+	background: -webkit-radial-gradient(circle,#1C1C1A, transparent);
+	transform: rotateX(75deg);
+	position: absolute;
+	top:230px;
+	left:880px;
+}
+/*敌人*/
+.enemy{
+	width:400px;
+	height:70px;
+	position: absolute;
+	top:100px;
+	left:100px;
+	/*background: url(../img/message.png) no-repeat;
+	background-size: 400px 100px;*/
+}
+.own{
+	top:400px;
+	left:900px;
+}
+.blood{
+	width:400px;
+	height:60px;
+	/*background:red;*/
+	position: relative;
+}
+.brown{
+	width:320px;
+	height:40px;
+	background: #6d5039;
+	border-radius:40px;
+	position: absolute;
+	top:-22px;
+	left:14px;
+	padding:0 10px;
+}
+
+.brown span:nth-of-type(1){
+	float:left;
+	font:18px/40px '微软雅黑';
+	color: #fff;
+}
+.brown span:nth-of-type(2){
+	float:right;
+	font:18px/40px '微软雅黑';
+	color: #fff;
+}
+.brown span i{
+	font:22px/40px '微软雅黑';
+	color: #fff;
+	padding:0 5px;
+}
+.l_triangle{
+	width:0;
+	height:0;
+	border-style: solid;
+	border-width: 30px 35px 30px 0;
+	border-color: transparent #d1bd95 transparent  transparent; 
+	float: left;
+}
+.m_div{
+	width:300px;
+	height:50px;
+	background:#d1bd95 ;
+	float: left;
+	padding-top:10px;
+}
+.m_div span:nth-of-type(1){
+	float:right;
+	font:18px/40px '微软雅黑';
+	color: #000;
+}
+.m_div span:nth-of-type(2){
+	float:right;
+	width:200px;
+	height:4px;
+	border:1px solid #000;
+	border-radius: 4px;
+	margin-top:18px;
+	margin-right:5px;
+	overflow: hidden;
+}
+.m_div span:nth-of-type(2) i{
+	float: left;
+	width:200px;
+	height:4px;
+	/*background: red;*/
+	background: #92c525;
+}
+.m_div span:nth-of-type(3){
+	float:left;
+	padding-left:130px;
+	font:bold 18px/30px '微软雅黑';
+	color: #000;
+}
+.r_triangle{
+	width:0;
+	height:0;
+	border-style: solid;
+	border-width: 30px 0 30px 35px;
+	border-color: transparent  transparent  transparent #d1bd95; 
+	float: left;
+}
+
+
+
+
+
+/*//形象*/
+.ownimg{
+	width:340px;
+	height:300px;
+	position: absolute;
+	top:288px;
+	left:185px;
+}
+.ownimg img{
+	display: inline-block;
+	width:340px;
+	height:300px;
+}
+.enemyimg{
+	width:270px;
+	height:270px;
+	position: absolute;
+	top:18px;
+	left:880px;
+	display: none;
+}
+.enemyimg img{
+	display: inline-block;
+	width:270px;
+	height:270px;
+}
+
+
+/*底部*/
+.footer{
+	width:100%;
+	height:180px;
+	/*background: skyblue;*/
+	position: absolute;
+	left:0;
+	bottom:0;
+	padding:0 20px;
+}
+
+.footer .f_l{
+	width:840px;
+	height:180px;
+	/*background: red;*/
+	position: relative;
+}
+.footer .f_l_bottom{
+	width:820px;
+	height:160px;
+	position: absolute;
+	top:10px;
+	left:10px;
+	background: #8a8c81;
+	border-radius: 5px;
+	box-shadow: 10px 0 5px rgba(191,191,191,.8),-10px 0 5px rgba(191,191,191,.8),0 -10px 5px rgba(191,191,191,.8),0 10px 5px rgba(191,191,191,.8);
+}
+
+.footer .jn{
+	position: absolute;
+	top:0;
+	left:0;
+	z-index: 222;
+	width:210px;
+	height:160px;
+	background:url(../img/fighting_bg.png) no-repeat;
+	background-size: 210px 200px;
+	padding-top:20px;
+}
+.footer .jn .img-size1{
+	position: absolute;
+	top:-1px;
+	left:4px;
+	width:50px;
+}
+.footer .jn .img-size2{
+	position: absolute;
+	top:1px;
+	left:1px;
+	width:56px;
+	height:58px;
+}
+.footer .jn strong{
+	display: inline-block;
+	width:88px;
+	color: #fff;
+	text-align: center;
+}
+.footer .jn2{
+	top:0;
+	left:210px;
+}
+.footer .jn3{
+	top:0;
+	left:420px;
+}
+.footer .jn4{
+	top:0;
+	left:630px;
+}
+.footer .f_r{
+	width:452px;
+	height:180px;
+	/*background: green;*/
+	position: absolute;
+	top:0;
+	right:40px;
+}
+.footer .f_r .f_r_bottom{
+	position: absolute;
+	top:10px;
+	left:10px;
+	width:430px;
+	height:160px;
+	background:rgba(191,191,191,.8);
+	border-radius: 5px;
+	box-shadow: 10px 0 5px rgba(191,191,191,.8),-10px 0 5px rgba(191,191,191,.8),0 -10px 5px rgba(191,191,191,.8),0 10px 5px rgba(191,191,191,.8);
+}
+.footer .spr{
+	background-size: 150px 200px;
+	padding-top:20px;
+	padding-left:8px;
+}
+.footer .spr img{
+	display: inline-block;
+	width:132px;
+	height:148px;
+}
+.footer .bag{
+	top:0;
+	left:150px;
+}
+.footer .run{
+	top:0;
+	left:300px;
+}
+
+
+
+
+
+
+.footer .f_l .jn span{
+	display: inline-block;
+	width:100%;
+	text-align: center;
+	font: 26px/40px "华文琥珀";
+	color: black;
+}
+.footer .f_l .jn div{
+	width:170px;
+	height:78px;
+	background: #aba87e;
+	/*display: inline-block;*/
+	margin: 12px auto 0;
+	border-radius: 10px;
+	padding-top:15px;
+	position: relative;
+}
+.f_l .jn div i{
+	position: absolute;
+	top:18px;
+	left:10px;
+	z-index: 222;
+	width:60px;
+	height:60px;
+	border-radius: 60px;
+	background: #302c21;
+}
+.f_l .jn div em{
+	position: absolute;
+	top:26px;
+	left:55px;
+	width:90px;
+	height:45px;
+	border-radius: 7px;
+	background: #302c21;
+	padding-left:10px;
+}
+.skill{
+	position: absolute;
+	top: 60px;
+	left: 850px;
+	z-index: 5;
+}
+
+/* 对话框 */
+.dia{
+	width: 100%;
+	height: 35%;
+	position: absolute;
+	z-index: 999;
+	top:73%;
+	left: 0;
+	background: #6d5039;
+	border-top: 1px solid black;
+	font-size: 20px;
+	color: white;
+	font-weight:bold ;
+}

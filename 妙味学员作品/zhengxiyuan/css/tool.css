@@ -1,0 +1,63 @@
+.fl{
+	float: left;
+}
+.fr{
+	float: right;
+}
+.clearfix:after{
+	content: "";
+	display: block;
+	clear: both;
+}
+.wrap2{
+	width: 1200px;
+	margin: 0 auto;
+}
+.title_box{
+	margin-bottom: 16px;
+}
+.item_left:hover label{
+	color: red;
+}
+.text_money:hover label{
+	color: red;
+}
+.item_zi:hover{
+	color: red;
+}
+.nav_zi_hot:hover{
+	color: red;
+}
+.label_zi:hover{
+	color: red;
+}
+.square_box:hover a{
+	color: #ff3c3c;
+}
+.keyword .keyword_bg{
+	overflow: hidden;
+}
+.keyword_zi:hover{
+	color: red;
+}
+.tag_zi:hover{
+	color: red;
+}
+.zongse:hover{
+	color: #cea145;
+}
+.refer:hover{
+	color: red;
+}
+.ft_bt_zi:hover{
+	color: red;
+}
+.xbt{
+	background: url(../img2/xuebitu2-1.png) no-repeat;
+}
+.tier{
+	position: relative;
+}
+.brno{
+	border-right: none;
+}

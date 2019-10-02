@@ -1,0 +1,356 @@
+
+body{ 
+	width: 100%; 
+	/*height: 100%;*/
+	
+}
+#header .about {
+	display: none;
+}
+
+#initBg {
+	position: fixed;
+	top: 0;
+	left: 0;
+	opacity: 1;
+	width: 100%;
+	height: 100%;
+	background: #fff url(../img/bg.jpg) 0 0 no-repeat fixed;
+	background-size: 100% 100%;
+	transition: 0s;
+	z-index: 0;
+}
+
+#mainWrap {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+}
+
+div#pos1 {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 630px;
+	width: 100%;
+	z-index: 4;
+}
+
+div#pos1 h2 {
+	width: 100%;
+	height: 120px;
+	font: 120px/120px normal;
+	font-family: cervoNorm;
+	color: rgba(41,41,41,.08);
+	font-weight: bold;
+	position: absolute;
+	top: 170px;
+	left: 0;
+	text-align: center;
+	
+}
+div#pos1 h1 {
+	width: 100%;
+	font: 50px/60px normal;
+	font-family: cervoThin;
+	color: #353535;
+	position: absolute;
+	top: 254px;
+	letter-spacing: 14px;
+	left: 0;
+	text-align: center;
+
+}
+div#pos2 {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #fff url(../img/bg-gae.jpg) 0 0 no-repeat fixed;
+	background-size: cover;
+	z-index: 2;	
+}
+div#pos2_1 {
+	position: absolute;
+	top: 630px;
+	left: 0;
+	width: 100%;
+	height: 630px;
+	line-height: 630px;
+	text-align: center;
+	z-index: 4;
+}
+div#pos2_1 img{
+	vertical-align: middle;
+}
+
+article#pos3 {
+	position: absolute;
+	width: 700px;
+	height: 630px;
+	top: 1320px;
+	left: 260px;
+	z-index: 4;
+}
+
+
+article.desc {
+	z-index: 4;
+}
+article.desc h1 {
+	width: 68%;
+	font: 50px/70px normal;
+	font-family: cervoThin;
+	color: #353535;
+	letter-spacing: 8px;
+	left: 0;
+	text-transform: uppercase;
+}
+
+article.desc h2{
+	width: 64%;
+	margin-top: 20px;
+	font: 20px/30px normal;
+	font-family: cervoThin;
+	color: #373a3c;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+}
+article.desc p {
+	width: 64%;
+	margin-top: 30px;
+	font: 16px/20px normal;
+	font-family: cervoThin;
+	color: #666;
+}
+
+div#pos4 {
+	position: absolute;
+	top: 1460px;
+	left: 780px;
+	width: 24%;
+	z-index: 4;
+
+
+}
+div#pos4 img {
+	width: 100%;
+	height: auto;
+}
+
+
+div#pos5 {
+	position: absolute;
+	top: 1840px;
+	left: 200px;
+	width: 36%;
+	z-index: 4;
+
+
+}
+
+div#pos5 img {
+	width: 100%;
+	height: auto;
+}
+
+
+div#pos6 {
+	position: absolute;
+	top: 2480px;
+	left: 0;
+	width: 100%;
+	height: 630px;
+	line-height: 630px;
+	text-align: center;
+	z-index: 4;
+
+}
+div#pos6 img{
+	vertical-align: middle;
+}
+
+article#pos7 {
+	position: absolute;
+	top: 3240px;
+	right: 200px;
+	text-align: right;
+	z-index: 4;
+
+}
+article#pos7 h1{
+	margin-left: 22%;
+	width: 80%;
+	margin-bottom: 40px;
+	letter-spacing: 20px;
+}
+article#pos7 h2{
+	margin-left: 36%;
+}
+article#pos7 p{
+	margin-left: 60%;
+	width: 40%;
+	font-size: 20px;
+	letter-spacing: 2px;
+}
+
+div#pos8 {
+	position: absolute;
+	top: 3390px;
+	left: 160px;
+	width: 26%;
+	z-index: 4;
+
+
+}
+
+div#pos8 img {
+	width: 100%;
+	height: auto;
+
+}
+
+div#pos9 {
+	position: absolute;
+	top: 3900px;
+	right: 200px;
+	width: 30%;
+	z-index: 4;
+
+
+}
+div#pos9 img {
+	width: 100%;
+	height: auto;
+}
+
+
+
+div#pos10 {
+	position: absolute;
+	top: 4200px;
+	left: 160px;
+	width: 34%;
+	z-index: 4;
+
+
+}
+div#pos10 img{
+	width: 100%;
+	height: auto;
+}
+
+div#pos11 {
+	position: absolute;
+	top: 4800px;
+	left: 0;
+	width: 100%;
+	height: 630px;
+	line-height: 630px;
+	text-align: center;
+	z-index: 4;
+
+}
+div#pos11 video {
+	width: 60%;
+	vertical-align: middle;
+}
+
+article#pos12 {
+	position: absolute;
+	top: 5400px;
+	left: 300px;
+	z-index: 4;
+	
+}
+article#pos12 h2 {
+	margin-top: 40px;
+	width: 40%;
+}
+
+
+
+
+article#pos12 p{
+	width: 40%;
+	font-size: 16px;
+}
+
+div#pos13 {
+	position: absolute;
+	top: 5530px;
+	right: 160px;
+	width: 26%;
+	z-index: 4;
+
+
+}
+div#pos13 img {
+	width: 100%;
+	height: auto;
+}
+div#pos14 {
+	width: 30%;
+	position: absolute;
+	top: 6000px;
+	left: 160px;
+	z-index: 4;
+
+
+}
+div#pos14 img { 
+	width: 100%;
+	height: auto;
+}
+
+#footer {
+	position: absolute;
+	top: 6300px;
+	right: 0;
+	font-size: 14px;
+	font-family: cervoNorm;
+	font-weight: bold;
+	letter-spacing: 4px;
+	color: #999;
+	padding: 30px;
+	height: 60px;
+	z-index: 4;
+}
+
+#footer .footer-right p{
+	line-height: 30px;
+	text-align: right;
+}
+
+#footer .footer-right a {
+	color:#333;
+	font-weight: bold;
+}
+#footer .footer-right a.active {
+	color: #999;
+}
+
+
+.unActiveBg {
+	opacity: 0;
+	transition: 1.2s ease-out .2s;
+}
+
+
+.unActive {
+	opacity: .1;
+	transition: 1.2s ease-out .2s;
+	transform :scale(1.2) translateY(120px);
+}
+
+
+
+
+
+
+
+
+
+

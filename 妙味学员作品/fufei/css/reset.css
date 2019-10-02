@@ -1,0 +1,78 @@
+
+body,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+dl,
+dd,
+form {
+	margin: 0;
+}
+ul,
+ol {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+a {
+	text-decoration: none;
+}
+img {
+	border: none;
+	vertical-align: top;
+}
+input,
+textarea {
+	margin: 0;
+	padding: 0;
+	outline: none;
+}
+select {
+	outline:none;
+}
+textarea {
+	resize: none;
+	overflow: auto;
+}
+table {
+	border-collapse: collapse;
+}
+th,
+td {
+	padding: 0;
+}
+
+
+/* è¡¥ï¼š è¾“å…¥ç±»åž‹çš„è¡¨å•æœ‰é»˜è®¤å­—ä½“é«˜åº¦13.333 ä¸ä¼šç»§æ‰¿ï¼› */
+
+/* ç§»åŠ¨ç«¯ */
+
+a,
+input,
+button {
+	-webkit-tap-hightlight-color: rgba(0,0,0,0)
+}
+
+/* iosåœ†è§’button */
+
+input,
+button {
+	-webkit-appearance: none;
+	border-radius: 0;
+}
+
+body {
+	font-family: Helvetica;
+}
+body * {
+	// ç¦æ­¢æ–‡å­—ç¼©æ”¾,å¦åˆ™æ¨ªç«–å±åˆ‡æ¢ä¼šæ”¹å˜å­—ä½“å¤§å°
+	-webkit-text-size-adjust: 100%;
+	// ç¦æ­¢æ–‡å­—é€‰ä¸­
+	-webkit-user-select: none;
+}
+
+

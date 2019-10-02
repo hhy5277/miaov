@@ -1,0 +1,1 @@
+﻿document.writeln("本站带宽由[<a href=\"http:\/\/www.muu.cc\"><font color=\"red\">MUU.CC<\/font><\/A>]友情提供<br>关注Linux，关注LinuxIDC.com，<font color=\"red\">请向您的QQ好友宣传LinuxIDC.com<\/font>，多谢支持！")

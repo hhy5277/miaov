@@ -1,0 +1,456 @@
+body, h1, h2, h3{
+    margin: 0;
+    padding: 0;
+}
+.clearfix{
+    *zoom:1;
+}
+.clearfix:after{
+    content: "";
+    display: block;
+    clear: both;
+}
+ul{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+a{
+    text-decoration: none;
+}
+img{
+    vertical-align: top;
+    border:none;
+    border-radius: 13px;
+}
+input{
+    padding: 0;
+    margin: 0;
+    border:0;
+    outline: none;
+}
+#box1{
+    width: 100%;
+    height:768px;
+    overflow: hidden;
+    background: url("../img/bj.jpg");
+    background-size: 100%;
+    position: relative;
+    display:none;
+}
+.hade{
+    width:100%;
+    height:92px;
+    position: relative;
+    
+}
+.hade h3{
+    font-size: 45px;
+    color: #efd20c;
+    position: absolute;
+    left:129px;
+    top:10px;
+    text-shadow:5px 5px 1px #915c0b;
+    color: #ffffd2;
+    /*margin: 15px 0 0 15px;*/
+}
+.box1{
+    width: 1080px;
+    height:536px;
+    border:3px solid #1e1e2a;
+    border-radius: 30px;
+    margin: 0 auto;
+    padding-top: 10px;
+    background-color: #fefefd;
+}
+.close{
+    width: 63px;
+    height:64px;
+    background-color: #0090f2;
+    position: absolute;
+    top:6px;
+    right: 15px;
+    background: url("../img/close.png");
+    background-size: 62px;
+    display:block;
+}
+.shop_left{
+    width: 195px;
+    height:100%;
+    float: left;
+}
+.shop_left li{
+    width: 160px;
+    height:88px;
+    background-color: #c44db7;
+    margin: 0 auto;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    position: relative;
+}
+
+.shop_left li span{
+    position: absolute;
+    top:0;
+    left:0;
+    display: block;
+    width: 160px;
+    height:88px;
+    background: rgba(250,250,250,.6);
+    font: bold 30px/88px "serif";
+    text-align: center;
+}
+.shop_right{
+    width: 857px;
+    height:503px;
+    border: 2px solid #d1cdbd;
+    border-radius: 15px;
+    float: left;
+    padding: 4px 6px;
+    position: relative;
+    overflow: hidden;
+}
+.pr_left{
+    width: 636px;
+    height:100%;
+    float: left;
+}
+.shop_map{
+    width: 636px;
+    height:286px;
+    /*background-color: #ffd583;*/
+    margin-bottom: 4px;
+}
+.shop_details{
+    width: 636px;
+    height:210px;
+    border-radius: 15px;
+    position: relative;
+    overflow: hidden;
+}
+.shop_details .details_hade{
+    width: 616px;
+    height:38px;
+    padding: 6px 0 0 20px;
+    background: url("../img/xpx.png") repeat-x;
+    border-radius: 15px 15px 0 0;
+    margin-bottom: 7px;
+}
+.details_hade h3{
+    font-size: 20px;
+    text-shadow:5px 5px 1px #915c0b;
+    color: #ffffd2;
+    /*-webkit-text-stroke: 1.5px;*/
+    /*-webkit-text-fill-color: #ffffd2;*/
+}
+.shop_details .details_introduce{
+    width: 2000px;
+    position: absolute;
+    bottom:10px;
+    left:0;
+}
+.details_introduce li{
+    width: 182px;
+    height:143px;
+    border-radius: 30px;
+    margin-right: 10px;
+    float: left;
+    background: url("../img/introduce-1.png");
+    position: relative;
+}
+.details_introduce li span{
+    font: bold 16px/28px "微软雅黑";
+    display: block;
+    text-align: center;
+    color: #666;
+}
+.details_introduce li .adaline{
+    width:73px;
+    height:73px;
+    margin: 0 auto;
+    /*background: url("img/lea.png");*/
+}
+.details_introduce li i{
+    position: absolute;
+    top:108px;
+    left:75px;
+    display: block;
+    color: white;
+}
+.pr_right{
+    width:206px;
+    height:100%;
+    float: right;
+}
+.pr_right .arig_hade{
+    width:198px;
+    height:36px;
+    padding: 6px 0 0 6px;
+    background: url("../img/xpx.png") repeat-x;
+    border-radius: 15px 15px 0 0;
+
+}
+.pr_right .arig_hade h3{
+    font-size: 20px;
+    text-shadow:5px 5px 1px #915c0b;
+    color: #ffffd2;
+}
+.rig_commodity{
+    padding-left: 10px;
+    overflow: hidden;
+}
+.rig_commodity li{
+    width:182px;
+    height:143px;
+    border-radius: 30px;
+    margin: 0 auto;
+    margin-top: 6px;
+    background: url("../img/introduce-2.png");
+
+}
+.active{
+    border:6px solid #83fd01;
+
+}
+.gift_bag li{
+    width:398px;
+    height:238px;
+    border-radius: 18px;
+    margin: 8px 15px 8px 15px;
+    float: left;
+    position: relative;
+}
+.gift_bag li a{
+    width:134px;
+    height:66px;
+    position: absolute;
+    bottom: 13px;
+    left:206px;
+}
+.gift_bag li span{
+    position: absolute;
+    top: 0;
+    left:0;
+    color:rgba(250,250,250,.0)
+}
+.jewel li{
+    width:186px;
+    height:195px;
+    position: relative;
+    background: url("../img/jewel.png");
+    margin: 14px;
+    float: left;
+}
+.jewel li .adaline img{
+    margin-left: 38px;
+}
+.jewel li span{
+    font: bold 16px/28px "微软雅黑";
+    display: block;
+    text-align: center;
+    color: #666;
+    line-height: 35px;
+}
+.jewel li i{
+    position: absolute;
+    top: 160px;
+    left: 75px;
+    display: block;
+    color: white;
+}
+.gold li{
+    background: url("../img/jewel-a.png");
+}
+.shade{
+    position: absolute;
+    top:0;
+    left: 0;
+    width:100%;
+    height:100%;
+    background-color: rgba(15,5,4,.6);
+    display: none;
+}
+.shade .pop-up{
+    width:416px;
+    height:563px;
+    border: 2px solid #553013;
+    border-radius: 15px;
+    background-color: #ffffff;
+    margin: 35px auto;
+    /*overflow: hidden;*/
+}
+.shade .pop-up .popHade{
+    height:48px;
+    background: url("../img/hade.png");
+    border-radius: 15px 15px 0 0;
+    position: relative;
+}
+.popHade .pop_close{
+    width:60px;
+    height:64px;
+    /*background-color: blue;*/
+    border-radius: 30px;
+    position: absolute;
+    background: url(../img/close.png);
+    background-size: 62px;
+    top: -16px;
+    right: -13px;
+}
+.content{
+    padding-top: 20px;
+    padding-left: 15px;
+}
+.content span{
+    font-size: 18px;
+    line-height: 32px;
+    color: #9d6b14;
+    margin-left: 8px;
+    display: block;
+    float: left;
+    width:250px
+
+}
+.comm{
+    width:110px;
+    height:110px;
+    /*background: url("img/lea.png");*/
+    background-size: 110px;
+    float: left;
+}
+.comm img{
+    width:110px;
+    height:110px;
+}
+.money{
+    width:110px;
+    height:36px;
+    margin-left: 8px;
+    float: left;
+    background: url("../img/money.png");
+    padding-left: 88px;
+    line-height: 36px;
+    font-size: 24px;
+    color: white;
+}
+.content p{
+    display: block;
+    float: left;
+    width:340px;
+    height:200px;
+    margin-top: 16px;
+    border: 2px solid #877148;
+    border-radius: 10px;
+    font:bold 18px/28px "微软雅黑" ;
+    color: #523410;
+    background: #b8af88;
+    padding: 0 20px 0 20px;
+    margin-bottom: 0;
+}
+
+.foot input{
+    width:74px;
+    height:66px;
+    border:1px solid #845d10;
+    border-radius: 5px;
+    font-size: 28px;
+    line-height: 66px;
+    text-align: center;
+    margin: 10px auto;
+    display: block;
+    background: #fbf9ae;
+}
+.foot .buy{
+    width:134px;
+    height:66px;
+    margin: 0 auto;
+    background: url("../img/buy.png");
+}
+.drill{
+    position: absolute;
+    top:0;
+    left: 0;
+    width:100%;
+    height:100%;
+    background-color: rgba(15,5,4,.6);
+    display: none;
+}
+.drill .tk{
+    width:400px;
+    height:200px;
+    background: rgba(255,255,255,.7);
+    margin: 180px auto;
+    border-radius: 15px;
+}
+.drill .tk span{
+    display: block;
+    font-size: 20px;
+    line-height: 80px;
+    color: #ae330d;
+    text-align: center;
+}
+.tk .btn{
+    width:346px;
+    margin: 20px auto;
+}
+.tk .btn .confirm{
+    width:142px;
+    height:74px;
+    border-radius: 22px;
+    background: url("../img/btn-1.png");
+    float: left;
+}
+.tk .btn .cancel{
+    width:142px;
+    height:74px;
+    border-radius: 22px;
+    background: url("../img/btn-2.png");
+    float: right;
+}
+.hint{
+    position: absolute;
+    /*z-index: 999999;*/
+    top: 290px;
+    left: 526px;
+    width:274px;
+    font: 18px/30px "微软雅黑";
+    color:white;
+    text-align: center;
+    border:1px solid #ccc;
+    background: rgba(0,0,0,.6);
+    border-radius: 8px;
+    padding: 10px;
+    margin: 0 auto;
+    display: none;
+}
+.explain{
+    width:100%;
+    height:100%;
+    position: absolute;
+    left:0;
+    top:0;
+    background: rgba(0,0,0,.5);
+    z-index: 9999;
+    display: none;
+}
+.explain .operation{
+    width:400px;
+    height:300px;
+    padding: 80px 20px 0 20px;
+    border:3px solid #00BFFF;
+    border-radius: 20px;
+    margin: 150px auto;
+    background: rgba(26,27,29,.5);
+    color: white;
+    font: 30px/50px "微软雅黑";
+    position: relative;
+}
+.explain .shut-shut{
+    width: 60px;
+    height: 64px;
+    border-radius: 30px;
+    position: absolute;
+    background: url(../img/close.png);
+    background-size: 62px;
+    top: -16px;
+    right: -13px;
+}
