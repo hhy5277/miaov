@@ -1,0 +1,763 @@
+git init 
+
+git clone
+
+git config --list
+
+git config --global user.name
+
+git config --global use.email 
+
+set LANG=zh_CN.UTF-8  //在命令行工具的环境变量中添加，解决代码或文件夹乱码问题
+
+git config --global core.quotepath false //解决中文文件名乱码的问题
+
+git log  查看提交信息
+
+git log commit_id  查看某次提交
+
+git log -p 查看详细提交信息
+
+git log -n 查看n条提交信息
+
+回车查看下一屏log
+
+q退出 git log  
+
+
+工作区 暂存区（过渡层、避免误操作、保护工作区和版本区、分支处理） 版本库
+
+
+git status 查看各个区的状态  三个数字分别代表  增加 修改 删除的文件数
+
+	-s  == git status short 简化打印内容
+
+git add filename   工作区单个文件filename添加到暂存区
+
+git add .     工作区的所有文件添加到暂存区
+
+
+git commit -m  暂存区的文件添加到 版本区 并添加注释
+
+git commit -a -m 工作区的文件添加到暂存区 并从暂存区 添加到 版本区 并添加注释（该简写方式只针对已经暂存过的文件，即已经tracked的文件）
+
+
+移动/重命名
+git mv a.txt aa/a.txt
+
+
+比较
+git diff 比较工作区和暂存区的文件
+
+git diff --cached(--staged) 比较暂存区和版本区的文件
+
+git diff master 比较工作区和版本区的文件
+
+
+撤销
+git reset HEAD <file.name>  取消已经暂存的文件 撤销提交到暂存区的文件（清理暂存区）
+
+git checkout -- <file.name>  取消对文件的修改 撤销工作区的文件的修改 拉取版本区文件
+
+git commit --amend  修改最后一次提交 提交完了才发现漏掉了几个文件没有加，或者提交信息写错了。想要撤消刚才的提交操作，可以先add 然后使用加--amend 选项重新提交
+
+
+删除
+git rm <file.name/file_path>  删除工作区文件，之后commit删除暂存区的文件
+
+git rm -f <file.name/file_path> 删除暂存区文件同时强制删除工作区文件
+
+git rm --cached <file.name/file_path> 删除暂存区文件 保留工作区文件
+
+
+恢复【删除错误提交的commit】
+git reset有三个选项，--hard、--mixed、--soft。
+//仅仅只是撤销已提交的版本库，不会修改暂存区和工作区
+git reset --soft 版本库ID
+ 
+
+//仅仅只是撤销已提交的版本库和暂存区，不会修改工作区
+git reset --mixed 版本库ID
+ 
+
+//彻底将工作区、暂存区和版本库记录恢复到指定的版本库
+git reset --hard 版本库ID
+
+git checkout commit_id <file.name>  将某个文件恢复到某次提交（某个版本）
+
+git reset --hard commit_id   将整个版本还原到某次提交（某个版本）
+
+git reset --hard HEAD^  往回回一个版本
+
+git reset --hard --HEAD~<num>  往回回num个版本
+
+git reflog  打印出操作记录 （如果版本回到了过去某个版本，再使用这个展示操作的记录，可以重新回到当前版本）
+
+
+远程操作
+git remote 查看远程仓库名称  
+
+git remote add 可以修改远程仓库名称
+
+git remote -v 查看远程仓库名称、地址
+
+git push origin master 同步到远程仓库
+
+
+多人协作解决冲突
+git fetch  拉取而不合并
+ >> git diff master orgin/master  比较本地和远端代码
+ >> git merge origin/master  解决冲突后  手动合并
+
+git pull 拉取并自动合并
+
+
+git分支
+git branch  显示分支
+git branch <branchname>  创建分支
+	-d <branchname>删除已合并的分支
+	-D <branchname>强制删除分支
+	--merged  已合并的分支
+	--no-merged  未合并的分支
+	
+git checkout <branchname>  切换分支
+git checkout -b <branchname> 创建并切换分支
+		
+git merge <branchname> 合并 branchname分支到当前分支  如果	branchname 和 当前分支都对同一个地方有修改 ，merge后 需要手动解决冲突，然后再次git commit -a -m ''
+
+
+github分支
+git push
+
+github上直接创建
+
+github上的标签
+git tag  <version> 打标签
+git push orgin <version>  把打的标签推送到远端
+
+github上直接创建
+
+
+github创建个人博客
+https://pages.github.com/
+
+
+创建别名
+git config --global alias.co checkout  创建checkout的别名co
+
+
+git stash  能够将所有未提交的修改（工作区和暂存区）保存至堆栈中，用于后续恢复当前工作目录。
+git stash save "注释"   作用等同于git stash，区别是可以加一些注释
+git stash list  查看当前stash中的内容
+git stash apply   将堆栈中的内容应用到当前目录，不同于git stash pop，该命令不会将内容从堆栈中删除，
+也就说该命令能够将堆栈的内容多次应用到工作目录中，适应于多个分支的情况。可以使用git stash apply + stash名字（如stash@{1}）指定恢复哪个stash到当前的工作目录。
+git stash pop  将当前stash中的内容弹出，并应用到当前分支对应的工作目录上。 注：该命令将堆栈中最近保存的内容删除（栈是先进后出） 
+git stash drop + 名称  从堆栈中移除某个指定的stash
+git stash clear  清除堆栈中的所有 内容
+git stash show  查看堆栈中最新保存的stash和当前目录的差异。
+git stash show stash@{1}查看指定的stash和当前目录差异。 
+通过 git stash show -p 查看详细的不同
+git stash branch   从最新的stash创建分支。 
+
+
+
+git 推送出现 "fatal: The remote end hung up unexpectedly" 解决方案
+
+方法一：
+
+修改提交缓存大小为500M，或者更大的数字
+
+git config --global http.postBuffer 524288000
+
+# some comments below report having to double the value:
+
+git config --global http.postBuffer 1048576000 
+
+git config --global http.postBuffer 1572864000
+
+或者在克隆/创建版本库生成的 .git目录下面修改生成的config文件增加如下：
+
+[http]  
+postBuffer = 524288000
+
+
+方法二：
+
+配置git的最低速度和最低速度时间：
+
+git config --global http.lowSpeedLimit 0
+git config --global http.lowSpeedTime 999999  单位 秒
+--global
+配置对当前用户生效，如果需要对所有用户生效，则用
+--system
+
+
+
+.gitignore规则不生效
+.gitignore只能忽略那些原来没有被track的文件，如果某些文件已经被纳入了版本管理中，则修改.gitignore是无效的。
+解决方法就是先把本地缓存删除（改变成未track状态），然后再提交:
+git rm -r --cached .
+git add .
+git commit -m 'update .gitignore'
+
+
+
+warning: CRLF will be replaced by LF in XXX . The file will have its original line endings in your working directory.
+
+解决方法，非常简单，就一个命令行就可以解决的问题。
+
+git config core.autocrlf false  //将设置中自动转换功能关闭
+
+CRLF : windows 环境下的换行符
+LF ： linux 环境下的换行符
+
+这个错误的意思，就是文件中存在两种环境的换行符，git 会自动替换 CRLF 为 LF ，所以提示警告。
+
+
+
+git 优雅的撤销中间某次提交
+
+当想撤销中间某次提交时，强烈建议使用revert命令，而不是reset。 
+git reset –hard commit_id 虽然可以回退远程库，但是其要求pull最新代码的每个人的本地分支都要进行版本回退。这样就增加工作量了！
+
+正确的步骤：
+
+git revert commit_id
+//如果commit_id是merge节点的话,-m是指定具体哪个提交点
+git revert commit_id -m 1
+//接着就是解决冲突
+git add -A
+git commit -m ".."
+git revert commit_id -m 2
+//接着就是解决冲突
+git add -A
+git commit -m ".."
+git push
+
+其中git revert commit_id -m 数字是针对，merge提交点的操作。 
+如果是普通的提交点，不需要这么麻烦。
+
+
+通过将git配置变量 core.quotepath 设置为false，就可以解决中文文件名称在这些Git命令输出中的显示问题,
+
+如：git config --global core.quotepath false
+
+
+
+GIT提交空目录
+git和 svn不同，仅仅跟踪文件的变动，不跟踪目录。所以，一个空目录，如果里面没有文件，即便 git add这个目录，另外在别处 check out 的时候，是没有这个空目录的。
+
+只跟踪文件变化，不跟踪目录，这么设计是有原因的。但这会带来一些小麻烦。有时候，确实需要在代码仓库中保留某个空目录。比如测试时需要用到的空目录。下面来看看如何解决。
+
+其实这里有两种情况：
+
+一、目录是空的
+
+这种情况下只需要在目录下创建.gitkeep文件，然后在项目的.gitignore中设置不忽略.gitkeep
+
+.gitkeep 是一个约定俗成的文件名并不会带有特殊规则
+
+二、目录中已经存在文件
+
+那就需要首先在根目录中设置!.gitignore，然后在目标目录也创建一个.gitignore文件，并在文件中设置
+
+*
+!.gitignore
+
+小结
+
+这样就可以在项目中提交空目录了
+
+
+
+
+git commit 代码时提示： Warning: Your console font probably doesn‘t support Unicode. If you experience trange characters in the output, consider switching to a TrueType font such as ucida Console!
+
+
+
+依次执行以下命令：
+
+git config  core.quotepath off
+
+git config  --unset i18n.logoutputencoding
+
+git config  --unset i18n.commitencoding
+
+再次git commit和git push应该就不会弹出了
+
+
+这个其实是编码格式的问题 
+
+ 
+
+在git中如果想忽略掉某个文件，不让这个文件提交到版本库中，可以使用修改根目录中 .gitignore 文件的方法（如无，则需自己手工建立此文件）。这个文件每一行保存了一个匹配的规则例如：
+
+
+# 此为注释 – 将被 Git 忽略
+ 
+*.a       # 忽略所有 .a 结尾的文件
+!lib.a    # 但 lib.a 除外
+/TODO     # 仅仅忽略项目根目录下的 TODO 文件，不包括 subdir/TODO
+build/    # 忽略 build/ 目录下的所有文件
+doc/*.txt # 会忽略 doc/notes.txt 但不包括 doc/server/arch.txt
+规则很简单，不做过多解释，但是有时候在项目开发过程中，突然心血来潮想把某些目录或文件加入忽略规则，按照上述方法定义后发现并未生效，原因是.gitignore只能忽略那些原来没有被track的文件，如果某些文件已经被纳入了版本管理中，则修改.gitignore是无效的。那么解决方法就是先把本地缓存删除（改变成未track状态），然后再提交：
+
+
+git rm -r --cached .
+git add .
+git commit -m 'update .gitignore'
+
+
+
+## 本地项目上传到github
+
+
+Create new Repo
+
+
+
+方法1：git clone github上的远程仓库，本地代码覆盖提交。
+
+方法2：
+1.git init（linux:可以先touch README.md，windows：可以先echo > README.md 或者 type nul > README.md 或者 fsutil file createnew d:\a.txt 0）
+2.git add .
+3.git commit -m 'xxx'
+4.github上创建远程仓库
+5.git remote add origin https://github.com/hhy5277/xxx  或者  git remote add origin git@github.com:hhy5277/xxx.git(如果已存在，git remote rm origin)
+6.git pull origin master (github上创建仓库时自动创建README.md时，git pull --rebase origin master)
+7.git push -u origin master（首次加-u参数，后面就不用加了）
+
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+
+注意：如果github没有添加过SSH KEY,则需要创建SSH KEY。方法如下：
+
+先看一下你C盘用户目录下有没有.ssh目录，有的话看下里面有没有id_rsa和id_rsa.pub这两个文件，有就跳到下一步，没有就通过下面命令创建
+
+   $ ssh-keygen -t rsa -C "youremail@example.com"
+   
+登录Github,找到右上角的图标，打开点进里面的Settings，再选中里面的SSH and GPG KEYS，点击右上角的New SSH key，然后Title里面随便填，再把刚才id_rsa.pub里面的内容复制到Title下面的Key内容框里面，最后点击Add SSH key，这样就完成了SSH Key的加密。
+
+
+总结：其实只需要进行下面几步就能把本地项目上传到Github
+
+     1、在本地创建一个版本库（即文件夹），通过git init把它变成Git仓库；
+
+     2、把项目复制到这个文件夹里面，再通过git add .把项目添加到仓库；
+
+     3、再通过git commit -m “注释内容”把项目提交到仓库；
+
+     4、在Github上设置好SSH密钥后，新建一个远程仓库，通过git remote add origin https://github.com/guyibang/TEST2.git将本地仓库和远程仓库进行关联；
+
+     5、最后通过git push -u origin master把本地仓库的项目推送到远程仓库上；（若新建远程仓库的时候自动创建了README文件，git pull --rebase origin master）。
+	 
+------------------------------------------------------------------------------------------------------------------------------------------
+【 以下三种方法 待研究 还未成功】
+
+## 本地仓库联到远程仓库
+
+方法一 :  (个人首选方案) 
+
+本地git init 后会有.git目录
+
+修改 .git/config 配置文件 [remote "origin"] 下 url 的值 ；
+[remote "orgin"]
+	url =  git@github.com:hhy5277/itying.git
+	
+如果没有这个配置 就添加进去
+
+远程github上创建仓库 itying
+
+git push 提交
+
+方法二 ：
+
+使用 Git 命令
+直接修改本地仓库所关联的远程仓库的地址；
+
+进入本地 Git 仓库根目录下；
+键入：git remote 查看远程仓库名称：origin ；
+键入：git remote get-url origin 查看远程仓库地址；
+键入：git remote set-url origin git@github.com:hhy5277/itying.git ( 如果未设置ssh-key，此处仓库地址为 http://...开头)
+
+
+方法三 ：
+使用 Git 命令
+先删除本地仓库当前关联的无效远程地址，
+再为本地仓库添加新的远程仓库地址
+进入本地 Git 仓库根目录下；
+键入：git remote 查看远程仓库名称：origin ；
+键入：git remote rm origin 删除本地仓库当前关联的远程仓库；
+键入：git remote add origin https://github.com/hhy5277/itying ( 如果未设置ssh-key，此处仓库地址为 http://...开头)
+git pull origin master
+$ git pull --rebase origin master
+
+git branch --set-upstream-to=origin/<branch> master
+git push -u origin master
+
+git remote add origin git@github.com:hhy5277/itying.git
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+
+【 以上三种方法 待研究 还未成功】
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+## Git命令 
+
+查看、添加、提交、删除、找回，重置修改文件
+
+git help <command> # 显示command的help  
+
+git show # 显示某次提交的内容 git show $id  
+
+git co -- <file> # 抛弃工作区修改  
+
+git co . # 抛弃工作区修改  
+
+git add <file> # 将工作文件修改提交到本地暂存区  
+
+git add . # 将所有修改过的工作文件提交暂存区  
+
+git rm <file> # 从版本库中删除文件  
+
+git rm <file> --cached # 从版本库中删除文件，但不删除文件  
+
+git reset <file> # 从暂存区恢复到工作文件  
+
+git reset -- . # 从暂存区恢复到工作文件  
+
+git reset --hard # 恢复最近一次提交过的状态，即放弃上次提交后的所有本次修改  
+
+git ci <file> git ci . git ci -a # 将git add, git rm和git ci等操作都合并在一起做　git ci -am "some comments"  
+
+git ci --amend # 修改最后一次提交记录  
+
+git revert <$id> # 恢复某次提交的状态，恢复动作本身也创建次提交对象  
+
+git revert HEAD # 恢复最后一次提交的状态  
+
+
+## 查看文件diff
+
+git help <command> # 显示command的help  
+
+git show # 显示某次提交的内容 git show $id  
+
+git co -- <file> # 抛弃工作区修改  
+
+git co . # 抛弃工作区修改  
+
+git add <file> # 将工作文件修改提交到本地暂存区  
+
+git add . # 将所有修改过的工作文件提交暂存区  
+
+git rm <file> # 从版本库中删除文件  
+
+git rm <file> --cached # 从版本库中删除文件，但不删除文件  
+
+git reset <file> # 从暂存区恢复到工作文件  
+
+git reset -- . # 从暂存区恢复到工作文件  
+
+git reset --hard # 恢复最近一次提交过的状态，即放弃上次提交后的所有本次修改  
+
+git ci <file> git ci . git ci -a # 将git add, git rm和git ci等操作都合并在一起做　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　git ci -am "some comments"  
+
+git ci --amend # 修改最后一次提交记录  
+
+git revert <$id> # 恢复某次提交的状态，恢复动作本身也创建次提交对象  
+
+git revert HEAD # 恢复最后一次提交的状态  
+
+
+## 查看提交记录
+
+git log 
+
+git log <file> # 查看该文件每次提交记录  
+
+git log -p <file> # 查看每次详细修改内容的diff  
+
+git log -p -2 # 查看最近两次详细修改内容的diff  
+
+git log --stat #查看提交统计信息  
+
+tig
+
+Mac上可以使用tig代替diff和log，brew install tig
+
+
+## Git 本地分支管理 
+
+查看、切换、创建和删除分支
+
+git br -r # 查看远程分支  
+
+git br <new_branch> # 创建新的分支  
+
+git br -v # 查看各个分支最后提交信息  
+
+git br --merged # 查看已经被合并到当前分支的分支  
+
+git br --no-merged # 查看尚未被合并到当前分支的分支  
+
+git co <branch> # 切换到某个分支  
+
+git co -b <new_branch> # 创建新的分支，并且切换过去  
+
+git co -b <new_branch> <branch> # 基于branch创建新的new_branch  
+
+git co $id # 把某次历史提交记录checkout出来，但无分支信息，切换到其他分支会自动删除  
+
+git co $id -b <new_branch> # 把某次历史提交记录checkout出来，创建成一个分支  
+
+git br -d <branch> # 删除某个分支  
+
+git br -D <branch> # 强制删除某个分支 (未被合并的分支被删除的时候需要强制)  
+
+
+## 分支合并和reba
+
+git merge <branch> # 将branch分支合并到当前分支  
+
+git merge origin/master --no-ff # 不要Fast-Foward合并，这样可以生成merge提交  
+
+git rebase master <branch> # 将master rebase到branch，相当于： git co <branch> && git rebase master && git co master && git merge <branch>  
+
+
+## Git补丁管理(方便在多台机器上开发同步时用)
+
+git merge <branch> # 将branch分支合并到当前分支  
+
+git merge origin/master --no-ff # 不要Fast-Foward合并，这样可以生成merge提交  
+
+git rebase master <branch> # 将master rebase到branch，相当于： git co <branch> && git rebase master && git co master && git merge <branch>  
+
+
+## Git暂存管
+
+git stash # 暂存  
+
+git stash list # 列所有stash  
+
+git stash apply # 恢复暂存的内容  
+
+git stash drop # 删除暂存区  
+
+
+## Git远程分支管理
+
+git pull # 抓取远程仓库所有分支更新并合并到本地  
+
+git pull --no-ff # 抓取远程仓库所有分支更新并合并到本地，不要快进合并  
+
+git fetch origin # 抓取远程仓库更新  
+
+git merge origin/master # 将远程主分支合并到本地当前分支  
+
+git co --track origin/branch # 跟踪某个远程分支创建相应的本地分支  
+
+git co -b <local_branch> origin/<remote_branch> # 基于远程分支创建本地分支，功能同上  
+
+
+git push # push所有分支
+
+git push origin master # 将本地主分支推到远程主分支  
+
+git push -u origin master # 将本地主分支推到远程(如无远程主分支则创建，用于初始化远程仓库)  
+
+git push origin <local_branch> # 创建远程分支， origin是远程仓库名  
+
+git push origin <local_branch>:<remote_branch> # 创建远程分支  
+
+git push origin :<remote_branch> #先删除本地分支(git br -d <branch>)，然后再push删除远程分支  
+
+
+## Git远程仓库管
+
+git remote -v # 查看远程服务器地址和仓库名称  
+
+git remote show origin # 查看远程服务器仓库状态  
+
+git remote add origin git@ github:robbin/robbin_site.git # 添加远程仓库地址  
+
+git remote set-url origin git@ github.com:robbin/robbin_site.git # 设置远程仓库地址(用于修改远程仓库地址) git remote rm <repository> # 删除远程仓库 
+
+
+## 创建远程仓库
+
+git clone --bare robbin_site robbin_site.git # 用带版本的项目创建纯版本仓库  
+
+scp -r my_project.git git@ git.csdn.net:~ # 将纯仓库上传到服务器上  
+
+mkdir robbin_site.git && cd robbin_site.git && git --bare init # 在服务器创建纯仓库  
+
+git remote add origin git@ github.com:robbin/robbin_site.git # 设置远程仓库地址  
+
+git push -u origin master # 客户端首次提交  
+
+git push -u origin develop # 首次将本地develop分支提交到远程develop分支，并且track  
+
+git remote set-head origin master # 设置远程仓库的HEAD指向master分支 
+
+
+## 也可以命令设置跟踪远程库和本地库
+
+git branch --set-upstream master origin/master  
+
+git branch --set-upstream develop origin/develop  
+
+
+第二次commit的时候没注意添加 –amend 导致commit了2次无法push
+
+git log查看你commit的前一次的commit号，然后输入
+git reset --mixed 你的commit号
+
+然后local repo 和stage的修改全部撤销了，但是workspace的修改不会动，再重新 add,commit就行啦~
+
+
+## 大容量git代码库断点续传方法
+
+1. 使用proxy
+
+开启：
+
+git config --global http.proxy $server:$port
+git config --global https.proxy $server:$port
+关闭：
+
+git config --global --unset https.proxy
+git config --global --unset http.proxy
+关闭SSL CERT verification:
+
+git config --global http.sslVerify false
+启用默认的SSL CERT verification:
+
+git config --global --unset http.sslVerify
+2.断点续传
+
+git clone总是出错那么：
+
+1).建立repo的本地存储目录
+
+2).进入目录执行 git init生成.git索引文件夹
+
+3).继续执行 git fetch GIT_REPO_URL, 如果掉线，可继续重复执行该命令知道看到如下标志表示fetch成功：//git fetch git://github.com/hhy5277/miaov.git   // 用http也会断，只有用git才行
+```
+From GIT_REPO_URL
+*branch       HEAD   -> FETCH_HEAD  //意思是把最新的数据fetch到了本地的FETCH_HEAD分支上去了
+```
+4). 执行 git checkout FETCH_HEAD  //或者也等同于git fetch git://…..git HEAD
+
+5). OK clone Head成功，自行用GUI工具管理repo的本地checkout即可。
+
+
+### 异曲同工之妙
+
+1. git clone git://android.git.kernel.org/ + project path.
+
+2. mkdir mydroid
+
+   cd mydroid
+   repo init -u git://android.git.kernel.org/platform/manifest.git
+   repo sync
+
+[Git断点续传和离线增量更新的实现](https://www.cnblogs.com/Aimeast/p/3515560.html)
+
+
+
+## github加速的方法如下：
+
+最近发现使用git clone的速度比较慢，于是找到了办法分享给大家：
+
+思路：
+git clone特别慢是因为github.global.ssl.fastly.net域名被限制了。
+只要找到这个域名对应的ip地址，然后在hosts文件中加上ip–>域名的映射，刷新DNS缓存便可。
+
+实施：
+在网站 https://www.ipaddress.com/ 或 http://ip.cha127.com/分别搜索：
+
+github.global.ssl.fastly.net
+github.com
+
+得到ip: 69.171.224.85
+		13.250.177.223
+
+
+1.用记事本打开hosts文件
+
+windows上的hosts文件路径在
+
+C:\Windows\System32\drivers\etc\hosts
+linux的hosts文件路径在：
+
+sudo vim /etc/hosts
+
+2. 在hosts文件末尾添加两行
+
+69.171.224.85 http://global-ssl.fastly.Net
+13.250.177.223 http://github.com
+
+保存更新DNS
+Winodws系统的做法：打开CMD，输入ipconfig /flushdns
+Linux的做法：在终端输入sudo /etc/init.d/networking restart
+
+3.重启电脑，让hosts文件生效
+你会发现git clone的速度快很多
+
+
+4.如果上面的方法都不行就要试着下面的方法：
+
+
+因为在天朝，用git clone 下载 github上的仓库的时候，速度很慢，才几十k每秒，稍微大点的仓库，要等到猴年马月。
+利用shadowsocks的socks5代理，配置好后明显加速。用下面两条命令配置好后，保持shadowsocks客户端开启就行了。
+
+git config --global http.proxy 'socks5://127.0.0.1:1080' 
+git config --global https.proxy 'socks5://127.0.0.1:1080'
+
+
+shadowsocks的本地端口默认是1080
+
+上面设置只是开启https://代理
+git协议开启代理可以查看[如何为 Git 设置代理？](https://segmentfault.com/q/1010000000118837)
+
+
+
+## 第一次从git远程仓库pull内容到本地
+
+第一步：配置本地SSH（这里不赘述）
+
+第二步：cd选择本地目录，用指令$git clone 远程仓库SSH地址
+
+第三步：$git fetch --all ?先把远程仓库所有地址拉到本地，用$git branch -a查看拉取情况
+
+第四步：$git checkout -b 新分支名称
+
+第五步：$git branch --set-upstream-to=origin/远程分支名称 本地分支名称 ?目的是在本地分支和远程分支之间建立跟踪连接
+
+第六步：$git pull?
+
+这样就将远程分支拉取到本地了！！！
+
+
+
+
+git clone https://github.com/killgcd/chromego.git
+
+
+git commit 代码时提示： Warning: Your console font probably doesn‘t support Unicode. If you experience trange characters in the output, consider switching to a TrueType font such as ucida Console!
+
+
+
+依次执行以下命令：
+
+git config  core.quotepath off
+
+git config  --unset i18n.logoutputencoding
+
+git config  --unset i18n.commitencoding
+
+再次git commit和git push应该就不会弹出了
+
+
+这个其实是编码格式的问题
