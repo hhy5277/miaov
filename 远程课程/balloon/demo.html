@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        overflow: hidden;
+        background: #ccc;
+    }
+    .balloon {
+        position: absolute;
+        width: 160px;
+        height: 160px;
+        background: #faf9f9;
+        border-radius: 160px 160px 64px 160px;
+        transform: rotate(45deg);
+        box-shadow: -8px -8px 80px -8px #873940 inset;
+    }
+    .balloon::after {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        content: '';
+        width: 10px;
+        height: 10px;
+        border: 8px solid transparent;
+        border-right-color: #873940;
+        transform: rotate(45deg);
+        border-radius: 16px;
+    }
+    </style>
+</head>
+
+<body>
+    <script type="text/javascript">
+    var num = 10;
+    var wH = window.innerHeight;
+    var wW = window.innerWidth;
+    var timer = null;
+    bZ = 160;
+
+    init();
+
+    function init() {
+        for (var i = 0; i < num; i++) {
+            var randomX = ~~(Math.random() * wW) - bZ;
+            randomX = Math.max(0, randomX);
+            var oBalloon = document.createElement('div');
+            oBalloon.className = 'balloon';
+            oBalloon.style.top = wH - bZ + 'px';
+            oBalloon.style.left = randomX + 'px';
+            oBalloon.speed = ~~(Math.random() * 8) + 1;
+            document.body.appendChild(oBalloon);
+        }
+    }
+
+    timer = setInterval(move, 1000 / 30);
+    move();
+    document.body.addEventListener('click', function(e) {
+        // console.log(e.target);
+        if (e.target.className.toLowerCase() == 'balloon') {
+            // e.target.parentNode.removeChild(e.target);
+            boom.call(e.target, function() {
+                this.parentNode.removeChild(this);
+            }.bind(e.target));
+        }
+    })
+
+    function move() {
+        var aBalloons = document.querySelectorAll('.balloon');
+        for (var i = 0; i < aBalloons.length; i++) {
+            // aBalloons[i].style.top = aBalloons[i].offsetTop - 10 + 'px';
+            aBalloons[i].style.top = aBalloons[i].offsetTop - aBalloons[i].speed + 'px';
+            // aBalloons[i].onclick = function() {
+            //     //这样元素很多时可能会很卡
+            // }
+        }
+
+        // requestAnimationFrame(move);
+    }
+    var i = 0;
+
+    function auto() {
+        i++;
+        timer = setTimeout(arguments.callee, 500);
+        // timer = setTimeout(auto, 500);
+    };
+    // auto;
+    function boom(cb) {
+
+        this.timer = setInterval(function() {
+            if (this.offsetWidth < 10) {
+                cb && cb();
+                clearInterval(this.timer);
+            }
+            this.speed++;
+            this.style.top = this.offsetTop - this.speed + 'px';
+            this.style.width = this.offsetWidth - 10 + 'px';
+            this.style.height = this.offsetHeight - 10 + 'px';
+        }.bind(this), 1000 / 60);
+    };
+    </script>
+</body>
+
+</html>

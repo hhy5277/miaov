@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>京东轮播</title>
+    <style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    #wrap {
+        position: relative;
+        width: 100%;
+        height: 185px;
+        background: red;
+        overflow: hidden;
+    }
+    #wrap ul {
+        width: 1000%;
+        height: 100%;
+    }
+    #wrap ul li {
+        float: left;
+        width: 100%;
+        height: 100%;
+        background: #663399;
+    }
+    #wrap ul li img {
+        width: 100%;
+        height: 100%;
+    }
+    #wrap .btn {
+        position: absolute;
+        left: 0%;
+        bottom: 10px;
+        width: 100%;
+        text-align: center;
+    }
+    #wrap .btn span {
+        display: inline-block;
+        *display: inline;
+        *zoom: 1;
+        width: 5px;
+        height: 5px;
+        border: 1px solid #fff;
+        border-radius: 50%;
+        background: red;
+    }
+    </style>
+    <script type="text/javascript" src="swiper.min.js"></script>
+</head>
+
+<body>
+    <div id="wrap" class="swiper-container">
+        <ul class="swiper-wrapper">
+            <li class="swiper-slide"><img src="images/1.jpg" alt="">
+            </li>
+            <li class="swiper-slide"><img src="images/2.jpg" alt="">
+            </li>
+            <li class="swiper-slide"><img src="images/3.jpg" alt="">
+            </li>
+            <li class="swiper-slide"><img src="images/4.jpg" alt="">
+            </li>
+            <li class="swiper-slide"><img src="images/5.jpg" alt="">
+            </li>
+            <li class="swiper-slide"><img src="images/6.jpg" alt="">
+            </li>
+            <li class="swiper-slide"><img src="images/7.jpg" alt="">
+            </li>
+            <li class="swiper-slide"><img src="images/8.jpg" alt="">
+            </li>
+        </ul>
+        <div class="btn">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    <script type="text/javascript">
+    var mySwiper = new Swiper('.swiper-container', {
+        autoplay: 5000, //可选选项，自动滑动
+    })
+    </script>
+</body>
+
+</html>
