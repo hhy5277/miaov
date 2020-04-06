@@ -1,0 +1,32 @@
+
+
+-webkit-
+
+-moz-
+
+-o-
+
+-ms-
+
+
+transition 过渡
+
+rgba 颜色值 rgba 红+绿+蓝+alpha
+
+linear-gradient 线性渐变
+
+box-reflect 倒影 above|below|left|right;
+
+perspective  景深 （单位px）
+
+transform-style:preserve-3d 建立3D空间
+
+transform 变换
+
+rotateY() Y轴旋转
+
+translateZ() Z轴位移
+
+
+ 
+

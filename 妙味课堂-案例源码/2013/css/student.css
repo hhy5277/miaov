@@ -1,0 +1,200 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* student.css */
+#student{ height:712px; display:none; position:relative; z-index:0; margin:0 auto;}
+#studentList{height:712px;width:1308px; position:absolute; left:50%;
+top:50%;margin:-356px 0 0 -654px;}
+.studentList dt{position:absolute;z-index:1;border-radius:50%;background:rgba(255,255,255,0.3);opacity:0;}
+.studentList dd{position:absolute;z-index:2;border-radius:50%;background-size:100% 100%;
+-webkit-transform:scale(0);
+-moz-transform:scale(0);
+transform:scale(0);
+perspective:1000;
+-moz-perspective:1000;
+-webkit-perspective:1000;
+}
+
+@-webkit-keyframes stundentIn{
+	0%{-webkit-transform:scale(0);opacity:0;}
+	70%{-webkit-transform:scale(1.1);opacity:1;}
+	100%{-webkit-transform:scale(1);}
+}
+@-moz-keyframes stundentIn{
+	0%{-moz-transform:scale(0);opacity:0;}
+	70%{-moz-transform:scale(1.1);opacity:1;}
+	100%{-moz-transform:scale(1);}
+}
+@keyframes stundentIn{
+	0%{transform:scale(0);opacity:0;}
+	70%{transform:scale(1.1);opacity:1;}
+	100%{transform:scale(1);}
+}
+
+@-webkit-keyframes stundentOut{
+	0%{-webkit-transform:scale(1);opacity:1;}
+	100%{-webkit-transform:scale(0);opacity:0;}
+}
+@-moz-keyframes stundentOut{
+	0%{-moz-transform:scale(1);opacity:1;}
+	100%{-moz-transform:scale(0);opacity:0;}
+}
+@keyframes stundentOut{
+	0%{transform:scale(1);opacity:1;}
+	100%{transform:scale(0);opacity:0;}
+}
+
+.studentList .sIn{
+-webkit-animation:stundentIn .8s ease-in-out forwards;
+-moz-animation:stundentIn .8s ease-in-out forwards;
+animation:stundentIn .8s ease-in-out forwards;
+}
+.studentList .sOut{
+-webkit-animation:stundentOut .3s ease-in-out forwards;
+-moz-animation:stundentOut .3s ease-in-out forwards;
+animation:stundentOut .3s ease-in-out forwards;
+}
+.studentList dd div *{position:absolute;border-radius:50%;overflow:hidden;
+box-sizing:border-box;cursor:pointer;
+-moz-box-sizing: border-box;
+}
+.studentList dd div{width: 100%;height: 100%;border-radius:50%;
+-webkit-transform-style:preserve-3d;
+-moz-transform-style:preserve-3d;
+transform-style:preserve-3d;
+}
+.studentList dd span,.studentList dd a,.studentList dd b{top:0;left:0;width:100%;height:100%;background-size:100% 100%;}
+.studentList dd dfn{padding-top:65%;color:rgb(255,255,255);font-size:12px;text-align:center;font-style:normal;height:100%;width:100%;
+background:-webkit-linear-gradient(bottom,rgba(0,0,0,.4) 20%,rgba(0,0,0,.1) 40%,rgba(0,0,0,0) 50%);
+background:-moz-linear-gradient(bottom,rgba(0,0,0,.4) 20%,rgba(0,0,0,.1) 40%,rgba(0,0,0,0) 50%);
+background:linear-gradient(bottom,rgba(0,0,0,.4) 20%,rgba(0,0,0,.1) 40%,rgba(0,0,0,0) 50%);
+text-shadow:2px 2px 3px #000;bottom:0;left:0;opacity:0;
+-webkit-transition:.4s .7s all linear!important;
+-moz-transition:.4s .7s all linear!important;
+transition:.4s .7s all linear!important;
+}
+.studentList dd b{border:5px solid rgb(255,255,255);
+-webkit-transform:translateZ(0.3px); 
+-moz-transform:translateZ(0.3px);
+transform:translateZ(0.3px);}
+.studentList dd span{
+box-shadow:inset -2px 2px 18px rgba(0,0,0,.46);border:5px solid rgb(255,255,255);
+-webkit-transform:rotateX(0) rotateY(180deg) translateZ(0.2px); 
+-moz-transform:rotateX(0) rotateY(180deg) translateZ(0.2px);
+transform:rotateX(0) rotateY(180deg) translateZ(0.2px);
+background-color:rgb(240,240,240);
+}
+.studentList dd a{position:absolute;border:5px solid #fff;top:0;left:0;z-index:3;width:100%;height:100%;border-radius:50%;background-image:url(../img/studentworks.png);
+-webkit-transform:translateZ(3px); 
+-moz-transform:translateZ(3px);
+transform:translateZ(3px);
+box-sizing:border-box;cursor:pointer;
+-moz-box-sizing: border-box;
+}
+.studentList dd:hover div{
+-webkit-transform:rotateX(0) rotateY(-180deg);
+-moz-transform:rotateX(0) rotateY(-180deg);
+transform:rotateX(0) rotateY(-180deg);
+}
+.studentList dd:hover dfn{opacity: 1;} 
+
+.studentList dd dfn{font-size:12px;}
+.studentList dd:nth-of-type(1) dfn{font-size:16px;}
+.studentList dd:nth-of-type(2) dfn,.studentList dd:nth-of-type(3) dfn{font-size:14px;}
+.studentList dd:nth-of-type(6) dfn{font-size:12px;}
+
+.studentList dd dfn:first-line{font-size:14px;}
+.studentList dd:nth-of-type(1) dfn:first-line{font-size:24px;}
+.studentList dd:nth-of-type(2) dfn:first-line,.studentList dd:nth-of-type(3) dfn:first-line{font-size:20px;}
+.studentList dd:nth-of-type(6) dfn:first-line{font-size:16px;}
+
+
+.studentList dd:nth-of-type(1){width:270px;height:270px;left:391px;top:159px;}
+.studentList dd:nth-of-type(2){width:204px;height:204px;right:497px;top:-17px;}
+.studentList dd:nth-of-type(3){width:214px;height:214px;right:359px;top:219px;}
+.studentList dd:nth-of-type(4){width:122px;height:122px;left:633px;top:427px;}
+.studentList dd:nth-of-type(5){width:114px;height:114px;left:231px;top:442px;}
+.studentList dd:nth-of-type(6){ width:172px;height:172px;right:184px;top:54px;}
+.studentList dd:nth-of-type(7){ width:150px;height:150px;left:155px;top:87px;}
+.studentList dd:nth-of-type(8){ width:130px;height:130px;right:79px;top:310px;}
+.studentList dd:nth-of-type(9){ width:132px;height:132px;left:90px;top:290px;}
+
+.studentList dt:nth-of-type(1){ width:120px;height:120px;left:-45px;top:341px;}
+.studentList dt:nth-of-type(2){ width:220px;height:220px;left:126px;top:127px;}
+.studentList dt:nth-of-type(3){ width:60px;height:60px;left:427px;top:449px;}
+.studentList dt:nth-of-type(4){ width:212px;height:212px;right:398px;top:85px;}
+.studentList dt:nth-of-type(5){ width:120px;height:120px;right:220px;top:290px;}
+.studentList dt:nth-of-type(6){ width:98px;height:98px;right:30px;top:112px;}
+.studentList dt:nth-of-type(7){ width:120px;height:120px;right:-135px;top:340px;}
+
+.studentList .sBox{ width:100%;height:100%;border-radius:50%;position:relative; 
+-webkit-transform:scale(0);
+-moz-transform:scale(0);
+transform:scale(0);
+}
+#studentList .sWork{ position:absolute;left:0;top:0;width:100%;height:100%; box-sizing:border-box; border:8px solid #fff;border-radius:50%; background:url(../img/studentsWork/sWork.png) no-repeat center; background-size:cover; z-index:2;overflow:hidden;}
+#studentList .sWork a{ display:block; height:100%;}
+#studentList .sWorkAuthor{opacity:0; position:absolute;width:40%;height:40%; z-index:2;left:30%;top:-15%;
+-webkit-transform-origin:50% 165%;
+-moz-transform-origin:50% 150%;
+transform-origin:50% 150%; 
+-webkit-transform:rotate(90deg);
+-moz-transform:rotate(0deg);
+transform:rotate(120deg);
+
+/*-webkit-transition:1s all ease;*/
+
+}
+.sWorkAuthorIco{height:100%;border-radius:50%; box-sizing:border-box; border:4px solid #fff; background:url(../img/studentsWork/sWorksHead.png) no-repeat center; background-size:cover;
+-webkit-transform-origin:center;
+-webkit-transform:scale(0) rotate(30deg);
+-moz-transform:scale(0) rotate(30deg);
+transform:scale(0) rotate(30deg);
+
+/*-webkit-transition:1s all ease;*/
+}
+#studentList .sWorkAuthor hgroup{width:124px;height:74px; background:url(../img/sWorkAuthorIco.png) no-repeat;padding:7px 0 0 18px; color:#FFF; position:absolute; left:10%;top:-70px;opacity:0;
+-webkit-transform-origin:left bottom;
+-moz-transform-origin:left bottom;
+transform-origin:left bottom;
+-webkit-transform:rotate(-30deg) scale(0);
+-moz-transform:rotate(-30deg) scale(0);
+transform:rotate(-30deg) scale(0);
+
+/*-webkit-transition:1s 1s all ease;*/
+}
+#studentList .sWorkAuthor a{color:#fff;}
+#studentList .sWorkAuthor h4{line-height:20px; font-size:16px; font-weight:normal;}
+#studentList .sWorkAuthor p{line-height:14px; font-size:12px;}
+.sShowBox{
+	-webkit-animation:.7s "sBoxIn" ease-out;
+	-moz-animation:.7s "sBoxIn" ease-out;
+	animation:.7s "sBoxIn" ease-out;
+}
+
+.sNavBg{ width:1px; height:0;background:#aea6a4; right:10px;top:-195px; position:absolute;z-index:3;
+-webkit-transition:.8s .5s all ease-in-out;
+-moz-transition:.8s .5s all ease-in-out;
+transition:.8s .5s all ease-in-out;
+}
+#sNav{ height:96px;width:16px; position:absolute;left:-8px;top:-300px; overflow:hidden;z-index:4;
+-webkit-transition:1s .4s all ease;
+-moz-transition:1s .4s all ease;
+transition:1s all .4s ease;
+}
+#sNav a{ display:block;top:0;left:0;width:10px;height:10px; border:3px solid #bd988c; border-radius:8px; background:#fff;margin:8px 0; float:left; position:relative;
+-webkit-transition:.2s all ease;
+-moz-transition:.2s all ease;
+transition:.2s all ease;
+}
+#sNav a:nth-child(3){display: none;}
+#sNav span{ position:absolute;width:0;right:21px;top:-2px; background:url(../img/sNavBg.png) no-repeat right 0; font-size:12px; text-align:center; line-height:20px; color:#fff;
+-webkit-transition:.8s .2s all ease;
+-moz-transition:.8s .2s all ease;
+transition:.8s .2s all ease; 
+overflow:hidden;
+}
+#sNav strong{ display:block; width:86px;height:20px; font-weight:normal;}
+#sNav a:hover,#sNav .active{border-color:#fd2147;}
+#sNav a:hover span{width:86px;}
+/* end student.css */

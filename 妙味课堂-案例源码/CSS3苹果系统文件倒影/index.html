@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+html{height:100%;}
+body{ height:100%; margin:0; background:#000;}
+#box{height:100%; position:relative; overflow:hidden;-webkit-perspective:800px;}
+#imgList{ height:201px;position:absolute; top:50%;margin-top:-100px; left:62px;-webkit-transform-style:preserve-3d}
+img{ width:300px; position:absolute; bottom:0; -webkit-box-reflect:below 0 -webkit-linear-gradient( top,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0.5) 100%);}
+/*
+	中间图片的中心点 距离 imgList left 450
+	
+	浏览器width/2-()
+	
+*/
+</style>
+</head>
+<body>
+<div id="box">
+	<div id="imgList">
+    	<img src="img/1.jpg" style="left:0; -webkit-transform:rotateY(45deg) translateZ(-100px);"/>
+        <img src="img/2.jpg" style="left:100px; -webkit-transform:rotateY(45deg) translateZ(-100px);"/>
+        <img src="img/3.jpg" style="left:300px; -webkit-transform:translateZ(200px)"/>
+        <img src="img/4.jpg" style="left:500px; -webkit-transform:rotateY(-45deg) translateZ(-100px)"/>
+        <img src="img/5.jpg" style="left:600px; -webkit-transform:rotateY(-45deg) translateZ(-100px)"/>
+    </div>
+</div>
+</body>
+</html>

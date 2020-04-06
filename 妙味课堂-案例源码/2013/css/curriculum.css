@@ -1,0 +1,112 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* curriculum.css */
+#curriculum{position:relative; height:605px; display:none;width:1000px;margin:30px auto 0;}
+.curriculumChild:nth-of-type(1){ width:1000px;margin:0 auto;}
+.curriculumChild:nth-of-type(2){ position:absolute;left:0;top:0;width:100%;}
+.curriculumBg{ position:absolute;width:100%;height:100%;background:url(../img/curriculumBg.png) no-repeat 90px 335px; z-index:0; opacity:0;}
+#cCanvas{ position:absolute;width:1200px;height:420px; left:-100px; top:-22px;}
+#cCanvas canvas{ position:absolute; top:5px;z-index:1; left:30px;}
+.cCanvas{ position:absolute;width:315px;height:303px;/* 59px*/ top:300px;left:452px;opacity:0;
+-webkit-transform:scale(0.25);
+-moz-transform:scale(0.25);
+transform:scale(0.25);
+}
+#cCanvas .cShadow{width:203px;height:38px; background:url(../img/cCanvas.png) no-repeat; position:absolute;top:330px;left:58px; opacity:0;
+-webkit-transform:scale(0);
+-moz-transform:scale(0);
+transform:scale(0);
+}
+#cHtml5{/*top:94px;left:64px;
+	-webkit-transform:scale(0.8);*/
+	z-index:4;
+}
+#cJs{z-index:6;}
+#cCss{/* top:94px;left:840px; -webkit-transform:scale(0.78);*/z-index:2;}
+.cCanvas .bg,.cCanvas .mask,.cCanvas .bg,.cCanvas .text{ position:absolute;left:0;top:0;width:100%;height:100%; border-radius:50%; }
+.cCanvas .bg{z-index:0;}
+.cCanvas .text{z-index:1;}
+.cCanvas .mask{z-index:2;}
+#cHtml5 .bg{ background:url(../img/cHtml5Bg.png);}
+#cHtml5 .mask{ background:url(../img/cCss.png) center -25px no-repeat;}
+#cHtml5 .text{background:url(../img/cMobileText.png) no-repeat center center;}
+#cJs .bg{ background:url(../img/cJsBg.png);}
+#cJs .mask{ background:url(../img/cCss.png) center -25px no-repeat;}
+#cJs .text{ background:url(../img/cWebText.png) no-repeat center center;}
+#cCss .bg{ background:url(../img/cCssBg.png);}
+#cCss .mask{ background:url(../img/cCss.png) center -25px no-repeat;}
+#cCss .text{ background:url(../img/cVIPText.png) no-repeat center center;}
+#cCanvasMask{ position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0); z-index:5;}
+#cTitleS{width:348px;height:60px;text-align:center; position:absolute; left:340px; top:410px; z-index:3;
+-webkit-user-select:text;
+-moz-user-select:text;
+user-select:text;}
+#cTitleS * ::selection{background:#c33;color:#fff;}
+#cTitleS li{ background:url(../img/cTitle.png) center bottom no-repeat; height:60px; position:absolute;left:0;top:0; width:100%;opacity:0;
+-webkit-transform-origin:center -36px;
+-moz-transform-origin:center -36px;
+transform-origin:center -36px;
+-webkit-transform:scale(0.9);
+-moz-transform:scale(0.9);
+transform:scale(0.9);
+color:rgba(138,115,102,0);
+text-shadow:0 0 20px rgba(138,115,102,0.9);
+}
+#cTitleS h2{ line-height:36px; font-size:30px; font-weight:normal;}
+#cTitleS h4{ line-height:20px; font-size:14px; font-weight:normal;}
+.ckeyWords{ position:absolute; border-radius:50%;color:rgba(255,255,255,0.8); font-size:20px; font-weight:normal; text-align:center; z-index:8;opacity:0;
+margin-top:20px;
+/*-webkit-transform:scale(0);
+-moz-transform:scale(0);
+transform:scale(0);*/
+}
+.ckeyWordsIco{ position:absolute; z-index:-2;}
+.cCanvas .ckeyWords:nth-of-type(1){width:84px;height:84px;left:-84px; top:88px;background:#e74773; line-height:84px;
+-webkit-transform-origin:93px 71px;
+-moz-transform-origin:93px 71px;
+transform-origin:93px 71px;
+-webkit-animation:2s cCanvasMove infinite alternate;
+-moz-animation:2s cCanvasMove infinite alternate;
+animation:2s cCanvasMove infinite alternate;
+}
+.cCanvas .ckeyWords:nth-of-type(1) .ckeyWordsIco{width:24px;height:14px;right:-12px;top:58px; background:url(../img/ckeyWordsIco_2.png) no-repeat; 
+-webkit-transform-origin:-30px -16px;
+-moz-transform-origin:-30px -16px;
+transform-origin:-30px -16px;
+
+}
+.cCanvas .ckeyWords:nth-of-type(2){width:86px;height:86px;left:-50px; top:-24px;background:#fea26f; line-height:86px;
+-webkit-transform-origin:86px 78px;
+-moz-transform-origin:86px 78px;
+transform-origin:86px 78px;
+-webkit-animation:2s 500ms cCanvasMove infinite alternate;
+-moz-animation:2s 500ms cCanvasMove infinite alternate;
+animation:2s 500ms cCanvasMove infinite alternate;
+}
+.cCanvas .ckeyWords:nth-of-type(2) .ckeyWordsIco{width:14px;height:22px;right:-12px;top:32px; background:url(../img/ckeyWordsIco_1.png) no-repeat; 
+-webkit-transform-origin:-42px center;
+-moz-transform-origin:-42px center;
+transform-origin:-42px center;
+}
+.cCanvas .ckeyWords:nth-of-type(3){width:104px;height:104px;left:243px; top:-50px;background:#ed807b; line-height:104px; font-size:22px;
+-webkit-animation:2s 1000ms cCanvasMove infinite alternate;
+-moz-animation:2s 1000ms cCanvasMove infinite alternate;
+animation:2s 1000ms cCanvasMove infinite alternate;
+}
+.cCanvas .ckeyWords:nth-of-type(3) .ckeyWordsIco{ width:132px;height:132px; background:rgba(237,128,122,0.2);left:-14px;top:-14px; border-radius:50%;}
+
+.ckeyWordsIcoShow{ 
+	-webkit-animation:ckeyWords 1.8s infinite alternate;
+	-moz-animation:ckeyWords 1.8s infinite alternate;
+	animation:ckeyWords 1.8s infinite alternate;
+}
+.ckeyWordsIcoShow2{ 
+	-webkit-animation:ckeyWords 1.3s infinite alternate;
+	-moz-animation:ckeyWords 1.3s infinite alternate;
+	animation:ckeyWords 1.3s infinite alternate;
+}
+/* end curriculum.css */
+
+/*curriculumMore.css */
+/* end curriculumMore.css */ 

@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+html{height:100%;}
+body{ height:100%; margin:0; background:#000;}
+#box{height:100%; position:relative; overflow:hidden;}
+#imgList{position:absolute;}
+img{ position:absolute; bottom:0; -webkit-box-reflect:below 0 -webkit-linear-gradient( top,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0.5) 100%);}
+</style>
+<script src="js/style.js"></script>
+<script>
+window.onload=function()
+{
+	var oBox=document.getElementById("box");
+	var oImgList=document.getElementById("imgList");
+	var aImg=oImgList.getElementsByTagName("img");
+	var iInterval=100;
+	var iLeft=-iInterval;
+	var iWidth=300;
+	var iHeight=0;
+	var iListLeft=0;
+	var iStarNow=0;
+	setCss(oBox,{$Perspective:"800px"});
+	for(var i=0;i<aImg.length;i++)
+	{
+		iLeft+=iInterval;	
+		if(i<Math.floor(aImg.length/2))
+		{
+			setCss(aImg[i],{left:iLeft,width:iWidth,$Transform:"rotateY(45deg) translateZ(-100px)"});
+		}
+		else if(i>Math.floor(aImg.length/2))
+		{
+			setCss(aImg[i],{left:iLeft,width:iWidth,$Transform:"rotateY(-45deg) translateZ(-100px)"});
+		}	
+		else
+		{
+			iLeft+=iInterval;
+			setCss(aImg[i],{left:iLeft,width:iWidth,$Transform:"translateZ(200px)"});
+			iListLeft=document.documentElement.clientWidth/2-(iLeft+aImg[i].offsetWidth/2);
+			iLeft+=iInterval;
+			iStarNow=i;
+		}
+		iHeight=Math.max(iHeight,aImg[i].offsetHeight);
+		aImg[i].index=i;
+		aImg[i].onclick=function()
+		{
+			var iLeft=-(this.index-iStarNow)*iInterval
+			tab(aImg,iInterval,iLeft,this.index);
+		};
+	}
+	setCss(oImgList,{
+		height:iHeight,
+		top:(document.documentElement.clientHeight-iHeight)/2,
+		left:iListLeft,
+		$TransformStyle:"preserve-3d"
+		}
+	);
+};
+function tab(aImg,iInterval,iLeft,iNow)
+{
+	iLeft-=iInterval;
+	for(var i=0;i<aImg.length;i++)
+	{
+		setCss(aImg[i],{$Transition:"0.7s all ease"});
+		iLeft+=iInterval;	
+		if(i<iNow)
+		{
+			setCss(aImg[i],{left:iLeft,$Transform:"rotateY(45deg) translateZ(-100px)"});
+		}
+		else if(i>iNow)
+		{
+			setCss(aImg[i],{left:iLeft,$Transform:"rotateY(-45deg) translateZ(-100px)"});
+		}	
+		else
+		{
+			iLeft+=iInterval;
+			setCss(aImg[i],{left:iLeft,$Transform:"translateZ(200px)"});
+			iLeft+=iInterval;
+		}
+	}
+}
+//Math.floor(aImg.length/2)
+
+//Math.max()
+</script>
+</head>
+<body>
+<div id="box">
+	<div id="imgList">
+    	<img src="img/1.jpg" />
+        <img src="img/2.jpg" />
+        <img src="img/3.jpg" />
+        <img src="img/4.jpg" />
+        <img src="img/5.jpg" />
+        <img src="img/6.jpg" />
+        <img src="img/7.jpg" />
+        <img src="img/8.jpg" />
+        <img src="img/9.jpg" />
+        <img src="img/10.jpg" />
+        <img src="img/11.jpg" />
+    </div>
+</div>
+</body>
+</html>
